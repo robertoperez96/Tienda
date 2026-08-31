@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel VITRINA · Administración de catálogo</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@560;680&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0b0e14;--ink-2:#10141d;--ink-3:#161b26;--ink-4:#1c2230;
+    --line:rgba(233,222,193,0.09);--line-strong:rgba(233,222,193,0.16);
+    --foil:#c9a227;--foil-bright:#e8c766;--foil-dim:rgba(201,162,39,0.35);
+    --cream:#ede6d6;--cream-dim:rgba(237,230,214,0.62);--slate:#8891a3;
+    --ember:#b5482a;--ok:#4c8b6b;
+    --font-display:'Fraunces',serif;--font-body:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--cream);font-family:var(--font-body);line-height:1.5;}
+  .wrap{max-width:980px;margin:0 auto;padding:36px 24px 100px;}
+  h1{font-family:var(--font-display);font-weight:680;font-size:26px;margin:0 0 4px;}
+  h1 span{color:var(--foil-bright);}
+  .lede{color:var(--cream-dim);font-size:14px;margin:0 0 28px;}
+  .steps-mini{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;}
+  .steps-mini span{font-family:var(--font-mono);font-size:11.5px;background:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--cream-dim);}
+  .panel{background:var(--ink-2);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:22px;}
+  .panel h2{font-family:var(--font-display);font-weight:560;font-size:18px;margin:0 0 4px;}
+  .panel .hint{color:var(--slate);font-size:12.5px;margin:0 0 16px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  input,select{background:var(--ink);border:1px solid var(--line-strong);color:var(--cream);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;}
+  input:focus,select:focus{outline:2px solid var(--foil-bright);outline-offset:1px;}
+  .search-row input{flex:1;min-width:220px;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+  .btn{padding:10px 18px;border-radius:8px;font-weight:600;font-size:13.5px;}
+  .btn-foil{background:linear-gradient(180deg,var(--foil-bright),var(--foil));color:#171205;}
+  .btn-ghost{background:transparent;border:1px solid var(--line-strong);color:var(--cream);}
+  .btn-danger{background:transparent;border:1px solid rgba(181,72,42,0.5);color:#e08363;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .adv-toggle{color:var(--slate);font-size:12px;background:none;text-decoration:underline;padding:0;margin-top:10px;}
+  .adv-box{display:none;margin-top:12px;}
+  .adv-box.show{display:block;}
+
+  .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:18px;}
+  .result-card{background:var(--ink);border:1px solid var(--line-strong);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:border-color .15s;}
+  .result-card:hover{border-color:var(--foil-dim);}
+  .result-card.picked{border-color:var(--foil);background:rgba(201,162,39,0.08);}
+  .result-card img{width:100%;border-radius:6px;margin-bottom:8px;}
+  .result-card .rname{font-size:12.5px;font-weight:600;}
+  .result-card .rset{font-size:11px;color:var(--slate);font-family:var(--font-mono);}
+  .status-msg{font-size:13px;color:var(--slate);margin-top:12px;}
+
+  .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px;}
+  @media (max-width:640px){.form-grid{grid-template-columns:1fr;}}
+  .field label{display:block;font-size:12px;color:var(--slate);margin-bottom:6px;}
+  .field input,.field select{width:100%;}
+  .preview-box{display:flex;gap:16px;align-items:center;margin-top:16px;padding:14px;background:var(--ink);border:1px solid var(--line);border-radius:10px;}
+  .preview-box img{width:70px;border-radius:6px;}
+  .preview-box .ptxt b{display:block;font-size:14.5px;}
+  .preview-box .ptxt span{font-size:12px;color:var(--slate);font-family:var(--font-mono);}
+  .add-row{margin-top:18px;display:flex;justify-content:flex-end;gap:10px;}
+
+  table{width:100%;border-collapse:collapse;margin-top:6px;}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);font-size:13px;}
+  th{color:var(--slate);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;}
+  td img{width:32px;height:44px;object-fit:cover;border-radius:4px;vertical-align:middle;}
+  .row-actions button{background:none;color:var(--slate);font-size:12px;text-decoration:underline;padding:0;margin-right:10px;}
+  .row-actions button:hover{color:var(--cream);}
+  .empty{color:var(--slate);font-size:13.5px;padding:20px 0;text-align:center;}
+  .export-row{display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:10px;}
+  .count-pill{font-family:var(--font-mono);font-size:12.5px;color:var(--foil-bright);}
+  textarea{width:100%;min-height:110px;background:var(--ink);border:1px solid var(--line-strong);color:var(--cream);border-radius:8px;padding:10px;font-family:var(--font-mono);font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Panel <span>VITRINA</span> · Administración</h1>
+  <p class="lede">Busca la carta real por nombre, elige la impresión exacta y llena precio/condición. No necesitas fotografiar nada: la imagen se toma de la base de datos pública de Pokémon TCG.</p>
+  <div class="steps-mini">
+    <span>1. Busca</span><span>2. Elige la versión</span><span>3. Completa precio y estado</span><span>4. Agrega</span><span>5. Descarga cards-data.js</span>
+  </div>
+
+  <div class="panel">
+    <h2>1 · Buscar carta</h2>
+    <p class="hint">Escribe el nombre en inglés funciona mejor (ej. "Charizard", "Pikachu"). Puedes agregar varias impresiones distintas de la misma carta.</p>
+    <div class="row search-row">
+      <input type="text" id="searchName" placeholder="Nombre de la carta…">
+      <button class="btn btn-foil" id="searchBtn">Buscar</button>
+    </div>
+    <button class="adv-toggle" id="advToggle">Opciones avanzadas (API key propia, opcional)</button>
+    <div class="adv-box" id="advBox">
+      <input type="text" id="apiKey" placeholder="API key de dev.pokemontcg.io (opcional, sube el límite de búsquedas)">
+    </div>
+    <div class="status-msg" id="searchStatus"></div>
+    <div class="results" id="results"></div>
+  </div>
+
+  <div class="panel" id="detailsPanel" style="display:none;">
+    <h2>2 · Detalles de la publicación</h2>
+    <div class="preview-box">
+      <img id="prevImg" src="" alt="">
+      <div class="ptxt"><b id="prevName"></b><span id="prevMeta"></span></div>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Tipo</label>
+        <select id="fKind"><option value="single">Carta suelta (single)</option><option value="sellado">Producto sellado</option></select>
+      </div>
+      <div class="field"><label>Precio (MXN)</label><input type="number" id="fPrice" placeholder="1500"></div>
+      <div class="field"><label>Condición</label>
+        <select id="fCond"><option>M</option><option selected>NM</option><option>LP</option><option>MP</option><option>HP</option><option>DMG</option></select>
+      </div>
+      <div class="field"><label>Idioma</label>
+        <select id="fLang"><option>Español</option><option>Inglés</option><option>Japonés</option></select>
+      </div>
+      <div class="field"><label>Existencias (stock)</label><input type="number" id="fStock" value="1" min="1"></div>
+      <div class="field"><label>Energía / color de acento</label>
+        <select id="fType"><option value="fuego">Fuego</option><option value="agua">Agua</option><option value="planta">Planta</option><option value="rayo">Rayo</option><option value="psiquico">Psíquico</option><option value="lucha">Lucha</option><option value="oscuridad">Oscuridad</option><option value="metal">Metal</option><option value="hada">Hada</option><option value="dragon">Dragón</option><option value="incoloro">Incoloro</option></select>
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:var(--cream-dim);">
+      <input type="checkbox" id="fNew" style="width:16px;height:16px;"> Marcar como "Nuevo" (llegada reciente)
+    </label>
+    <div class="add-row">
+      <button class="btn btn-ghost" id="manualBtn">Agregar manualmente sin imagen</button>
+      <button class="btn btn-foil" id="addBtn">Agregar al catálogo</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>3 · Identificar cartas con IA usando tus propias fotos</h2>
+    <p class="hint">
+      Este panel no puede traer una IA integrada sin exponer una llave de pago en el código — cualquiera podría robarla.
+      En su lugar: abre un chat con Claude, sube las fotos de tus cartas y pide algo como
+      <i>"identifica estas cartas Pokémon TCG, dame el precio actual de TCGplayer en MXN y una descripción corta,
+      en formato JSON con los campos name, set, code, num, total, rarity, condition, language, type, kind, price, stock, isNew, image"</i>.
+      Claude te devolverá un bloque como el del recuadro de abajo — pégalo aquí y se agrega solo a tu catálogo.
+    </p>
+    <textarea id="aiPasteBox" placeholder='[{"name":"Charizard","set":"Base Set","code":"BS","num":4,"total":102,"rarity":"Holo Rara","condition":"NM","language":"Inglés","type":"fuego","kind":"single","price":18500,"stock":1,"isNew":false,"image":"https://images.pokemontcg.io/base1/4.png"}]'></textarea>
+    <div class="add-row"><button class="btn btn-foil" id="aiPasteBtn">Agregar piezas pegadas</button></div>
+    <div class="status-msg" id="aiPasteStatus"></div>
+  </div>
+
+  <div class="panel">
+    <h2>4 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
+    <table id="catalogTable">
+      <thead><tr><th></th><th>Nombre</th><th>Set</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
+      <tbody id="catalogBody"></tbody>
+    </table>
+    <div class="empty" id="emptyMsg">Aún no agregas ninguna pieza.</div>
+
+    <div class="export-row">
+      <div>
+        <button class="btn btn-ghost" id="importBtn">Importar cards-data.js existente</button>
+        <input type="file" id="importFile" accept=".js,.txt" style="display:none;">
+      </div>
+      <button class="btn btn-foil" id="exportBtn">Descargar cards-data.js</button>
+    </div>
+    <p class="hint" style="margin-top:10px;">Al descargar, reemplaza el archivo <code>cards-data.js</code> dentro de la carpeta de tu sitio (o vuelve a arrastrar toda la carpeta a Netlify). index.html lo lee automáticamente.</p>
+  </div>
+</div>
+
+<script>
+/* Estado local persistente mientras trabajas */
+let catalog = JSON.parse(localStorage.getItem("vitrina_admin_catalog") || "[]");
+let nextId = Number(localStorage.getItem("vitrina_admin_next_id") || (catalog.length ? Math.max(...catalog.map(c=>c.id))+1 : 1));
+let pickedCard = null;
+
+const advToggle = document.getElementById("advToggle");
+const advBox = document.getElementById("advBox");
+advToggle.addEventListener("click", () => advBox.classList.toggle("show"));
+
+document.getElementById("searchBtn").addEventListener("click", doSearch);
+document.getElementById("searchName").addEventListener("keydown", e => { if (e.key === "Enter") doSearch(); });
+
+async function doSearch(){
+  const name = document.getElementById("searchName").value.trim();
+  const status = document.getElementById("searchStatus");
+  const results = document.getElementById("results");
+  results.innerHTML = "";
+  if (!name){ status.textContent = "Escribe un nombre para buscar."; return; }
+  status.textContent = "Buscando…";
+  try{
+    const key = document.getElementById("apiKey").value.trim();
+    const headers = key ? {"X-Api-Key": key} : {};
+    const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=name:${encodeURIComponent(name)}*&pageSize=24`, {headers});
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    const cards = data.data || [];
+    if (!cards.length){ status.textContent = "Sin resultados. Prueba con el nombre en inglés."; return; }
+    status.textContent = `${cards.length} resultado(s). Haz clic en la impresión exacta que vas a vender.`;
+    cards.forEach(c => {
+      const div = document.createElement("div");
+      div.className = "result-card";
+      div.innerHTML = `<img src="${c.images?.small || ''}" alt="${c.name}" loading="lazy">
+        <div class="rname">${c.name}</div>
+        <div class="rset">${c.set?.name || ''} · #${c.number}</div>`;
+      div.addEventListener("click", () => selectCard(c, div));
+      results.appendChild(div);
+    });
+  } catch(err){
+    status.textContent = "No se pudo conectar con la base de datos de cartas. Revisa tu internet e intenta de nuevo.";
+  }
+}
+
+function selectCard(apiCard, el){
+  document.querySelectorAll(".result-card").forEach(r => r.classList.remove("picked"));
+  el.classList.add("picked");
+  pickedCard = {
+    name: apiCard.name,
+    set: apiCard.set?.name || "",
+    code: (apiCard.set?.ptcgoCode || apiCard.set?.id || "").toUpperCase().slice(0,4),
+    num: parseInt(apiCard.number) || 0,
+    total: apiCard.set?.printedTotal || 0,
+    rarity: apiCard.rarity || "—",
+    image: apiCard.images?.large || apiCard.images?.small || ""
+  };
+  openDetails();
+}
+
+document.getElementById("manualBtn").addEventListener("click", () => {
+  document.querySelectorAll(".result-card").forEach(r => r.classList.remove("picked"));
+  const name = document.getElementById("searchName").value.trim() || "Pieza sin nombre";
+  pickedCard = { name, set:"", code:"", num:0, total:0, rarity:"Sellado", image:"" };
+  document.getElementById("fKind").value = "sellado";
+  openDetails();
+});
+
+function openDetails(){
+  document.getElementById("detailsPanel").style.display = "block";
+  document.getElementById("prevImg").src = pickedCard.image || "";
+  document.getElementById("prevImg").style.display = pickedCard.image ? "block" : "none";
+  document.getElementById("prevName").textContent = pickedCard.name;
+  document.getElementById("prevMeta").textContent = pickedCard.set ? `${pickedCard.set} · ${pickedCard.rarity}` : "Producto sellado";
+  document.getElementById("detailsPanel").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+document.getElementById("addBtn").addEventListener("click", () => {
+  if (!pickedCard){ alert("Primero busca y elige una carta arriba."); return; }
+  const price = Number(document.getElementById("fPrice").value);
+  if (!price){ alert("Pon un precio en MXN."); return; }
+  const entry = {
+    id: nextId++,
+    name: pickedCard.name, set: pickedCard.set, code: pickedCard.code, num: pickedCard.num, total: pickedCard.total,
+    rarity: pickedCard.rarity, condition: document.getElementById("fCond").value,
+    language: document.getElementById("fLang").value, type: document.getElementById("fType").value,
+    kind: document.getElementById("fKind").value, price,
+    stock: Number(document.getElementById("fStock").value) || 1,
+    isNew: document.getElementById("fNew").checked, image: pickedCard.image
+  };
+  catalog.push(entry);
+  persist();
+  renderCatalog();
+  pickedCard = null;
+  document.getElementById("detailsPanel").style.display = "none";
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("searchName").value = "";
+  document.getElementById("fPrice").value = "";
+  document.getElementById("fNew").checked = false;
+});
+
+function persist(){
+  localStorage.setItem("vitrina_admin_catalog", JSON.stringify(catalog));
+  localStorage.setItem("vitrina_admin_next_id", String(nextId));
+}
+
+function renderCatalog(){
+  const body = document.getElementById("catalogBody");
+  body.innerHTML = "";
+  document.getElementById("countPill").textContent = `(${catalog.length})`;
+  document.getElementById("emptyMsg").style.display = catalog.length ? "none" : "block";
+  document.getElementById("catalogTable").style.display = catalog.length ? "table" : "none";
+  catalog.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c.image ? `<img src="${c.image}" alt="">` : "📦"}</td>
+      <td>${c.name}${c.set ? ` <span style="color:var(--slate);font-size:11px;">(${c.set})</span>` : ""}</td>
+      <td>${c.kind === "sellado" ? "Sellado" : "Single"}</td>
+      <td>$${c.price.toLocaleString("es-MX")}</td>
+      <td>${c.stock}</td>
+      <td class="row-actions"><button data-id="${c.id}" class="delBtn">Eliminar</button></td>
+    `;
+    body.appendChild(tr);
+  });
+  document.querySelectorAll(".delBtn").forEach(b => b.addEventListener("click", () => {
+    catalog = catalog.filter(c => c.id !== Number(b.dataset.id));
+    persist(); renderCatalog();
+  }));
+}
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  if (!catalog.length){ alert("Agrega al menos una pieza antes de exportar."); return; }
+  const content = `/* cards-data.js — generado desde admin.html el ${new Date().toLocaleString("es-MX")} */\nwindow.CARDS = ${JSON.stringify(catalog, null, 2)};\n`;
+  const blob = new Blob([content], {type:"text/javascript"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "cards-data.js";
+  a.click();
+});
+
+document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
+document.getElementById("importFile").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const match = reader.result.match(/window\.CARDS\s*=\s*(\[[\s\S]*\]);?/);
+      if (!match) throw new Error("Formato no reconocido");
+      const imported = JSON.parse(match[1]);
+      catalog = imported;
+      nextId = catalog.length ? Math.max(...catalog.map(c=>c.id))+1 : 1;
+      persist(); renderCatalog();
+      alert(`Se importaron ${imported.length} piezas.`);
+    } catch(err){
+      alert("No se pudo leer ese archivo. Asegúrate de que sea un cards-data.js exportado desde este panel.");
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById("aiPasteBtn").addEventListener("click", () => {
+  const status = document.getElementById("aiPasteStatus");
+  const raw = document.getElementById("aiPasteBox").value.trim();
+  if (!raw){ status.textContent = "Pega primero el bloque que te dio Claude."; return; }
+  try{
+    const items = JSON.parse(raw);
+    if (!Array.isArray(items)) throw new Error("no es una lista");
+    let added = 0;
+    items.forEach(it => {
+      if (!it.name || !it.price) return;
+      catalog.push({
+        id: nextId++,
+        name: it.name, set: it.set || "", code: it.code || "", num: it.num || 0, total: it.total || 0,
+        rarity: it.rarity || "—", condition: it.condition || "NM", language: it.language || "Español",
+        type: it.type || "incoloro", kind: it.kind || "single", price: Number(it.price),
+        stock: Number(it.stock) || 1, isNew: !!it.isNew, image: it.image || ""
+      });
+      added++;
+    });
+    persist(); renderCatalog();
+    status.textContent = `Se agregaron ${added} pieza(s) a tu catálogo.`;
+    document.getElementById("aiPasteBox").value = "";
+  } catch(err){
+    status.textContent = "Ese bloque no es JSON válido. Pídele a Claude que te lo entregue exactamente en ese formato.";
+  }
+});
+
+renderCatalog();
+</script>
+</body>
+</html>
