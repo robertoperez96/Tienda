@@ -446,6 +446,7 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
 
   let done = 0, updated = 0, highConfidence = 0, lowConfidence = 0;
   const reviewList = [];
+  const notFoundList = [];
   for (const item of targets){
     status.textContent = `Buscando ${done+1} de ${targets.length}: ${item.name}…`;
     try{
@@ -468,14 +469,19 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
         updated++;
         if (picked.confidence === "alta") highConfidence++; else lowConfidence++;
         if (picked.confidence !== "alta") reviewList.push(item.name);
+      } else {
+        notFoundList.push(item.name);
       }
-    } catch(err){ /* seguimos con la siguiente aunque falle una */ }
+    } catch(err){ notFoundList.push(item.name + " (error de red)"); }
     done++;
     persist();
     renderCatalog();
     await new Promise(r => setTimeout(r, 350)); // no saturar la API pública
   }
-  status.textContent = `Listo: ${updated} de ${targets.length} actualizadas — ${highConfidence} con coincidencia exacta de número (confiables), ${lowConfidence} por nombre solamente (revisa estas: ${reviewList.slice(0,8).join(", ")}${reviewList.length>8?"…":""}).`;
+  let msg = `Listo: ${updated} de ${targets.length} actualizadas — ${highConfidence} con coincidencia exacta de número (confiables), ${lowConfidence} por nombre solamente.`;
+  if (reviewList.length) msg += ` Revisa estas (encontradas por nombre, verifica que sea la impresión correcta): ${reviewList.join(", ")}.`;
+  if (notFoundList.length) msg += ` NO se encontraron (probablemente sets muy recientes/exclusivos de Japón que esta base de datos aún no tiene): ${notFoundList.join(", ")}. Para estas, mándame una foto clara donde se lea el número de carta y te ayudo a conseguir la imagen o la subimos como foto propia.`;
+  status.textContent = msg;
 });
 </script>
 </body>

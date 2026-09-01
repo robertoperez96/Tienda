@@ -50,12 +50,12 @@
   .cart-count{position:absolute;top:-6px;right:-6px;background:var(--ember);color:var(--cream);font-family:var(--font-mono);font-size:11px;font-weight:600;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--ink);}
   @media (max-width:860px){nav.main-nav{display:none;}}
 
-  section.hero{padding:64px 0 36px;position:relative;overflow:hidden;}
-  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;}
-  @media (max-width:900px){.hero-grid{grid-template-columns:1fr;gap:36px;}}
-  h1.hero-title{font-family:var(--font-display);font-weight:560;font-size:clamp(32px,4.2vw,50px);line-height:1.06;letter-spacing:-.01em;margin:14px 0 16px;}
+  section.hero{padding:28px 0 22px;position:relative;overflow:hidden;}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;}
+  @media (max-width:900px){.hero-grid{grid-template-columns:1fr;gap:18px;}}
+  h1.hero-title{font-family:var(--font-display);font-weight:560;font-size:clamp(24px,3vw,34px);line-height:1.1;letter-spacing:-.01em;margin:8px 0 8px;}
   h1.hero-title em{font-style:italic;color:var(--foil-bright);font-weight:500;}
-  p.hero-sub{font-size:16.5px;color:var(--cream-dim);max-width:46ch;margin:0 0 26px;}
+  p.hero-sub{font-size:14px;color:var(--cream-dim);max-width:52ch;margin:0 0 14px;}
   .hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
   .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:10px;font-weight:600;font-size:14.5px;text-decoration:none;cursor:pointer;border:1px solid transparent;transition:transform .15s,border-color .15s,background .15s;}
   .btn:active{transform:translateY(1px);}
@@ -63,10 +63,10 @@
   .btn-foil:hover{filter:brightness(1.06);}
   .btn-ghost{background:transparent;border-color:var(--line-strong);color:var(--cream);}
   .btn-ghost:hover{border-color:var(--foil-dim);}
-  .stat-strip{margin-top:30px;display:flex;gap:26px;flex-wrap:wrap;padding-top:20px;border-top:1px solid var(--line);}
-  .stat b{display:block;font-family:var(--font-mono);font-size:20px;color:var(--foil-bright);}
-  .stat span{font-size:12.5px;color:var(--slate);}
-  .hero-visual{position:relative;height:340px;display:flex;align-items:center;justify-content:center;}
+  .stat-strip{margin-top:12px;display:flex;gap:18px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line);}
+  .stat b{display:block;font-family:var(--font-mono);font-size:15px;color:var(--foil-bright);}
+  .stat span{font-size:11px;color:var(--slate);}
+  .hero-visual{position:relative;display:flex;align-items:center;justify-content:center;}
   .stack-card{position:absolute;width:200px;height:280px;border-radius:16px;border:1px solid var(--line-strong);background:linear-gradient(160deg,var(--ink-4),var(--ink-2));box-shadow:var(--shadow-card);}
   .stack-card.c1{transform:rotate(-11deg) translate(-66px,10px);z-index:1;opacity:.7;}
   .stack-card.c3{transform:rotate(9deg) translate(66px,16px);z-index:1;opacity:.7;}
@@ -76,7 +76,7 @@
   @keyframes spin-holo{to{transform:rotate(360deg);}}
   .stack-card.c2 svg.gem{width:54px;height:54px;position:relative;z-index:2;opacity:.9;}
   @media (prefers-reduced-motion:reduce){.stack-card.c2 .holo-face::after{animation:none;}}
-  @media (max-width:900px){.hero-visual{height:260px;}.stack-card{width:160px;height:224px;}}
+  @media (max-width:900px){.stack-card{width:160px;height:224px;}}
 
   section.how{padding:44px 0 16px;}
   .how-head{margin-bottom:22px;}
@@ -89,7 +89,7 @@
   .step h3{font-size:15.5px;margin:10px 0 6px;font-weight:600;}
   .step p{font-size:13.5px;color:var(--cream-dim);margin:0;}
 
-  section.catalog{padding:50px 0 36px;}
+  section.catalog{padding:8px 0 36px;}
   .catalog-head{margin-bottom:18px;}
   .kind-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
   .kind-tab{background:var(--ink-2);border:1px solid var(--line-strong);color:var(--cream-dim);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:500;}
@@ -176,18 +176,18 @@
   .add-to-cart-btn.in-cart{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);}
 
   /* carrusel de destacados */
-  .hero-visual{position:relative;height:360px;border-radius:20px;overflow:hidden;background:var(--ink-2);border:1px solid var(--line-strong);box-shadow:var(--shadow-card);}
-  .carousel-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:24px;padding:30px;opacity:0;transition:opacity .7s ease;cursor:pointer;}
+  .hero-visual{position:relative;height:210px;border-radius:16px;overflow:hidden;background:var(--ink-2);border:1px solid var(--line-strong);box-shadow:var(--shadow-card);}
+  .carousel-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:18px;opacity:0;transition:opacity .7s ease;cursor:pointer;}
   .carousel-slide.active{opacity:1;z-index:1;}
-  .carousel-slide img{max-height:270px;max-width:46%;object-fit:contain;border-radius:12px;box-shadow:0 20px 44px rgba(0,0,0,.55);}
-  .carousel-info .featured-tag{font-family:var(--font-mono);font-size:10.5px;color:var(--foil-bright);letter-spacing:.08em;text-transform:uppercase;}
-  .carousel-info .name{font-family:var(--font-display);font-weight:560;font-size:20px;margin:8px 0 6px;max-width:22ch;}
-  .carousel-info .price{font-family:var(--font-mono);color:var(--foil-bright);font-size:19px;}
-  .carousel-info .set{font-size:11.5px;color:var(--slate);margin-top:4px;}
-  .carousel-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
+  .carousel-slide img{max-height:150px;max-width:42%;object-fit:contain;border-radius:10px;box-shadow:0 14px 30px rgba(0,0,0,.5);}
+  .carousel-info .featured-tag{font-family:var(--font-mono);font-size:10px;color:var(--foil-bright);letter-spacing:.08em;text-transform:uppercase;}
+  .carousel-info .name{font-family:var(--font-display);font-weight:560;font-size:16px;margin:6px 0 4px;max-width:20ch;}
+  .carousel-info .price{font-family:var(--font-mono);color:var(--foil-bright);font-size:16px;}
+  .carousel-info .set{font-size:10.5px;color:var(--slate);margin-top:3px;}
+  .carousel-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
   .carousel-dots span{width:6px;height:6px;border-radius:999px;background:var(--line-strong);transition:all .2s;}
   .carousel-dots span.active{background:var(--foil-bright);width:18px;}
-  @media (max-width:900px){.hero-visual{height:300px;} .carousel-slide{flex-direction:column;gap:12px;padding:20px;} .carousel-slide img{max-height:150px;max-width:70%;}}
+  @media (max-width:900px){.hero-visual{height:170px;} .carousel-slide{padding:14px;gap:10px;} .carousel-slide img{max-height:100px;max-width:38%;}}
 
   /* métodos de pago */
   .pay-methods{margin-bottom:14px;}
@@ -268,6 +268,44 @@
   .drawer-total b{font-family:var(--font-mono);font-size:19px;color:var(--foil-bright);}
   .drawer-foot .btn{width:100%;justify-content:center;}
   .drawer-note{font-size:11px;color:var(--slate);margin-top:10px;text-align:center;}
+
+  /* ---- zoom de carta ---- */
+  .zoom-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:110;}
+  .zoom-backdrop.open{display:block;}
+  .zoom-modal{
+    display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    z-index:111;background:var(--ink-2);border:1px solid var(--line-strong);border-radius:var(--radius-l);
+    width:min(760px,92vw);max-height:88vh;overflow-y:auto;
+    grid-template-columns:1fr 1fr;gap:0;box-shadow:0 30px 70px -20px rgba(0,0,0,.7);
+  }
+  .zoom-modal.open{display:grid;}
+  @media (max-width:680px){ .zoom-modal.open{ grid-template-columns:1fr; } }
+  .zoom-close{position:absolute;top:14px;right:14px;z-index:2;background:rgba(11,14,20,.6);}
+  .zoom-art{
+    background:linear-gradient(160deg,var(--ink-4),var(--ink-3));
+    display:flex;align-items:center;justify-content:center;padding:34px;
+    border-radius:var(--radius-l) 0 0 var(--radius-l);
+  }
+  @media (max-width:680px){ .zoom-art{ border-radius:var(--radius-l) var(--radius-l) 0 0; } }
+  .zoom-art img{max-width:100%;max-height:56vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 44px rgba(0,0,0,.55);}
+  .zoom-art svg.gem{width:80px;height:80px;opacity:.8;}
+  .zoom-info{padding:30px 28px;}
+  .zoom-set{font-family:var(--font-mono);font-size:12px;color:var(--slate);margin-bottom:8px;}
+  .zoom-info h3{font-family:var(--font-display);font-weight:560;font-size:24px;margin:0 0 12px;}
+  .zoom-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .zoom-price{font-family:var(--font-mono);font-weight:600;font-size:26px;color:var(--foil-bright);}
+  .zoom-stock{font-size:12.5px;color:var(--ok);margin-top:6px;}
+  .zoom-stock.sold{color:var(--ember-bright);}
+
+  /* ---- toast ---- */
+  .toast{
+    position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink-4);border:1px solid var(--foil);color:var(--foil-bright);
+    padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:600;
+    z-index:120;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+    box-shadow:0 12px 26px -8px rgba(0,0,0,.6);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -303,30 +341,14 @@
       <div>
         <span class="eyebrow">Catálogo curado · Actualizado a diario</span>
         <h1 class="hero-title">Encuentra el próximo <em>tesoro</em> para tu colección.</h1>
-        <p class="hero-sub">Singles y producto sellado, coleccionables y más. Estado verificado, precio claro en MXN y pago seguro con MercadoPago, tarjeta o transferencia.</p>
-        <div class="hero-actions">
-          <a href="#catalogo" class="btn btn-foil">Ver catálogo</a>
-          <a href="#como-comprar" class="btn btn-ghost">Cómo comprar</a>
-        </div>
+        <p class="hero-sub">Singles y producto sellado, coleccionables y más. Estado verificado y pago seguro con MercadoPago, tarjeta o transferencia.</p>
         <div class="stat-strip">
-          <div class="stat"><b id="statSold">184</b><span>cartas encontraron dueño este mes</span></div>
-          <div class="stat"><b id="statTotal">0</b><span>piezas activas en catálogo</span></div>
-          <div class="stat"><b id="statUpdated">29 ago</b><span>última actualización de precios</span></div>
+          <div class="stat"><b id="statSold">184</b><span>vendidas este mes</span></div>
+          <div class="stat"><b id="statTotal">0</b><span>piezas activas</span></div>
+          <div class="stat"><b id="statUpdated">29 ago</b><span>últ. actualización</span></div>
         </div>
       </div>
       <div class="hero-visual" id="featuredCarousel" aria-label="Productos destacados"></div>
-    </div>
-  </section>
-
-  <section class="how" id="como-comprar">
-    <div class="wrap">
-      <div class="how-head"><span class="eyebrow">El proceso</span><h2>Cómo comprar</h2></div>
-      <div class="steps">
-        <div class="step"><span class="num">01</span><h3>Elige tus piezas</h3><p>Filtra por tipo (singles o sellado), set, rareza o condición.</p></div>
-        <div class="step"><span class="num">02</span><h3>Ajusta cantidades</h3><p>En sellado puedes pedir más de una pieza; en singles cada carta es única.</p></div>
-        <div class="step"><span class="num">03</span><h3>Paga seguro</h3><p>Elige MercadoPago, tarjeta de crédito o transferencia bancaria directo en el carrito.</p></div>
-        <div class="step"><span class="num">04</span><h3>Recibe tu pedido</h3><p>Envío protegido a todo México o entrega en persona, según prefieras.</p></div>
-      </div>
     </div>
   </section>
 
@@ -368,6 +390,18 @@
           <button class="clear-filters" id="clearFilters">Quitar todos los filtros</button>
         </aside>
         <div class="grid" id="cardGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="como-comprar">
+    <div class="wrap">
+      <div class="how-head"><span class="eyebrow">El proceso</span><h2>Cómo comprar</h2></div>
+      <div class="steps">
+        <div class="step"><span class="num">01</span><h3>Elige tus piezas</h3><p>Filtra por tipo (singles o sellado), set, rareza o condición.</p></div>
+        <div class="step"><span class="num">02</span><h3>Ajusta cantidades</h3><p>En sellado puedes pedir más de una pieza; en singles cada carta es única.</p></div>
+        <div class="step"><span class="num">03</span><h3>Paga seguro</h3><p>Elige MercadoPago, tarjeta de crédito o transferencia bancaria directo en el carrito.</p></div>
+        <div class="step"><span class="num">04</span><h3>Recibe tu pedido</h3><p>Envío protegido a todo México o entrega en persona, según prefieras.</p></div>
       </div>
     </div>
   </section>
@@ -435,6 +469,22 @@
 </div>
 
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="zoom-backdrop" id="zoomBackdrop"></div>
+<div class="zoom-modal" id="zoomModal">
+  <button class="icon-btn zoom-close" id="zoomClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  <div class="zoom-art" id="zoomArt"></div>
+  <div class="zoom-info">
+    <div class="zoom-set" id="zoomSet"></div>
+    <h3 id="zoomName"></h3>
+    <div class="zoom-meta" id="zoomMeta"></div>
+    <div class="zoom-price" id="zoomPrice"></div>
+    <div id="zoomStock" class="zoom-stock"></div>
+    <button type="button" class="btn btn-foil" id="zoomAddBtn" style="width:100%;justify-content:center;margin-top:14px;">Agregar al carrito</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <div class="drawer" id="drawer">
   <div class="drawer-head"><h3>Tu selección</h3><button class="icon-btn" id="drawerClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
   <div class="drawer-list" id="drawerList"></div>
@@ -570,18 +620,19 @@ function renderCard(card){
       <button type="button" class="add-to-cart-btn ${qty>0 ? 'in-cart' : ''}" ${soldOut?'disabled':''}>${soldOut ? 'Agotado' : (qty>0 ? '✓ En tu carrito' : 'Agregar al carrito')}</button>`}
     </div>
   `;
-  const toggleSingle = () => {
+  const toggleSingle = (opts) => {
     if (soldOut) return;
     const cur = state.selected[card.id] || 0;
-    if (cur > 0) delete state.selected[card.id]; else state.selected[card.id] = 1;
+    if (cur > 0) delete state.selected[card.id]; else { state.selected[card.id] = 1; showToast(`✓ ${card.name} agregada al carrito`); }
     saveCart(); render();
+    if (opts?.closeZoom) closeZoom();
   };
   if (card.kind === "sellado"){
     el.querySelector(".qty-plus").addEventListener("click", ev => {
       ev.stopPropagation();
       if (soldOut) return;
       const cur = state.selected[card.id] || 0;
-      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); }
+      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); showToast(`✓ ${card.name} agregado al carrito`); }
     });
     el.querySelector(".qty-minus").addEventListener("click", ev => {
       ev.stopPropagation();
@@ -589,18 +640,58 @@ function renderCard(card){
       if (cur <= 1) delete state.selected[card.id]; else state.selected[card.id] = cur-1;
       saveCart(); render();
     });
-    el.querySelector(".card-art").addEventListener("click", () => {
-      if (soldOut) return;
-      const cur = state.selected[card.id] || 0;
-      if (cur === 0 && card.stock>0){ state.selected[card.id]=1; saveCart(); render(); }
-    });
+    el.querySelector(".card-art").addEventListener("click", () => openZoom(card));
   } else {
-    el.querySelector(".card-art").addEventListener("click", () => {
-      if (!soldOut && (state.selected[card.id]||0) === 0) toggleSingle();
-    });
+    el.querySelector(".card-art").addEventListener("click", () => openZoom(card));
     el.querySelector(".add-to-cart-btn").addEventListener("click", ev => { ev.stopPropagation(); toggleSingle(); });
   }
   return el;
+}
+
+/* ---- zoom modal ---- */
+function openZoom(card){
+  const artWrap = document.getElementById("zoomArt");
+  artWrap.innerHTML = card.image ? `<img src="${card.image}" alt="${card.name}" onerror="this.remove()">` : GEM_ICON;
+  document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
+  document.getElementById("zoomName").textContent = card.name;
+  document.getElementById("zoomMeta").innerHTML = `<span class="tag">${card.rarity}</span><span class="tag">${card.language}</span><span class="tag">${card.condition}</span>`;
+  document.getElementById("zoomPrice").textContent = money(card.price);
+  const soldOut = card.stock <= 0;
+  const stockEl = document.getElementById("zoomStock");
+  stockEl.textContent = soldOut ? "Agotado" : (card.kind==="sellado" ? `Disponible: ${card.stock}` : (card.stock===1 ? "Última pieza disponible" : "Disponible"));
+  stockEl.className = "zoom-stock" + (soldOut ? " sold" : "");
+  const addBtn = document.getElementById("zoomAddBtn");
+  addBtn.disabled = soldOut;
+  addBtn.textContent = soldOut ? "Agotado" : "Agregar al carrito";
+  addBtn.onclick = () => {
+    if (soldOut) return;
+    if (card.kind === "sellado"){
+      const cur = state.selected[card.id] || 0;
+      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); showToast(`✓ ${card.name} agregado al carrito`); }
+    } else {
+      const cur = state.selected[card.id] || 0;
+      if (cur === 0){ state.selected[card.id] = 1; saveCart(); render(); showToast(`✓ ${card.name} agregada al carrito`); }
+    }
+    closeZoom();
+  };
+  document.getElementById("zoomModal").classList.add("open");
+  document.getElementById("zoomBackdrop").classList.add("open");
+}
+function closeZoom(){
+  document.getElementById("zoomModal").classList.remove("open");
+  document.getElementById("zoomBackdrop").classList.remove("open");
+}
+document.getElementById("zoomClose").addEventListener("click", closeZoom);
+document.getElementById("zoomBackdrop").addEventListener("click", closeZoom);
+
+/* ---- toast ---- */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
 }
 
 function buildCarousel(){
