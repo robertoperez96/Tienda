@@ -151,7 +151,23 @@
   </div>
 
   <div class="panel">
-    <h2>4 · Importar/actualizar desde CSV de Collectr</h2>
+    <h2>4 · Buscar imágenes en Serebii.net (por set)</h2>
+    <p class="hint">
+      Para sets que TCGplayer/pokemontcg.io/TCGdex no tienen (como "Abyss Eye"), Serebii.net sí suele tener galería completa
+      con URLs predecibles por número de carta. Escribe el nombre del set tal como lo tienes guardado y el "slug" que usa
+      Serebii en su URL (lo ves en la barra de direcciones cuando entras a la página del set, ej. <code>serebii.net/card/<b>abysseye</b>/</code>).
+    </p>
+    <div class="row">
+      <input type="text" id="serebiiSetName" placeholder="Nombre del set en tu catálogo (ej. Abyss Eye)" style="flex:1;">
+      <input type="text" id="serebiiSlug" placeholder="Slug de Serebii (ej. abysseye)" style="flex:1;">
+    </div>
+    <div class="add-row"><button class="btn btn-foil" id="serebiiBtn" type="button">Generar imágenes desde Serebii</button></div>
+    <div class="status-msg" id="serebiiStatus"></div>
+    <p class="hint">Estas imágenes NO quedan bloqueadas automáticamente — revísalas en la tabla antes de cerrarles el candado, por si alguna no cargó bien.</p>
+  </div>
+
+  <div class="panel">
+    <h2>5 · Importar/actualizar desde CSV de Collectr</h2>
     <p class="hint">
       Sube el export.csv de tu portafolio "ventas" cuando quieras. Compara contra lo que ya tienes (por set + número + nombre)
       y <b>solo agrega las piezas nuevas</b> — las que ya existen no se tocan (conservan su imagen y precio ya buscados).
@@ -165,29 +181,40 @@
   </div>
 
   <div class="panel">
-    <h2>5 · Actualizar imágenes y precios automáticamente</h2>
+    <h2>6 · Buscar imágenes automáticamente</h2>
     <p class="hint">
-      Busca en pokemontcg.io la imagen real y el precio actual de TCGplayer para cada <b>carta suelta</b> de tu catálogo
-      que no tenga imagen (o para todas si marcas la casilla), y convierte el precio a MXN con el tipo de cambio del día.
-      Corre en tu navegador — no gasta créditos de ningún plan y lo puedes usar cada vez que quieras.
-      Producto <b>sellado</b> no se actualiza aquí (esa base de datos no tiene cajas/colecciones).
+      Busca en pokemontcg.io / TCGdex la imagen real de cada <b>carta suelta</b> sin imagen, y la <b>bloquea 🔒</b> apenas la confirma
+      (nombre + número + set exactos) — así nunca se vuelve a buscar, aunque corras esto mil veces. Solo tarda en las piezas
+      que de verdad le faltan. Corre en tu navegador, no gasta créditos de ningún plan.
+      Producto <b>sellado</b> y cartas <b>(CN)</b> no se buscan aquí (no hay base de datos confiable para esas).
     </p>
-    <div class="row" style="align-items:center;">
-      <label style="font-size:13px;color:var(--cream-dim);">Tipo de cambio USD→MXN:</label>
-      <input type="number" id="fxRate" step="0.01" style="width:100px;">
-      <button class="btn btn-ghost" id="fxRefreshBtn" type="button">Actualizar tipo de cambio</button>
-    </div>
     <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--cream-dim);">
-      <input type="checkbox" id="forceAllImages" style="width:16px;height:16px;"> Revisar también las que ya tienen imagen (por si cambió el precio)
+      <input type="checkbox" id="forceAllImages" style="width:16px;height:16px;"> Revisar también las que tienen imagen SIN candado (no toca las que ya están 🔒)
     </label>
-    <div class="add-row"><button class="btn btn-foil" id="autoUpdateBtn" type="button">Actualizar todo</button></div>
+    <div class="add-row"><button class="btn btn-foil" id="autoUpdateBtn" type="button">Buscar imágenes</button></div>
     <button class="adv-toggle" id="lockAllBtn" type="button">🔒 Bloquear ya todas las que ya tienen imagen (sin verificar de nuevo)</button>
     <button class="adv-toggle" id="resetCnBtn" type="button" style="display:block;margin-top:6px;color:var(--ember-bright);">🔄 Vaciar y desbloquear todas las (CN) — no son confiables, mejor a mano</button>
     <div class="status-msg" id="autoUpdateStatus"></div>
   </div>
 
   <div class="panel">
-    <h2>6 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
+    <h2>6b · Sugerir precio de TCGplayer</h2>
+    <p class="hint">
+      El precio base de cada carta es el de tu CSV de Collectr. Este botón busca el precio actual de TCGplayer y,
+      <b>solo si es más alto</b> que el que ya tienes, te avisa aquí para que decidas si lo usas — nunca lo cambia solo.
+      De dónde salió cada precio (CSV o TCGplayer) queda guardado para ti en el panel; tu cliente en la tienda nunca ve esa etiqueta.
+    </p>
+    <div class="row" style="align-items:center;">
+      <label style="font-size:13px;color:var(--cream-dim);">Tipo de cambio USD→MXN:</label>
+      <input type="number" id="fxRate" step="0.01" style="width:100px;">
+      <button class="btn btn-ghost" id="fxRefreshBtn" type="button">Actualizar tipo de cambio</button>
+    </div>
+    <div class="add-row"><button class="btn btn-foil" id="suggestPriceBtn" type="button">Buscar sugerencias de precio</button></div>
+    <div class="status-msg" id="suggestPriceStatus"></div>
+  </div>
+
+  <div class="panel">
+    <h2>7 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
     <table id="catalogTable">
       <thead><tr><th></th><th>Nombre</th><th>Set</th><th>Precio</th><th>Imagen (URL)</th><th>Stock</th><th></th></tr></thead>
       <tbody id="catalogBody"></tbody>
@@ -335,6 +362,8 @@ function renderCatalog(){
             <span>${c.priceLocked ? "🔒" : "🔓"}</span>
           </label>
         </div>
+        <div style="font-size:10px;color:var(--slate);margin-top:2px;">fuente: ${c.priceSource === "tcgplayer" ? "TCGplayer" : "CSV"}</div>
+        ${c.suggestedPrice ? `<div style="font-size:11px;color:var(--foil-bright);margin-top:3px;">⚠️ TCGplayer: $${c.suggestedPrice} <button class="useSuggestedBtn" data-id="${c.id}" style="background:none;border:none;color:var(--foil-bright);text-decoration:underline;cursor:pointer;padding:0;">usar</button></div>` : ""}
       </td>
       <td>
         <div style="display:flex;gap:4px;align-items:center;">
@@ -367,8 +396,9 @@ function renderCatalog(){
   }));
   document.querySelectorAll(".editPrice").forEach(inp => inp.addEventListener("change", () => {
     const item = catalog.find(c => c.id === Number(inp.dataset.id));
-    if (item){ item.price = Number(inp.value) || item.price; persist(); }
+    if (item){ item.price = Number(inp.value) || item.price; item.priceSource = "manual"; persist(); renderCatalog(); }
   }));
+  document.querySelectorAll(".useSuggestedBtn").forEach(btn => btn.addEventListener("click", () => useSuggestedPrice(Number(btn.dataset.id))));
   document.querySelectorAll(".editImage").forEach(inp => {
     inp.addEventListener("change", () => {
       const item = catalog.find(c => c.id === Number(inp.dataset.id));
@@ -617,6 +647,53 @@ async function refreshFx(){
   }
 }
 document.getElementById("fxRefreshBtn").addEventListener("click", refreshFx);
+
+document.getElementById("suggestPriceBtn").addEventListener("click", async () => {
+  const status = document.getElementById("suggestPriceStatus");
+  const fx = Number(document.getElementById("fxRate").value) || 18.5;
+  const apiKey = document.getElementById("apiKey").value.trim();
+  const headers = apiKey ? {"X-Api-Key": apiKey} : {};
+  const targets = catalog.filter(c => c.kind !== "sellado" && !c.priceLocked && !c.name.includes("(CN)"));
+  if (!targets.length){ status.textContent = "No hay piezas para revisar (todas tienen precio fijo con candado, o son sellado/CN)."; return; }
+
+  let done = 0, suggested = 0;
+  for (const item of targets){
+    status.textContent = `Comparando precio ${done+1} de ${targets.length}: ${item.name}…`;
+    const searchName = cleanSearchName(item.name);
+    let query = `name:"${searchName}"`;
+    if (item.num) query += ` number:${item.num}`;
+    const data = await fetchWithRetry(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(query)}&pageSize=25`, headers);
+    const picked = pickBestMatch(data?.data, item);
+    if (picked && picked.confidence === "alta"){
+      const usd = bestPrice(picked.card.tcgplayer);
+      if (usd){
+        const tcgPrice = Math.round(usd * fx);
+        if (tcgPrice > item.price){
+          item.suggestedPrice = tcgPrice;
+          suggested++;
+        } else {
+          item.suggestedPrice = null;
+        }
+      }
+    }
+    done++;
+    persist();
+    renderCatalog();
+    await new Promise(r => setTimeout(r, apiKey ? 250 : 600));
+  }
+  status.textContent = `Listo: ${suggested} piezas tienen un precio de TCGplayer más alto que el de tu CSV. Revísalas en la tabla (aviso ⚠️ junto al precio) y decide si lo usas.`;
+});
+
+function useSuggestedPrice(id){
+  const item = catalog.find(c => c.id === id);
+  if (item && item.suggestedPrice){
+    item.price = item.suggestedPrice;
+    item.priceSource = "tcgplayer";
+    item.suggestedPrice = null;
+    persist();
+    renderCatalog();
+  }
+}
 refreshFx();
 
 /* ---- actualizar imagen y precio de todas las cartas sueltas ---- */
@@ -697,7 +774,6 @@ document.getElementById("lockAllBtn").addEventListener("click", () => {
 });
 document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
   const status = document.getElementById("autoUpdateStatus");
-  const fx = Number(document.getElementById("fxRate").value) || 18.5;
   const forceAll = document.getElementById("forceAllImages").checked;
   const apiKey = document.getElementById("apiKey").value.trim();
   const headers = apiKey ? {"X-Api-Key": apiKey} : {};
@@ -705,14 +781,15 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
     status.textContent = "Sugerencia: pon una API key gratis (sección 1, 'Opciones avanzadas') antes de continuar — sin ella la base de datos te corta muy rápido con muchas piezas. Empezando de todos modos en 5s…";
     await new Promise(r => setTimeout(r, 5000));
   }
-  const targets = catalog.filter(c => c.kind !== "sellado" && !c.name.includes("(CN)") && !(c.imageLocked && c.priceLocked) && (forceAll || !c.image));
-  if (!targets.length){ status.textContent = "No hay cartas sueltas pendientes (todas ya tienen imagen, o marca la casilla para revisar todas)."; return; }
+  // las bloqueadas 🔒 NUNCA se vuelven a buscar, sin importar el checkbox — para eso es el candado
+  const targets = catalog.filter(c => c.kind !== "sellado" && !c.name.includes("(CN)") && !c.imageLocked && (forceAll || !c.image));
+  if (!targets.length){ status.textContent = "No hay imágenes pendientes (todas ya están confirmadas/bloqueadas, o marca la casilla para revisar las que tengan imagen sin candado)."; return; }
 
   let done = 0, updated = 0, highConfidence = 0;
   const reviewList = [];
   const notFoundList = [];
   for (const item of targets){
-    status.textContent = `Buscando ${done+1} de ${targets.length}: ${item.name}…`;
+    status.textContent = `Buscando imagen ${done+1} de ${targets.length}: ${item.name}…`;
     const searchName = cleanSearchName(item.name);
     let query = `name:"${searchName}"`;
     if (item.num) query += ` number:${item.num}`;
@@ -724,25 +801,17 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
     }
     if (picked && picked.confidence === "alta"){
       const match = picked.card;
-      if (!item.imageLocked) item.image = match.images?.large || match.images?.small || item.image;
+      item.image = match.images?.large || match.images?.small || item.image;
       item.imageLocked = true; // ya se confirmó nombre+número+set: no hace falta volver a buscarla
-      if (!item.priceLocked){
-        const usd = bestPrice(match.tcgplayer);
-        if (usd) item.price = Math.round(usd * fx);
-      }
       updated++;
       highConfidence++;
     } else if (picked){
-      // encontró algo, pero no confirmó nombre+número+set los tres a la vez: NO toca lo que ya había, solo avisa
       reviewList.push(item.name);
     } else {
-      // pokemontcg.io no encontró nada: probamos TCGdex antes de darnos por vencidos (cubre sets muy recientes como Ascended Heroes)
-      // Nota: TCGdex mismo advierte que su precio para variantes de Ascended Heroes puede estar mal,
-      // así que de TCGdex solo tomamos la IMAGEN — el precio siempre sale de TCGplayer (pokemontcg.io).
-      const td = await tryTcgdex(item, fx);
+      const td = await tryTcgdex(item, 1);
       if (td && td.image){
-        if (!item.imageLocked) item.image = td.image;
-        item.imageLocked = true; // también confirmado por set: no hace falta re-buscar
+        item.image = td.image;
+        item.imageLocked = true;
         updated++;
         highConfidence++;
       } else {
@@ -758,7 +827,7 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
       await new Promise(r => setTimeout(r, 4000));
     }
   }
-  let msg = `Listo: ${updated} de ${targets.length} actualizadas con imagen y precio confirmados (nombre + número + set coinciden los tres).`;
+  let msg = `Listo: ${updated} de ${targets.length} imágenes confirmadas (nombre + número + set coinciden los tres) y bloqueadas 🔒. El precio no se tocó — usa el botón de "Sugerir precio de TCGplayer" para eso.`;
   if (reviewList.length) msg += ` ${reviewList.length} encontraron algo parecido pero NO coincidía el set exacto — no se tocaron (si ya tenían imagen, la conservan tal cual): ${reviewList.slice(0,15).join(", ")}${reviewList.length>15?"…":""}.`;
   if (notFoundList.length) msg += ` ${notFoundList.length} no encontraron nada: ${notFoundList.slice(0,15).join(", ")}${notFoundList.length>15?"…":""}.`;
   status.textContent = msg;
@@ -766,6 +835,42 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
 
 /* ---- pantalla de bloqueo con contraseña ---- */
 const ADMIN_PASSWORD = "pokebaul2026"; // <-- cámbiala por la tuya
+function testImageLoads(url){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
+document.getElementById("serebiiBtn").addEventListener("click", async () => {
+  const status = document.getElementById("serebiiStatus");
+  const setName = document.getElementById("serebiiSetName").value.trim().toLowerCase();
+  const slug = document.getElementById("serebiiSlug").value.trim();
+  if (!setName || !slug){ status.textContent = "Escribe el nombre del set y el slug de Serebii."; return; }
+
+  const targets = catalog.filter(c => c.kind !== "sellado" && c.set.toLowerCase().includes(setName) && !c.image && c.num);
+  if (!targets.length){ status.textContent = "No hay piezas de ese set sin imagen (o no encontré ninguna con ese nombre de set)."; return; }
+
+  let found = 0, done = 0;
+  for (const item of targets){
+    status.textContent = `Probando ${done+1} de ${targets.length}: ${item.name}…`;
+    const candidates = [
+      `https://www.serebii.net/card/${slug}/${item.num}.jpg`,
+      `https://www.serebii.net/card/${slug}/${String(item.num).padStart(3,"0")}.jpg`
+    ];
+    for (const url of candidates){
+      if (await testImageLoads(url)){ item.image = url; found++; break; }
+    }
+    done++;
+    persist();
+    renderCatalog();
+    await new Promise(r => setTimeout(r, 150));
+  }
+  status.textContent = `Listo: ${found} de ${targets.length} imágenes encontradas en Serebii. Revísalas en la tabla y cierra el candado 🔒 de las que estén bien.`;
+});
+
 function tryUnlock(){
   const val = document.getElementById("lockPassInput").value;
   if (val === ADMIN_PASSWORD){
