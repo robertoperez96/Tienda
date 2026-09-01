@@ -85,9 +85,10 @@
       <input type="text" id="searchName" placeholder="Nombre de la carta…">
       <button class="btn btn-foil" id="searchBtn">Buscar</button>
     </div>
-    <button class="adv-toggle" id="advToggle">Opciones avanzadas (API key propia, opcional)</button>
+    <button class="adv-toggle" id="advToggle">Opciones avanzadas (API key gratis — muy recomendada con catálogos grandes)</button>
     <div class="adv-box" id="advBox">
-      <input type="text" id="apiKey" placeholder="API key de dev.pokemontcg.io (opcional, sube el límite de búsquedas)">
+      <input type="text" id="apiKey" placeholder="API key de dev.pokemontcg.io (regístrate gratis en 30 segundos)">
+      <p class="hint" style="margin-top:6px;">Con más de ~30 piezas, consigue una llave gratis en <b>dev.pokemontcg.io</b> (botón "Get an API Key", solo pide tu correo) y pégala aquí. Sin ella, "Actualizar todo" va a fallar mucho por exceso de peticiones.</p>
     </div>
     <div class="status-msg" id="searchStatus"></div>
     <div class="results" id="results"></div>
@@ -191,6 +192,8 @@ const advToggle = document.getElementById("advToggle");
 const advBox = document.getElementById("advBox");
 advToggle.addEventListener("click", () => advBox.classList.toggle("show"));
 
+document.getElementById("apiKey").value = localStorage.getItem("vitrina_admin_apikey") || "";
+document.getElementById("apiKey").addEventListener("change", e => localStorage.setItem("vitrina_admin_apikey", e.target.value.trim()));
 document.getElementById("searchBtn").addEventListener("click", doSearch);
 document.getElementById("searchName").addEventListener("keydown", e => { if (e.key === "Enter") doSearch(); });
 
@@ -476,10 +479,31 @@ function pickBestMatch(results, item){
   return { card: results[0], confidence: "baja" };
 }
 
+function cleanSearchName(name){
+  return name.replace(/\s*\([^)]*\)\s*$/, "").trim();
+}
+
+async function fetchWithRetry(url, headers, tries=2){
+  for (let i=0;i<tries;i++){
+    try{
+      const res = await fetch(url, {headers});
+      if (res.ok) return await res.json();
+    } catch(e){ /* reintenta */ }
+    await new Promise(r => setTimeout(r, 800 + i*800));
+  }
+  return null;
+}
+
 document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
   const status = document.getElementById("autoUpdateStatus");
   const fx = Number(document.getElementById("fxRate").value) || 18.5;
   const forceAll = document.getElementById("forceAllImages").checked;
+  const apiKey = document.getElementById("apiKey").value.trim();
+  const headers = apiKey ? {"X-Api-Key": apiKey} : {};
+  if (!apiKey){
+    status.textContent = "Sugerencia: pon una API key gratis (sección 1, 'Opciones avanzadas') antes de continuar — sin ella la base de datos te corta muy rápido con muchas piezas. Empezando de todos modos en 5s…";
+    await new Promise(r => setTimeout(r, 5000));
+  }
   const targets = catalog.filter(c => c.kind !== "sellado" && (forceAll || !c.image));
   if (!targets.length){ status.textContent = "No hay cartas sueltas pendientes (todas ya tienen imagen, o marca la casilla para revisar todas)."; return; }
 
@@ -488,38 +512,38 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
   const notFoundList = [];
   for (const item of targets){
     status.textContent = `Buscando ${done+1} de ${targets.length}: ${item.name}…`;
-    try{
-      let query = `name:"${item.name}"`;
-      if (item.num) query += ` number:${item.num}`;
-      const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(query)}&pageSize=10`);
-      const data = await res.json();
-      let picked = pickBestMatch(data?.data, item);
-      // si buscar con número no dio nada, reintenta solo por nombre
-      if (!picked && item.num){
-        const res2 = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(`name:"${item.name}"`)}&pageSize=10`);
-        const data2 = await res2.json();
-        picked = pickBestMatch(data2?.data, item);
-      }
-      if (picked){
-        const match = picked.card;
-        if (!item.image || forceAll) item.image = match.images?.large || match.images?.small || item.image;
-        const usd = bestPrice(match.tcgplayer);
-        if (usd) item.price = Math.round(usd * fx);
-        updated++;
-        if (picked.confidence === "alta") highConfidence++; else lowConfidence++;
-        if (picked.confidence !== "alta") reviewList.push(item.name);
-      } else {
-        notFoundList.push(item.name);
-      }
-    } catch(err){ notFoundList.push(item.name + " (error de red)"); }
+    const searchName = cleanSearchName(item.name);
+    let query = `name:"${searchName}"`;
+    if (item.num) query += ` number:${item.num}`;
+    let data = await fetchWithRetry(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(query)}&pageSize=10`, headers);
+    let picked = pickBestMatch(data?.data, item);
+    if (!picked && item.num){
+      const data2 = await fetchWithRetry(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(`name:"${searchName}"`)}&pageSize=10`, headers);
+      picked = pickBestMatch(data2?.data, item);
+    }
+    if (picked){
+      const match = picked.card;
+      if (!item.image || forceAll) item.image = match.images?.large || match.images?.small || item.image;
+      const usd = bestPrice(match.tcgplayer);
+      if (usd) item.price = Math.round(usd * fx);
+      updated++;
+      if (picked.confidence === "alta") highConfidence++; else lowConfidence++;
+      if (picked.confidence !== "alta") reviewList.push(item.name);
+    } else {
+      notFoundList.push(item.name);
+    }
     done++;
     persist();
     renderCatalog();
-    await new Promise(r => setTimeout(r, 350)); // no saturar la API pública
+    await new Promise(r => setTimeout(r, apiKey ? 250 : 600));
+    if (!apiKey && done % 20 === 0){
+      status.textContent = `Pausa breve para no saturar la base gratuita (${done}/${targets.length})…`;
+      await new Promise(r => setTimeout(r, 4000));
+    }
   }
   let msg = `Listo: ${updated} de ${targets.length} actualizadas — ${highConfidence} con coincidencia exacta de número (confiables), ${lowConfidence} por nombre solamente.`;
   if (reviewList.length) msg += ` Revisa estas (encontradas por nombre, verifica que sea la impresión correcta): ${reviewList.join(", ")}.`;
-  if (notFoundList.length) msg += ` NO se encontraron (probablemente sets muy recientes/exclusivos de Japón que esta base de datos aún no tiene): ${notFoundList.join(", ")}. Para estas, mándame una foto clara donde se lea el número de carta y te ayudo a conseguir la imagen o la subimos como foto propia.`;
+  if (notFoundList.length) msg += ` NO se encontraron: ${notFoundList.join(", ")}. Prueba correr "Actualizar todo" otra vez (algunas fallan solo por saturación, no porque no existan) — funciona mucho mejor con una API key puesta.`;
   status.textContent = msg;
 });
 </script>

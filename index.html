@@ -106,7 +106,7 @@
   .catalog-layout{display:grid;grid-template-columns:240px 1fr;gap:26px;align-items:flex-start;}
   @media (max-width:900px){.catalog-layout{grid-template-columns:1fr;}}
   .filter-backdrop{display:none;}
-  aside.filters{background:var(--ink-2);border:1px solid var(--line);border-radius:var(--radius-m);padding:18px;position:sticky;top:92px;}
+  aside.filters{background:var(--ink-2);border:1px solid var(--line);border-radius:var(--radius-m);padding:18px;position:sticky;top:92px;max-height:calc(100vh - 112px);overflow-y:auto;}
   .filter-group{padding:14px 0;border-bottom:1px solid var(--line);}
   .filter-group:first-child{padding-top:0;}
   .filter-group:last-child{border-bottom:none;padding-bottom:0;}
@@ -198,6 +198,7 @@
   .pay-panel{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--cream-dim);margin-bottom:10px;line-height:1.5;}
   .pay-panel b{color:var(--cream);}
   .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--slate);}
+  .load-more-wrap{display:none;justify-content:center;margin-top:24px;}
   .empty-state h3{color:var(--cream);font-family:var(--font-display);font-weight:500;font-size:20px;margin-bottom:8px;}
 
   section.legend{padding:8px 0 50px;}
@@ -390,6 +391,9 @@
           <button class="clear-filters" id="clearFilters">Quitar todos los filtros</button>
         </aside>
         <div class="grid" id="cardGrid"></div>
+        <div class="load-more-wrap" id="loadMoreWrap">
+          <button type="button" class="btn btn-ghost" id="loadMoreBtn">Ver más</button>
+        </div>
       </div>
     </div>
   </section>
@@ -551,7 +555,7 @@ function buildFilterUI(){
   unique("set").forEach(set => {
     const chip = document.createElement("button");
     chip.className = "chip"; chip.textContent = set;
-    chip.addEventListener("click", () => { state.sets.has(set) ? state.sets.delete(set) : state.sets.add(set); chip.classList.toggle("active"); render(); });
+    chip.addEventListener("click", () => { state.sets.has(set) ? state.sets.delete(set) : state.sets.add(set); chip.classList.toggle("active"); resetAndRender(); });
     setChips.appendChild(chip);
   });
   const buildChecks = (container, key, targetSet) => {
@@ -559,7 +563,7 @@ function buildFilterUI(){
       const id = `chk-${key}-${val}`.replace(/\s+/g,"-");
       const row = document.createElement("label");
       row.className = "check-row"; row.innerHTML = `<input type="checkbox" id="${id}"> ${val}`;
-      row.querySelector("input").addEventListener("change", e => { e.target.checked ? targetSet.add(val) : targetSet.delete(val); render(); });
+      row.querySelector("input").addEventListener("change", e => { e.target.checked ? targetSet.add(val) : targetSet.delete(val); resetAndRender(); });
       container.appendChild(row);
     });
   };
@@ -716,7 +720,11 @@ function buildCarousel(){
 
   el.querySelectorAll(".carousel-slide").forEach(slide => {
     slide.addEventListener("click", () => {
-      const id = slide.dataset.id;
+      const id = Number(slide.dataset.id);
+      const list = sortCards(CARDS.filter(matches));
+      const idx = list.findIndex(c => c.id === id);
+      if (idx >= visibleCount) visibleCount = idx + 1;
+      render();
       document.getElementById("catalogo").scrollIntoView({behavior:"smooth"});
       setTimeout(() => {
         const target = document.querySelector(`.card[data-id="${id}"]`);
@@ -741,6 +749,9 @@ function buildCarousel(){
   }
 }
 
+const PAGE_SIZE = 24;
+let visibleCount = PAGE_SIZE;
+
 function render(){
   document.querySelectorAll(".kind-tab").forEach(t => t.classList.toggle("active", t.dataset.kind === state.kind));
   const grid = document.getElementById("cardGrid");
@@ -753,11 +764,19 @@ function render(){
       ? `<div class="empty-state"><h3>No hay piezas con esos filtros</h3><p>Prueba quitando alguno de los filtros activos.</p></div>`
       : `<div class="empty-state"><h3>Tu catálogo está vacío</h3><p>Agrega tu primera pieza desde admin.html.</p></div>`;
   } else {
-    list.forEach(c => grid.appendChild(renderCard(c)));
+    const shown = list.slice(0, visibleCount);
+    shown.forEach(c => grid.appendChild(renderCard(c)));
     requestAnimationFrame(() => {
       const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in-view"); obs.unobserve(e.target); } }); }, {threshold:.1});
       grid.querySelectorAll(".card").forEach(c => obs.observe(c));
     });
+  }
+  const loadMoreWrap = document.getElementById("loadMoreWrap");
+  if (list.length > visibleCount){
+    loadMoreWrap.style.display = "flex";
+    document.getElementById("loadMoreBtn").textContent = `Ver más (${list.length - visibleCount} restantes)`;
+  } else {
+    loadMoreWrap.style.display = "none";
   }
   updateCartUI();
 }
@@ -807,19 +826,23 @@ document.getElementById("cardGrid").addEventListener("mousemove", e => {
   art.style.setProperty("--my", `${((e.clientY-rect.top)/rect.height)*100}%`);
 });
 
-document.getElementById("searchInput").addEventListener("input", e => { state.query = e.target.value; render(); });
-document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; render(); });
-document.getElementById("priceMin").addEventListener("input", e => { state.priceMin = e.target.value ? Number(e.target.value) : null; render(); });
-document.getElementById("priceMax").addEventListener("input", e => { state.priceMax = e.target.value ? Number(e.target.value) : null; render(); });
+function resetAndRender(){ visibleCount = PAGE_SIZE; render(); }
+
+document.getElementById("loadMoreBtn").addEventListener("click", () => { visibleCount += PAGE_SIZE; render(); });
+
+document.getElementById("searchInput").addEventListener("input", e => { state.query = e.target.value; resetAndRender(); });
+document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; resetAndRender(); });
+document.getElementById("priceMin").addEventListener("input", e => { state.priceMin = e.target.value ? Number(e.target.value) : null; resetAndRender(); });
+document.getElementById("priceMax").addEventListener("input", e => { state.priceMax = e.target.value ? Number(e.target.value) : null; resetAndRender(); });
 document.getElementById("clearFilters").addEventListener("click", () => {
   state.query=""; state.sets.clear(); state.rarities.clear(); state.conditions.clear(); state.languages.clear(); state.priceMin=null; state.priceMax=null;
   document.getElementById("searchInput").value=""; document.getElementById("priceMin").value=""; document.getElementById("priceMax").value="";
   document.querySelectorAll(".chip.active").forEach(c=>c.classList.remove("active"));
   document.querySelectorAll("aside.filters input[type=checkbox]").forEach(c=>c.checked=false);
-  render();
+  resetAndRender();
 });
 document.getElementById("searchToggle").addEventListener("click", () => document.getElementById("searchInput").focus());
-document.querySelectorAll(".kind-tab").forEach(tab => tab.addEventListener("click", () => { state.kind = tab.dataset.kind; render(); }));
+document.querySelectorAll(".kind-tab").forEach(tab => tab.addEventListener("click", () => { state.kind = tab.dataset.kind; resetAndRender(); }));
 
 const filtersPanel = document.getElementById("filtersPanel");
 const filterBackdrop = document.getElementById("filterBackdrop");
