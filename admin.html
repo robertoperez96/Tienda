@@ -543,7 +543,7 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
     try{
       const rows = parseCsv(reader.result);
       const existingKeys = new Set(catalog.map(c => catalogKey(c.name, c.set, c.num)));
-      let added = 0, updatedStock = 0, skipped = 0;
+      let added = 0, updatedStock = 0, skipped = 0, priceRestored = 0;
       rows.forEach(r => {
         const name = (r["Product Name"] || "").trim();
         if (!name) return;
@@ -557,17 +557,25 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
         } else if (cardNumRaw){ num = parseInt(cardNumRaw.replace(/\D/g,"")) || 0; }
         const key = catalogKey(name, setName, num);
         const stockVal = Math.round(parseFloat(r["Quantity"]) || 1);
-
-        if (existingKeys.has(key)){
-          const existing = catalog.find(c => catalogKey(c.name, c.set, c.num) === key);
-          if (existing && existing.stock !== stockVal){ existing.stock = stockVal; updatedStock++; }
-          else skipped++;
-          return;
-        }
         const priceKey = Object.keys(r).find(k => k.startsWith("Market Price"));
         const priceRaw = (priceKey ? r[priceKey] : "").replace(/,/g,"").replace(/"/g,"");
         let price = Math.round(parseFloat(priceRaw)) || 1;
         if (price <= 0) price = 1;
+
+        if (existingKeys.has(key)){
+          const existing = catalog.find(c => catalogKey(c.name, c.set, c.num) === key);
+          if (existing){
+            if (existing.stock !== stockVal){ existing.stock = stockVal; updatedStock++; }
+            // si todavía no tiene imagen confirmada, restauramos el precio original del CSV
+            // (deshace precios inventados de una búsqueda automática que haya fallado)
+            if (!existing.imageLocked && !existing.priceLocked && existing.price !== price){
+              existing.price = price;
+              priceRestored++;
+            }
+            if (existing.stock === stockVal && existing.imageLocked) skipped++;
+          }
+          return;
+        }
         let language = "Inglés";
         if (name.includes("(JP)")) language = "Japonés";
         else if (name.includes("(CN)")) language = "Chino";
@@ -582,7 +590,7 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
       });
       persist();
       renderCatalog();
-      status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${skipped} ya estaban igual (no se tocaron). Corre "Actualizar todo" para buscarles imagen y precio solo a las nuevas.`;
+      status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${priceRestored} con precio restaurado al original del CSV (no tenían imagen confirmada), ${skipped} ya estaban igual (no se tocaron). Corre "Actualizar todo" para buscarles imagen y precio solo a las nuevas.`;
     } catch(err){
       status.textContent = "No se pudo leer ese archivo. Asegúrate de que sea el export.csv de Collectr sin modificar.";
     }
@@ -729,11 +737,12 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
       reviewList.push(item.name);
     } else {
       // pokemontcg.io no encontró nada: probamos TCGdex antes de darnos por vencidos (cubre sets muy recientes como Ascended Heroes)
+      // Nota: TCGdex mismo advierte que su precio para variantes de Ascended Heroes puede estar mal,
+      // así que de TCGdex solo tomamos la IMAGEN — el precio siempre sale de TCGplayer (pokemontcg.io).
       const td = await tryTcgdex(item, fx);
       if (td && td.image){
         if (!item.imageLocked) item.image = td.image;
         item.imageLocked = true; // también confirmado por set: no hace falta re-buscar
-        if (!item.priceLocked && td.price) item.price = td.price;
         updated++;
         highConfidence++;
       } else {
