@@ -325,12 +325,24 @@ function renderCatalog(){
       <td>${c.image ? `<img src="${c.image}" alt="">` : "📦"}</td>
       <td>${c.name}${c.set ? ` <span style="color:var(--slate);font-size:11px;">(${c.set})</span>` : ""}</td>
       <td>${c.kind === "sellado" ? "Sellado" : "Single"}</td>
-      <td><input type="number" class="editPrice" data-id="${c.id}" value="${c.price}" style="width:80px;"></td>
       <td>
         <div style="display:flex;gap:4px;align-items:center;">
-          <input type="text" class="editImage" data-id="${c.id}" value="${c.image || ''}" placeholder="URL o pega/sube imagen" style="width:110px;font-size:11px;">
+          <input type="number" class="editPrice" data-id="${c.id}" value="${c.price}" style="width:70px;">
+          <label title="Precio fijo: no lo toques al 'Actualizar todo'" style="cursor:pointer;font-size:14px;">
+            <input type="checkbox" class="lockPrice" data-id="${c.id}" ${c.priceLocked ? "checked" : ""} style="display:none;">
+            <span>${c.priceLocked ? "🔒" : "🔓"}</span>
+          </label>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input type="text" class="editImage" data-id="${c.id}" value="${c.image || ''}" placeholder="URL o pega/sube imagen" style="width:100px;font-size:11px;">
           <label class="uploadBtn" style="cursor:pointer;background:var(--ink-4);border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px;font-size:12px;" title="Subir imagen desde tu dispositivo">
             📎<input type="file" accept="image/*" data-id="${c.id}" class="uploadImageInput" style="display:none;">
+          </label>
+          <label title="Imagen confirmada: no la busques de nuevo" style="cursor:pointer;font-size:14px;">
+            <input type="checkbox" class="lockImage" data-id="${c.id}" ${c.imageLocked ? "checked" : ""} style="display:none;">
+            <span>${c.imageLocked ? "🔒" : "🔓"}</span>
           </label>
         </div>
       </td>
@@ -342,6 +354,14 @@ function renderCatalog(){
   document.querySelectorAll(".soldBtn").forEach(b => b.addEventListener("click", () => {
     const item = catalog.find(c => c.id === Number(b.dataset.id));
     if (item){ item.stock = 0; persist(); renderCatalog(); }
+  }));
+  document.querySelectorAll(".lockImage").forEach(cb => cb.addEventListener("change", () => {
+    const item = catalog.find(c => c.id === Number(cb.dataset.id));
+    if (item){ item.imageLocked = cb.checked; persist(); renderCatalog(); }
+  }));
+  document.querySelectorAll(".lockPrice").forEach(cb => cb.addEventListener("change", () => {
+    const item = catalog.find(c => c.id === Number(cb.dataset.id));
+    if (item){ item.priceLocked = cb.checked; persist(); renderCatalog(); }
   }));
   document.querySelectorAll(".editPrice").forEach(inp => inp.addEventListener("change", () => {
     const item = catalog.find(c => c.id === Number(inp.dataset.id));
@@ -474,6 +494,38 @@ function parseCsv(text){
     return obj;
   });
 }
+async function tryTcgdex(item, fx){
+  const searchName = cleanSearchName(item.name);
+  if (!item.num) return null;
+  try{
+    const listRes = await fetch(`https://api.tcgdex.net/v2/en/cards?name=like:${encodeURIComponent(searchName)}&localId=eq:${item.num}`);
+    if (!listRes.ok) return null;
+    const list = await listRes.json();
+    if (!Array.isArray(list) || !list.length) return null;
+    for (const brief of list.slice(0, 5)){
+      const detRes = await fetch(`https://api.tcgdex.net/v2/en/cards/${brief.id}`);
+      if (!detRes.ok) continue;
+      const card = await detRes.json();
+      if (setsMatch(card.set?.name, item.set)){
+        const tp = card.pricing?.tcgplayer;
+        let price = null;
+        if (tp){
+          const order = ["holofoil","reverse-holofoil","normal","1st-edition-holofoil","unlimited-holofoil","unlimited","1st-edition"];
+          for (const key of order){
+            const v = tp[key];
+            if (v){
+              const cands = [v.marketPrice, v.lowPrice].filter(n => typeof n === "number" && n > 0);
+              if (cands.length){ price = Math.round(Math.max(...cands) * fx); break; }
+            }
+          }
+        }
+        return { image: card.image ? card.image + "/high.webp" : "", price };
+      }
+    }
+  } catch(e){ /* no pasa nada, se cuenta como no encontrado */ }
+  return null;
+}
+
 function cleanRowName(name){ return name.replace(/\s*\([^)]*\)\s*$/, "").trim(); }
 function catalogKey(name, set, num){ return `${cleanRowName(name)}|${set}|${num}`.toLowerCase(); }
 
@@ -561,8 +613,15 @@ function bestPrice(tcgplayer){
   const order = ["holofoil","reverseHolofoil","normal","1stEditionHolofoil","unlimitedHolofoil"];
   for (const key of order){
     const p = tcgplayer.prices[key];
-    if (p?.market) return p.market;
-    if (p?.mid) return p.mid;
+    if (!p) continue;
+    // usa el mayor entre market price y lowest listed (evita precios bajos cuando
+    // el "market price" sale raro por pocas ventas, pero el más barato real es más caro)
+    if (typeof p.market === "number" && typeof p.low === "number" && p.market > 0 && p.low > 0){
+      return Math.max(p.market, p.low);
+    }
+    if (typeof p.market === "number" && p.market > 0) return p.market;
+    if (typeof p.low === "number" && p.low > 0) return p.low;
+    if (typeof p.mid === "number" && p.mid > 0) return p.mid;
   }
   return null;
 }
@@ -614,7 +673,7 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
     status.textContent = "Sugerencia: pon una API key gratis (sección 1, 'Opciones avanzadas') antes de continuar — sin ella la base de datos te corta muy rápido con muchas piezas. Empezando de todos modos en 5s…";
     await new Promise(r => setTimeout(r, 5000));
   }
-  const targets = catalog.filter(c => c.kind !== "sellado" && (forceAll || !c.image));
+  const targets = catalog.filter(c => c.kind !== "sellado" && !(c.imageLocked && c.priceLocked) && (forceAll || !c.image));
   if (!targets.length){ status.textContent = "No hay cartas sueltas pendientes (todas ya tienen imagen, o marca la casilla para revisar todas)."; return; }
 
   let done = 0, updated = 0, highConfidence = 0;
@@ -633,18 +692,29 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
     }
     if (picked && picked.confidence === "alta"){
       const match = picked.card;
-      item.image = match.images?.large || match.images?.small || item.image;
-      const usd = bestPrice(match.tcgplayer);
-      if (usd) item.price = Math.round(usd * fx);
+      if (!item.imageLocked) item.image = match.images?.large || match.images?.small || item.image;
+      item.imageLocked = true; // ya se confirmó nombre+número+set: no hace falta volver a buscarla
+      if (!item.priceLocked){
+        const usd = bestPrice(match.tcgplayer);
+        if (usd) item.price = Math.round(usd * fx);
+      }
       updated++;
       highConfidence++;
     } else if (picked){
-      // encontró algo, pero no confirmó nombre+número+set los tres a la vez: no la toca, para no arriesgar poner la carta equivocada
-      if (forceAll) item.image = ""; // si se pidió revisar todo y no hay certeza, mejor vacía que incorrecta
+      // encontró algo, pero no confirmó nombre+número+set los tres a la vez: NO toca lo que ya había, solo avisa
       reviewList.push(item.name);
     } else {
-      if (forceAll) item.image = "";
-      notFoundList.push(item.name);
+      // pokemontcg.io no encontró nada: probamos TCGdex antes de darnos por vencidos (cubre sets muy recientes como Ascended Heroes)
+      const td = await tryTcgdex(item, fx);
+      if (td && td.image){
+        if (!item.imageLocked) item.image = td.image;
+        item.imageLocked = true; // también confirmado por set: no hace falta re-buscar
+        if (!item.priceLocked && td.price) item.price = td.price;
+        updated++;
+        highConfidence++;
+      } else {
+        notFoundList.push(item.name);
+      }
     }
     done++;
     persist();
@@ -656,7 +726,7 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
     }
   }
   let msg = `Listo: ${updated} de ${targets.length} actualizadas con imagen y precio confirmados (nombre + número + set coinciden los tres).`;
-  if (reviewList.length) msg += ` ${reviewList.length} encontraron algo parecido pero NO coincidía el set exacto, así que NO les puse imagen (mejor eso que ponerte la carta equivocada) — revísalas a mano: ${reviewList.slice(0,15).join(", ")}${reviewList.length>15?"…":""}.`;
+  if (reviewList.length) msg += ` ${reviewList.length} encontraron algo parecido pero NO coincidía el set exacto — no se tocaron (si ya tenían imagen, la conservan tal cual): ${reviewList.slice(0,15).join(", ")}${reviewList.length>15?"…":""}.`;
   if (notFoundList.length) msg += ` ${notFoundList.length} no encontraron nada: ${notFoundList.slice(0,15).join(", ")}${notFoundList.length>15?"…":""}.`;
   status.textContent = msg;
 });
