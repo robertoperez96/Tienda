@@ -170,8 +170,9 @@
     <h2>5 · Importar/actualizar desde CSV de Collectr</h2>
     <p class="hint">
       Sube el export.csv de tu portafolio "ventas" cuando quieras. Compara contra lo que ya tienes (por set + número + nombre)
-      y <b>solo agrega las piezas nuevas</b> — las que ya existen no se tocan (conservan su imagen y precio ya buscados).
-      Si el stock cambió en Collectr, lo actualiza.
+      y <b>solo agrega piezas nuevas al catálogo</b> — la imagen no se toca. El <b>precio</b> de las que ya existen
+      <b>solo sube</b>, nunca baja: se actualiza al del CSV únicamente si es mayor al que ya tienes (o si tiene candado 🔒,
+      ahí nunca se toca). Si el stock cambió en Collectr, también se actualiza.
     </p>
     <div class="row">
       <button class="btn btn-ghost" id="csvImportBtn" type="button">Elegir CSV de Collectr</button>
@@ -215,6 +216,12 @@
 
   <div class="panel">
     <h2>7 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
+    <div class="row" style="margin-bottom:14px;">
+      <button class="btn btn-ghost" id="lockAllImagesBtn" type="button">🔒 Bloquear todas las imágenes</button>
+      <button class="btn btn-ghost" id="unlockAllImagesBtn" type="button">🔓 Desbloquear todas las imágenes</button>
+      <button class="btn btn-ghost" id="lockAllPricesBtn" type="button">🔒 Bloquear todos los precios</button>
+      <button class="btn btn-ghost" id="unlockAllPricesBtn" type="button">🔓 Desbloquear todos los precios</button>
+    </div>
     <table id="catalogTable">
       <thead><tr><th></th><th>Nombre</th><th>Set</th><th>Precio</th><th>Imagen (URL)</th><th>Stock</th><th></th></tr></thead>
       <tbody id="catalogBody"></tbody>
@@ -596,13 +603,13 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
           const existing = catalog.find(c => catalogKey(c.name, c.set, c.num) === key);
           if (existing){
             if (existing.stock !== stockVal){ existing.stock = stockVal; updatedStock++; }
-            // si todavía no tiene imagen confirmada, restauramos el precio original del CSV
-            // (deshace precios inventados de una búsqueda automática que haya fallado)
-            if (!existing.imageLocked && !existing.priceLocked && existing.price !== price){
+            // el precio nunca baja solo: se actualiza únicamente si el CSV resulta MAYOR que el que ya tienes
+            if (!existing.priceLocked && price > existing.price){
               existing.price = price;
+              existing.priceSource = "csv";
               priceRestored++;
             }
-            if (existing.stock === stockVal && existing.imageLocked) skipped++;
+            if (existing.stock === stockVal && price <= existing.price) skipped++;
           }
           return;
         }
@@ -612,7 +619,7 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
         catalog.push({
           id: nextId++, name, set: setName, code: "", num, total,
           rarity: (r["Rarity"] || (cardNumRaw ? "Rare" : "Sellado")), condition: "NM", language,
-          type: "incoloro", kind: cardNumRaw ? "single" : "sellado", price, stock: stockVal,
+          type: "incoloro", kind: cardNumRaw ? "single" : "sellado", price, priceSource: "csv", stock: stockVal,
           isNew: true, featured: false, image: ""
         });
         existingKeys.add(key);
@@ -620,7 +627,7 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
       });
       persist();
       renderCatalog();
-      status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${priceRestored} con precio restaurado al original del CSV (no tenían imagen confirmada), ${skipped} ya estaban igual (no se tocaron). Corre "Actualizar todo" para buscarles imagen y precio solo a las nuevas.`;
+      status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${priceRestored} con precio ajustado al del CSV (protegiendo las que editaste a mano, salvo que el CSV resultó mayor), ${skipped} ya estaban igual (no se tocaron). Corre "Buscar imágenes" para las nuevas.`;
     } catch(err){
       status.textContent = "No se pudo leer ese archivo. Asegúrate de que sea el export.csv de Collectr sin modificar.";
     }
@@ -887,6 +894,23 @@ if (sessionStorage.getItem("vitrina_admin_unlocked") === "1"){
 }
 document.getElementById("lockUnlockBtn").addEventListener("click", tryUnlock);
 document.getElementById("lockPassInput").addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
+
+document.getElementById("lockAllImagesBtn").addEventListener("click", () => {
+  catalog.forEach(c => { if (c.kind !== "sellado") c.imageLocked = true; });
+  persist(); renderCatalog();
+});
+document.getElementById("unlockAllImagesBtn").addEventListener("click", () => {
+  catalog.forEach(c => { c.imageLocked = false; });
+  persist(); renderCatalog();
+});
+document.getElementById("lockAllPricesBtn").addEventListener("click", () => {
+  catalog.forEach(c => { c.priceLocked = true; });
+  persist(); renderCatalog();
+});
+document.getElementById("unlockAllPricesBtn").addEventListener("click", () => {
+  catalog.forEach(c => { c.priceLocked = false; });
+  persist(); renderCatalog();
+});
 </script>
 </div>
 </body>
