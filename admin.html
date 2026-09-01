@@ -181,6 +181,8 @@
       <input type="checkbox" id="forceAllImages" style="width:16px;height:16px;"> Revisar también las que ya tienen imagen (por si cambió el precio)
     </label>
     <div class="add-row"><button class="btn btn-foil" id="autoUpdateBtn" type="button">Actualizar todo</button></div>
+    <button class="adv-toggle" id="lockAllBtn" type="button">🔒 Bloquear ya todas las que ya tienen imagen (sin verificar de nuevo)</button>
+    <button class="adv-toggle" id="resetCnBtn" type="button" style="display:block;margin-top:6px;color:var(--ember-bright);">🔄 Vaciar y desbloquear todas las (CN) — no son confiables, mejor a mano</button>
     <div class="status-msg" id="autoUpdateStatus"></div>
   </div>
 
@@ -494,6 +496,24 @@ function parseCsv(text){
     return obj;
   });
 }
+const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de PokeBaúl
+
+async function tryWorkerJp(item, fx){
+  if (WORKER_URL.includes("TU-WORKER")) return null;
+  try{
+    const params = new URLSearchParams({ name: cleanSearchName(item.name) });
+    if (item.num) params.set("num", item.num);
+    const res = await fetch(`${WORKER_URL}/jp-lookup?${params.toString()}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.found) return null;
+    return {
+      image: data.image || "",
+      price: data.priceUsd ? Math.round(data.priceUsd * fx) : null
+    };
+  } catch(e){ return null; }
+}
+
 async function tryTcgdex(item, fx){
   const searchName = cleanSearchName(item.name);
   if (!item.num) return null;
@@ -663,6 +683,26 @@ async function fetchWithRetry(url, headers, tries=2){
   return null;
 }
 
+document.getElementById("resetCnBtn").addEventListener("click", () => {
+  const status = document.getElementById("autoUpdateStatus");
+  let reset = 0;
+  catalog.forEach(c => {
+    if (c.name.includes("(CN)")){ c.image = ""; c.imageLocked = false; reset++; }
+  });
+  persist();
+  renderCatalog();
+  status.textContent = `Se vaciaron y desbloquearon ${reset} piezas chinas. Resuélvelas a mano (foto propia, o búscalas en Taobao/JD/TCGCollector) — la búsqueda automática ya no las va a intentar (no hay fuente confiable para el mercado chino).`;
+});
+document.getElementById("lockAllBtn").addEventListener("click", () => {
+  const status = document.getElementById("autoUpdateStatus");
+  let locked = 0;
+  catalog.forEach(c => {
+    if (c.kind !== "sellado" && !c.name.includes("(CN)") && c.image && !c.imageLocked){ c.imageLocked = true; locked++; }
+  });
+  persist();
+  renderCatalog();
+  status.textContent = `Listo: se bloquearon ${locked} imágenes que ya tenías, sin volver a consultar internet. La próxima "Actualizar todo" será mucho más rápida.`;
+});
 document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
   const status = document.getElementById("autoUpdateStatus");
   const fx = Number(document.getElementById("fxRate").value) || 18.5;
@@ -673,7 +713,7 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
     status.textContent = "Sugerencia: pon una API key gratis (sección 1, 'Opciones avanzadas') antes de continuar — sin ella la base de datos te corta muy rápido con muchas piezas. Empezando de todos modos en 5s…";
     await new Promise(r => setTimeout(r, 5000));
   }
-  const targets = catalog.filter(c => c.kind !== "sellado" && !(c.imageLocked && c.priceLocked) && (forceAll || !c.image));
+  const targets = catalog.filter(c => c.kind !== "sellado" && !c.name.includes("(CN)") && !(c.imageLocked && c.priceLocked) && (forceAll || !c.image));
   if (!targets.length){ status.textContent = "No hay cartas sueltas pendientes (todas ya tienen imagen, o marca la casilla para revisar todas)."; return; }
 
   let done = 0, updated = 0, highConfidence = 0;
@@ -713,7 +753,17 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
         updated++;
         highConfidence++;
       } else {
-        notFoundList.push(item.name);
+        // tercer intento: tu Worker (PTCG-database + JustTCG), pensado para japonesas raras
+        const wk = await tryWorkerJp(item, fx);
+        if (wk && wk.image){
+          if (!item.imageLocked) item.image = wk.image;
+          item.imageLocked = true;
+          if (!item.priceLocked && wk.price) item.price = wk.price;
+          updated++;
+          highConfidence++;
+        } else {
+          notFoundList.push(item.name);
+        }
       }
     }
     done++;

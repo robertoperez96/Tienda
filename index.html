@@ -502,7 +502,11 @@
         <button type="button" class="pay-opt" data-pay="whatsapp">💬 Confirmar por WhatsApp</button>
       </div>
       <div class="pay-panel" id="payPanelTransfer" style="display:none;"></div>
-      <div class="pay-panel" id="payPanelCard">Pago con tarjeta y MercadoPago llega muy pronto. Por ahora confirma tu compra por WhatsApp y coordinamos el pago mientras lo activamos.</div>
+      <div class="pay-panel" id="payPanelCard">
+        <p style="margin:0 0 10px;">Pago seguro con tarjeta, MercadoPago, OXXO o transferencia, procesado por MercadoPago.</p>
+        <button type="button" class="btn btn-foil" id="mpPayBtn" style="width:100%;justify-content:center;">Pagar con MercadoPago</button>
+        <p id="mpPayStatus" style="font-size:11px;color:var(--slate);margin-top:8px;"></p>
+      </div>
     </div>
     <a href="#" class="btn btn-foil" id="whatsappBtn" target="_blank" rel="noopener">Solicitar por WhatsApp</a>
     <p class="drawer-note">El apartado se confirma por WhatsApp según disponibilidad.</p>
@@ -517,6 +521,7 @@
    Solo cambia WHATSAPP_PHONE por tu número real.
    ===================================================================== */
 const WHATSAPP_PHONE = "528111707319"; // <-- tu número real
+const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de PokeBaúl
 const BANK_INFO = { // <-- reemplaza con tus datos reales para transferencia
   banco: "Tu banco",
   clabe: "0000 0000 0000 0000 00",
@@ -815,6 +820,29 @@ function updateCartUI(){
   const lines = entries.map(({card,qty}) => `• ${card.name}${qty>1?` x${qty}`:''} (${card.set}${card.num?`, ${card.code}${String(card.num).padStart(3,"0")}`:''}, ${card.condition}) — ${money(card.price*qty)}`);
   const msg = `Hola, me interesa apartar:%0A%0A${lines.join("%0A")}%0A%0ATotal aprox: ${money(total)}`;
   document.getElementById("whatsappBtn").href = count ? `https://wa.me/${WHATSAPP_PHONE}?text=${msg}` : `https://wa.me/${WHATSAPP_PHONE}`;
+
+  document.getElementById("mpPayBtn").onclick = async () => {
+    const mpStatus = document.getElementById("mpPayStatus");
+    if (!count){ mpStatus.textContent = "Agrega algo al carrito primero."; return; }
+    if (WORKER_URL.includes("TU-WORKER")){ mpStatus.textContent = "Falta configurar WORKER_URL en el código (ver worker.js)."; return; }
+    mpStatus.textContent = "Abriendo pago seguro…";
+    try {
+      const items = entries.map(({card, qty}) => ({ name: card.name, price: card.price, qty }));
+      const res = await fetch(`${WORKER_URL}/create-preference`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items, successUrl: location.href, failureUrl: location.href, pendingUrl: location.href })
+      });
+      const data = await res.json();
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        mpStatus.textContent = "No se pudo iniciar el pago. Intenta de nuevo o usa WhatsApp.";
+      }
+    } catch (err) {
+      mpStatus.textContent = "No se pudo conectar con el servidor de pago. Intenta de nuevo o usa WhatsApp.";
+    }
+  };
   document.getElementById("statTotal").textContent = CARDS.length;
 }
 
