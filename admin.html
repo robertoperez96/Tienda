@@ -142,9 +142,29 @@
   </div>
 
   <div class="panel">
-    <h2>4 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
+    <h2>4 · Actualizar imágenes y precios automáticamente</h2>
+    <p class="hint">
+      Busca en pokemontcg.io la imagen real y el precio actual de TCGplayer para cada <b>carta suelta</b> de tu catálogo
+      que no tenga imagen (o para todas si marcas la casilla), y convierte el precio a MXN con el tipo de cambio del día.
+      Corre en tu navegador — no gasta créditos de ningún plan y lo puedes usar cada vez que quieras.
+      Producto <b>sellado</b> no se actualiza aquí (esa base de datos no tiene cajas/colecciones).
+    </p>
+    <div class="row" style="align-items:center;">
+      <label style="font-size:13px;color:var(--cream-dim);">Tipo de cambio USD→MXN:</label>
+      <input type="number" id="fxRate" step="0.01" style="width:100px;">
+      <button class="btn btn-ghost" id="fxRefreshBtn" type="button">Actualizar tipo de cambio</button>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--cream-dim);">
+      <input type="checkbox" id="forceAllImages" style="width:16px;height:16px;"> Revisar también las que ya tienen imagen (por si cambió el precio)
+    </label>
+    <div class="add-row"><button class="btn btn-foil" id="autoUpdateBtn" type="button">Actualizar todo</button></div>
+    <div class="status-msg" id="autoUpdateStatus"></div>
+  </div>
+
+  <div class="panel">
+    <h2>5 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
     <table id="catalogTable">
-      <thead><tr><th></th><th>Nombre</th><th>Set</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Nombre</th><th>Set</th><th>Precio</th><th>Imagen (URL)</th><th>Stock</th><th></th></tr></thead>
       <tbody id="catalogBody"></tbody>
     </table>
     <div class="empty" id="emptyMsg">Aún no agregas ninguna pieza.</div>
@@ -279,12 +299,21 @@ function renderCatalog(){
       <td>${c.image ? `<img src="${c.image}" alt="">` : "📦"}</td>
       <td>${c.name}${c.set ? ` <span style="color:var(--slate);font-size:11px;">(${c.set})</span>` : ""}</td>
       <td>${c.kind === "sellado" ? "Sellado" : "Single"}</td>
-      <td>$${c.price.toLocaleString("es-MX")}</td>
+      <td><input type="number" class="editPrice" data-id="${c.id}" value="${c.price}" style="width:80px;"></td>
+      <td><input type="text" class="editImage" data-id="${c.id}" value="${c.image || ''}" placeholder="URL de imagen" style="width:140px;font-size:11px;"></td>
       <td>${c.stock}</td>
       <td class="row-actions"><button data-id="${c.id}" class="delBtn">Eliminar</button></td>
     `;
     body.appendChild(tr);
   });
+  document.querySelectorAll(".editPrice").forEach(inp => inp.addEventListener("change", () => {
+    const item = catalog.find(c => c.id === Number(inp.dataset.id));
+    if (item){ item.price = Number(inp.value) || item.price; persist(); }
+  }));
+  document.querySelectorAll(".editImage").forEach(inp => inp.addEventListener("change", () => {
+    const item = catalog.find(c => c.id === Number(inp.dataset.id));
+    if (item){ item.image = inp.value.trim(); persist(); renderCatalog(); }
+  }));
   document.querySelectorAll(".delBtn").forEach(b => b.addEventListener("click", () => {
     catalog = catalog.filter(c => c.id !== Number(b.dataset.id));
     persist(); renderCatalog();
@@ -350,6 +379,68 @@ document.getElementById("aiPasteBtn").addEventListener("click", () => {
 });
 
 renderCatalog();
+
+/* ---- tipo de cambio USD -> MXN (gratis, sin llave, corre en el navegador) ---- */
+const FX_STORAGE_KEY = "vitrina_admin_fx_mxn";
+document.getElementById("fxRate").value = localStorage.getItem(FX_STORAGE_KEY) || "18.5";
+
+async function refreshFx(){
+  const status = document.getElementById("autoUpdateStatus");
+  try{
+    const res = await fetch("https://api.frankfurter.app/latest?from=USD&to=MXN");
+    const data = await res.json();
+    if (data?.rates?.MXN){
+      document.getElementById("fxRate").value = data.rates.MXN.toFixed(2);
+      localStorage.setItem(FX_STORAGE_KEY, data.rates.MXN.toFixed(2));
+      status.textContent = `Tipo de cambio actualizado: $${data.rates.MXN.toFixed(2)} MXN por USD.`;
+    }
+  } catch(err){
+    status.textContent = "No se pudo obtener el tipo de cambio automático, usa el valor manual.";
+  }
+}
+document.getElementById("fxRefreshBtn").addEventListener("click", refreshFx);
+refreshFx();
+
+/* ---- actualizar imagen y precio de todas las cartas sueltas ---- */
+function bestPrice(tcgplayer){
+  if (!tcgplayer?.prices) return null;
+  const order = ["holofoil","reverseHolofoil","normal","1stEditionHolofoil","unlimitedHolofoil"];
+  for (const key of order){
+    const p = tcgplayer.prices[key];
+    if (p?.market) return p.market;
+    if (p?.mid) return p.mid;
+  }
+  return null;
+}
+
+document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
+  const status = document.getElementById("autoUpdateStatus");
+  const fx = Number(document.getElementById("fxRate").value) || 18.5;
+  const forceAll = document.getElementById("forceAllImages").checked;
+  const targets = catalog.filter(c => c.kind !== "sellado" && (forceAll || !c.image));
+  if (!targets.length){ status.textContent = "No hay cartas sueltas pendientes (todas ya tienen imagen, o marca la casilla para revisar todas)."; return; }
+
+  let done = 0, updated = 0;
+  for (const item of targets){
+    status.textContent = `Buscando ${done+1} de ${targets.length}: ${item.name}…`;
+    try{
+      const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=name:"${encodeURIComponent(item.name)}"&pageSize=5`);
+      const data = await res.json();
+      const match = data?.data?.[0];
+      if (match){
+        if (!item.image || forceAll) item.image = match.images?.large || match.images?.small || item.image;
+        const usd = bestPrice(match.tcgplayer);
+        if (usd) item.price = Math.round(usd * fx);
+        updated++;
+      }
+    } catch(err){ /* seguimos con la siguiente aunque falle una */ }
+    done++;
+    persist();
+    renderCatalog();
+    await new Promise(r => setTimeout(r, 350)); // no saturar la API pública
+  }
+  status.textContent = `Listo: se actualizaron ${updated} de ${targets.length} piezas. Revisa la tabla y descarga cards-data.js cuando estés conforme.`;
+});
 </script>
 </body>
 </html>
