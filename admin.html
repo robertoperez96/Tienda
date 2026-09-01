@@ -567,23 +567,26 @@ function bestPrice(tcgplayer){
   return null;
 }
 
+function setsMatch(apiSetName, itemSet){
+  if (!apiSetName || !itemSet) return false;
+  const a = apiSetName.toLowerCase().trim();
+  const b = itemSet.toLowerCase().trim();
+  return a === b || a.includes(b) || b.includes(a);
+}
+
 function pickBestMatch(results, item){
   if (!results?.length) return null;
-  // 1) coincidencia exacta de número de carta (la más confiable)
-  if (item.num){
-    const exact = results.find(c => String(parseInt(c.number)) === String(item.num));
-    if (exact) return { card: exact, confidence: "alta" };
+  let best = null, bestScore = -1;
+  for (const c of results){
+    let score = 0;
+    if (item.num && String(parseInt(c.number)) === String(item.num)) score += 2;
+    if (item.set && setsMatch(c.set?.name, item.set)) score += 2;
+    if (item.code && ((c.set?.id || "").toUpperCase().includes(item.code.toUpperCase()) || (c.set?.ptcgoCode || "").toUpperCase() === item.code.toUpperCase())) score += 1;
+    if (score > bestScore){ bestScore = score; best = c; }
   }
-  // 2) coincidencia por código de set (ej. "PRE", "SV5K") dentro del id o nombre del set
-  if (item.code){
-    const bySet = results.find(c =>
-      (c.set?.id || "").toUpperCase().includes(item.code.toUpperCase()) ||
-      (c.set?.ptcgoCode || "").toUpperCase() === item.code.toUpperCase()
-    );
-    if (bySet) return { card: bySet, confidence: "media" };
-  }
-  // 3) primer resultado, sin más pistas
-  return { card: results[0], confidence: "baja" };
+  if (!best || bestScore <= 0) return null;
+  const confidence = bestScore >= 4 ? "alta" : (bestScore >= 2 ? "media" : "baja");
+  return { card: best, confidence };
 }
 
 function cleanSearchName(name){
@@ -622,10 +625,10 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
     const searchName = cleanSearchName(item.name);
     let query = `name:"${searchName}"`;
     if (item.num) query += ` number:${item.num}`;
-    let data = await fetchWithRetry(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(query)}&pageSize=10`, headers);
+    let data = await fetchWithRetry(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(query)}&pageSize=25`, headers);
     let picked = pickBestMatch(data?.data, item);
     if (!picked && item.num){
-      const data2 = await fetchWithRetry(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(`name:"${searchName}"`)}&pageSize=10`, headers);
+      const data2 = await fetchWithRetry(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(`name:"${searchName}"`)}&pageSize=25`, headers);
       picked = pickBestMatch(data2?.data, item);
     }
     if (picked){
