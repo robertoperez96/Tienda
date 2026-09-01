@@ -177,6 +177,7 @@
       <button class="btn btn-foil" id="exportBtn">Descargar cards-data.js</button>
     </div>
     <p class="hint" style="margin-top:10px;">Al descargar, reemplaza el archivo <code>cards-data.js</code> dentro de la carpeta de tu sitio (o vuelve a arrastrar toda la carpeta a Netlify). index.html lo lee automáticamente.</p>
+    <p class="hint">Para las cartas que la búsqueda automática no encuentre: en la columna "Imagen (URL)" puedes pegar directo un screenshot (Ctrl+V, o mantén presionado y "Pegar" en el cel) o tocar 📎 para subir una foto desde tu dispositivo. Ojo: esto guarda la imagen dentro del propio cards-data.js, así que el archivo pesará más mientras más fotos subas así — para cartas comunes mejor deja que la búsqueda automática lo haga.</p>
   </div>
 </div>
 
@@ -300,7 +301,14 @@ function renderCatalog(){
       <td>${c.name}${c.set ? ` <span style="color:var(--slate);font-size:11px;">(${c.set})</span>` : ""}</td>
       <td>${c.kind === "sellado" ? "Sellado" : "Single"}</td>
       <td><input type="number" class="editPrice" data-id="${c.id}" value="${c.price}" style="width:80px;"></td>
-      <td><input type="text" class="editImage" data-id="${c.id}" value="${c.image || ''}" placeholder="URL de imagen" style="width:140px;font-size:11px;"></td>
+      <td>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input type="text" class="editImage" data-id="${c.id}" value="${c.image || ''}" placeholder="URL o pega/sube imagen" style="width:110px;font-size:11px;">
+          <label class="uploadBtn" style="cursor:pointer;background:var(--ink-4);border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px;font-size:12px;" title="Subir imagen desde tu dispositivo">
+            📎<input type="file" accept="image/*" data-id="${c.id}" class="uploadImageInput" style="display:none;">
+          </label>
+        </div>
+      </td>
       <td>${c.stock}</td>
       <td class="row-actions"><button data-id="${c.id}" class="soldBtn">Marcar vendido</button><button data-id="${c.id}" class="delBtn">Eliminar</button></td>
     `;
@@ -314,10 +322,41 @@ function renderCatalog(){
     const item = catalog.find(c => c.id === Number(inp.dataset.id));
     if (item){ item.price = Number(inp.value) || item.price; persist(); }
   }));
-  document.querySelectorAll(".editImage").forEach(inp => inp.addEventListener("change", () => {
-    const item = catalog.find(c => c.id === Number(inp.dataset.id));
-    if (item){ item.image = inp.value.trim(); persist(); renderCatalog(); }
-  }));
+  document.querySelectorAll(".editImage").forEach(inp => {
+    inp.addEventListener("change", () => {
+      const item = catalog.find(c => c.id === Number(inp.dataset.id));
+      if (item){ item.image = inp.value.trim(); persist(); renderCatalog(); }
+    });
+    inp.addEventListener("paste", ev => {
+      const items = ev.clipboardData?.items;
+      if (!items) return;
+      for (const it of items){
+        if (it.type.startsWith("image/")){
+          ev.preventDefault();
+          const file = it.getAsFile();
+          const reader = new FileReader();
+          reader.onload = () => {
+            const item = catalog.find(c => c.id === Number(inp.dataset.id));
+            if (item){ item.image = reader.result; persist(); renderCatalog(); }
+          };
+          reader.readAsDataURL(file);
+          break;
+        }
+      }
+    });
+  });
+  document.querySelectorAll(".uploadImageInput").forEach(fileInp => {
+    fileInp.addEventListener("change", () => {
+      const file = fileInp.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const item = catalog.find(c => c.id === Number(fileInp.dataset.id));
+        if (item){ item.image = reader.result; persist(); renderCatalog(); }
+      };
+      reader.readAsDataURL(file);
+    });
+  });
   document.querySelectorAll(".delBtn").forEach(b => b.addEventListener("click", () => {
     catalog = catalog.filter(c => c.id !== Number(b.dataset.id));
     persist(); renderCatalog();
