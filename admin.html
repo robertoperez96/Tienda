@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel VITRINA · Administración de catálogo</title>
+<title>Panel PokeBaúl · Administración de catálogo</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@560;680&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -72,7 +72,7 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Panel <span>VITRINA</span> · Administración</h1>
+  <h1>Panel <span>PokeBaúl</span> · Administración</h1>
   <p class="lede">Busca la carta real por nombre, elige la impresión exacta y llena precio/condición. No necesitas fotografiar nada: la imagen se toma de la base de datos pública de Pokémon TCG.</p>
   <div class="steps-mini">
     <span>1. Busca</span><span>2. Elige la versión</span><span>3. Completa precio y estado</span><span>4. Agrega</span><span>5. Descarga cards-data.js</span>
@@ -117,6 +117,9 @@
     </div>
     <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:var(--cream-dim);">
       <input type="checkbox" id="fNew" style="width:16px;height:16px;"> Marcar como "Nuevo" (llegada reciente)
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13.5px;color:var(--cream-dim);">
+      <input type="checkbox" id="fFeatured" style="width:16px;height:16px;"> Destacado (aparece en el carrusel automático del inicio)
     </label>
     <div class="add-row">
       <button class="btn btn-ghost" id="manualBtn">Agregar manualmente sin imagen</button>
@@ -243,7 +246,9 @@ document.getElementById("addBtn").addEventListener("click", () => {
     language: document.getElementById("fLang").value, type: document.getElementById("fType").value,
     kind: document.getElementById("fKind").value, price,
     stock: Number(document.getElementById("fStock").value) || 1,
-    isNew: document.getElementById("fNew").checked, image: pickedCard.image
+    isNew: document.getElementById("fNew").checked,
+    featured: document.getElementById("fFeatured").checked,
+    image: pickedCard.image
   };
   catalog.push(entry);
   persist();
@@ -254,6 +259,7 @@ document.getElementById("addBtn").addEventListener("click", () => {
   document.getElementById("searchName").value = "";
   document.getElementById("fPrice").value = "";
   document.getElementById("fNew").checked = false;
+  document.getElementById("fFeatured").checked = false;
 });
 
 function persist(){
@@ -331,7 +337,7 @@ document.getElementById("aiPasteBtn").addEventListener("click", () => {
         name: it.name, set: it.set || "", code: it.code || "", num: it.num || 0, total: it.total || 0,
         rarity: it.rarity || "—", condition: it.condition || "NM", language: it.language || "Español",
         type: it.type || "incoloro", kind: it.kind || "single", price: Number(it.price),
-        stock: Number(it.stock) || 1, isNew: !!it.isNew, image: it.image || ""
+        stock: Number(it.stock) || 1, isNew: !!it.isNew, featured: !!it.featured, image: it.image || ""
       });
       added++;
     });

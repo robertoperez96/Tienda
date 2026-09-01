@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VITRINA · Catálogo Pokémon TCG</title>
-<meta name="description" content="Catálogo de cartas y producto sellado Pokémon TCG. Precios en MXN, estado verificado, aparta por WhatsApp.">
+<title>PokeBaúl · Catálogo Pokémon TCG</title>
+<meta name="description" content="Catálogo de cartas y producto sellado Pokémon TCG. Precios en MXN, estado verificado, paga con MercadoPago, tarjeta o transferencia.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;0,9..144,680;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -140,9 +140,10 @@
   @media (prefers-reduced-motion:reduce){.card{opacity:1;transform:none;animation:none;}}
   .card:hover{border-color:var(--foil-dim);}
   .card.selected{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil),var(--shadow-card);}
-  .card-art{aspect-ratio:3/4;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .card-art{aspect-ratio:3/4;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:16px;transition:transform .2s ease;}
   .card-art::before{content:"";position:absolute;inset:0;background:var(--art-grad);}
-  .card-art img.real{position:relative;z-index:1;width:78%;height:auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5));}
+  .card:hover .card-art{transform:scale(1.015);}
+  .card-art img.real{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;border-radius:8px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));}
   .card-art .sheen{position:absolute;inset:0;background:radial-gradient(220px 220px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 55%);mix-blend-mode:overlay;opacity:0;transition:opacity .2s;pointer-events:none;z-index:2;}
   .card:hover .card-art .sheen{opacity:1;}
   .card-art svg.gem{width:44px;height:44px;opacity:.85;position:relative;z-index:1;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));}
@@ -165,6 +166,32 @@
   .qty-stepper button{background:var(--ink-4);border:none;color:var(--cream);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;}
   .qty-stepper button:hover{background:var(--foil-dim);color:var(--foil-bright);}
   .qty-stepper span{font-family:var(--font-mono);font-size:13px;}
+  .add-to-cart-btn{margin-top:10px;width:100%;padding:9px;border-radius:8px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .add-to-cart-btn:hover{border-color:var(--foil-dim);}
+  .add-to-cart-btn.in-cart{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);}
+
+  /* carrusel de destacados */
+  .hero-visual{position:relative;height:360px;border-radius:20px;overflow:hidden;background:var(--ink-2);border:1px solid var(--line-strong);box-shadow:var(--shadow-card);}
+  .carousel-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:24px;padding:30px;opacity:0;transition:opacity .7s ease;cursor:pointer;}
+  .carousel-slide.active{opacity:1;z-index:1;}
+  .carousel-slide img{max-height:270px;max-width:46%;object-fit:contain;border-radius:12px;box-shadow:0 20px 44px rgba(0,0,0,.55);}
+  .carousel-info .featured-tag{font-family:var(--font-mono);font-size:10.5px;color:var(--foil-bright);letter-spacing:.08em;text-transform:uppercase;}
+  .carousel-info .name{font-family:var(--font-display);font-weight:560;font-size:20px;margin:8px 0 6px;max-width:22ch;}
+  .carousel-info .price{font-family:var(--font-mono);color:var(--foil-bright);font-size:19px;}
+  .carousel-info .set{font-size:11.5px;color:var(--slate);margin-top:4px;}
+  .carousel-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
+  .carousel-dots span{width:6px;height:6px;border-radius:999px;background:var(--line-strong);transition:all .2s;}
+  .carousel-dots span.active{background:var(--foil-bright);width:18px;}
+  @media (max-width:900px){.hero-visual{height:300px;} .carousel-slide{flex-direction:column;gap:12px;padding:20px;} .carousel-slide img{max-height:150px;max-width:70%;}}
+
+  /* métodos de pago */
+  .pay-methods{margin-bottom:14px;}
+  .pay-methods-label{font-size:12px;color:var(--slate);margin-bottom:8px;}
+  .pay-options{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .pay-opt{flex:1;min-width:88px;background:var(--ink);border:1px solid var(--line-strong);color:var(--cream-dim);border-radius:8px;padding:8px 6px;font-size:11px;cursor:pointer;}
+  .pay-opt.active{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);font-weight:600;}
+  .pay-panel{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--cream-dim);margin-bottom:10px;line-height:1.5;}
+  .pay-panel b{color:var(--cream);}
   .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--slate);}
   .empty-state h3{color:var(--cream);font-family:var(--font-display);font-weight:500;font-size:20px;margin-bottom:8px;}
 
@@ -240,13 +267,13 @@
 </head>
 <body>
 
-<div class="announce">Envíos a todo México · Recolección en punto de entrega disponible · <b>Aparta por WhatsApp en segundos</b></div>
+<div class="announce">Envíos a todo México · Recolección en punto de entrega disponible · <b>Paga con MercadoPago, tarjeta o transferencia</b></div>
 
 <header class="site">
   <div class="wrap site-bar">
     <a href="#top" class="brand">
       <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7l9 5 9-5-9-5z" stroke="#e8c766" stroke-width="1.4" stroke-linejoin="round"/><path d="M3 12l9 5 9-5" stroke="#e8c766" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
-      <span class="brand-word">VITRINA<span>.</span></span>
+      <span class="brand-word">PokeBaúl<span>.</span></span>
     </a>
     <nav class="main-nav">
       <a href="#catalogo">Catálogo</a>
@@ -270,8 +297,8 @@
     <div class="wrap hero-grid">
       <div>
         <span class="eyebrow">Catálogo curado · Actualizado a diario</span>
-        <h1 class="hero-title">Cada carta,<br>bajo <em>vitrina</em>.</h1>
-        <p class="hero-sub">Singles y producto sellado con estado verificado y precio claro en MXN. Eliges lo que te gusta, apartas por WhatsApp y listo.</p>
+        <h1 class="hero-title">Encuentra el próximo <em>tesoro</em> para tu colección.</h1>
+        <p class="hero-sub">Singles y producto sellado, coleccionables y más. Estado verificado, precio claro en MXN y pago seguro con MercadoPago, tarjeta o transferencia.</p>
         <div class="hero-actions">
           <a href="#catalogo" class="btn btn-foil">Ver catálogo</a>
           <a href="#como-comprar" class="btn btn-ghost">Cómo comprar</a>
@@ -282,10 +309,7 @@
           <div class="stat"><b id="statUpdated">29 ago</b><span>última actualización de precios</span></div>
         </div>
       </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="stack-card c1"></div><div class="stack-card c3"></div>
-        <div class="stack-card c2"><div class="holo-face"><svg class="gem" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7l9 5 9-5-9-5z" stroke="#ede6d6" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 7v10l9 5 9-5V7" stroke="#ede6d6" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 12v10" stroke="#ede6d6" stroke-width="1.2"/></svg></div></div>
-      </div>
+      <div class="hero-visual" id="featuredCarousel" aria-label="Productos destacados"></div>
     </div>
   </section>
 
@@ -295,8 +319,8 @@
       <div class="steps">
         <div class="step"><span class="num">01</span><h3>Elige tus piezas</h3><p>Filtra por tipo (singles o sellado), set, rareza o condición.</p></div>
         <div class="step"><span class="num">02</span><h3>Ajusta cantidades</h3><p>En sellado puedes pedir más de una pieza; en singles cada carta es única.</p></div>
-        <div class="step"><span class="num">03</span><h3>Aparta por WhatsApp</h3><p>Un botón arma el mensaje con tu lista y el total. Solo lo envías.</p></div>
-        <div class="step"><span class="num">04</span><h3>Recibe tu pedido</h3><p>Coordinamos pago, envío protegido o entrega en persona.</p></div>
+        <div class="step"><span class="num">03</span><h3>Paga seguro</h3><p>Elige MercadoPago, tarjeta de crédito o transferencia bancaria directo en el carrito.</p></div>
+        <div class="step"><span class="num">04</span><h3>Recibe tu pedido</h3><p>Envío protegido a todo México o entrega en persona, según prefieras.</p></div>
       </div>
     </div>
   </section>
@@ -389,7 +413,7 @@
 <footer>
   <div class="wrap footer-grid">
     <div class="footer-brand">
-      <span class="brand-word">VITRINA<span>.</span></span>
+      <span class="brand-word">PokeBaúl<span>.</span></span>
       <p>Catálogo independiente de cartas y producto sellado Pokémon TCG para coleccionistas. Precios sugeridos, sujetos a disponibilidad.</p>
     </div>
     <div class="footer-links">
@@ -411,6 +435,16 @@
   <div class="drawer-list" id="drawerList"></div>
   <div class="drawer-foot">
     <div class="drawer-total"><span>Total aproximado</span><b id="drawerTotal">$0</b></div>
+    <div class="pay-methods">
+      <div class="pay-methods-label">Método de pago</div>
+      <div class="pay-options">
+        <button type="button" class="pay-opt active" data-pay="card">💳 Tarjeta / MercadoPago</button>
+        <button type="button" class="pay-opt" data-pay="transfer">🏦 Transferencia</button>
+        <button type="button" class="pay-opt" data-pay="whatsapp">💬 Confirmar por WhatsApp</button>
+      </div>
+      <div class="pay-panel" id="payPanelTransfer" style="display:none;"></div>
+      <div class="pay-panel" id="payPanelCard">Pago con tarjeta y MercadoPago llega muy pronto. Por ahora confirma tu compra por WhatsApp y coordinamos el pago mientras lo activamos.</div>
+    </div>
     <a href="#" class="btn btn-foil" id="whatsappBtn" target="_blank" rel="noopener">Solicitar por WhatsApp</a>
     <p class="drawer-note">El apartado se confirma por WhatsApp según disponibilidad.</p>
   </div>
@@ -423,7 +457,12 @@
    Para agregar/editar piezas usa admin.html, NO edites este archivo.
    Solo cambia WHATSAPP_PHONE por tu número real.
    ===================================================================== */
-const WHATSAPP_PHONE = "528111707319"; // <-- reemplaza con tu número real
+const WHATSAPP_PHONE = "528111707319"; // <-- tu número real
+const BANK_INFO = { // <-- reemplaza con tus datos reales para transferencia
+  banco: "Tu banco",
+  clabe: "0000 0000 0000 0000 00",
+  titular: "Nombre del titular"
+};
 const CARDS = window.CARDS || [];
 
 const TYPE_COLORS = {
@@ -521,7 +560,8 @@ function renderCard(card){
         <button class="qty-minus" aria-label="Quitar uno">−</button>
         <span>${qty} en tu selección</span>
         <button class="qty-plus" aria-label="Agregar uno">+</button>
-      </div>` : ""}
+      </div>` : `
+      <button type="button" class="add-to-cart-btn ${qty>0 ? 'in-cart' : ''}">${qty>0 ? '✓ En tu carrito' : 'Agregar al carrito'}</button>`}
     </div>
   `;
   const toggleSingle = () => {
@@ -546,9 +586,59 @@ function renderCard(card){
       if (cur === 0 && card.stock>0){ state.selected[card.id]=1; saveCart(); render(); }
     });
   } else {
-    el.addEventListener("click", toggleSingle);
+    el.querySelector(".card-art").addEventListener("click", () => {
+      if ((state.selected[card.id]||0) === 0) toggleSingle();
+    });
+    el.querySelector(".add-to-cart-btn").addEventListener("click", ev => { ev.stopPropagation(); toggleSingle(); });
   }
   return el;
+}
+
+function buildCarousel(){
+  const el = document.getElementById("featuredCarousel");
+  if (!el) return;
+  const featured = CARDS.filter(c => c.featured && c.image);
+  if (!featured.length){
+    el.innerHTML = `<div class="carousel-slide active"><div class="carousel-info" style="text-align:center;"><div class="featured-tag">PokeBaúl</div><p class="name" style="max-width:none;">Marca piezas como "destacado" en admin.html<br>para que aparezcan aquí en rotación automática.</p></div></div>`;
+    return;
+  }
+  el.innerHTML = featured.map((c,i) => `
+    <div class="carousel-slide${i===0?' active':''}" data-id="${c.id}">
+      <img src="${c.image}" alt="${c.name}">
+      <div class="carousel-info">
+        <div class="featured-tag">Destacado</div>
+        <div class="name">${c.name}</div>
+        <div class="price">${money(c.price)}</div>
+        <div class="set">${c.set || ''}</div>
+      </div>
+    </div>`).join("") +
+    (featured.length>1 ? `<div class="carousel-dots">${featured.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join("")}</div>` : "");
+
+  el.querySelectorAll(".carousel-slide").forEach(slide => {
+    slide.addEventListener("click", () => {
+      const id = slide.dataset.id;
+      document.getElementById("catalogo").scrollIntoView({behavior:"smooth"});
+      setTimeout(() => {
+        const target = document.querySelector(`.card[data-id="${id}"]`);
+        if (target){
+          target.scrollIntoView({behavior:"smooth", block:"center"});
+          target.style.boxShadow = "0 0 0 2px var(--foil-bright)";
+          setTimeout(() => { target.style.boxShadow = ""; }, 1800);
+        }
+      }, 450);
+    });
+  });
+
+  if (featured.length > 1){
+    let idx = 0;
+    setInterval(() => {
+      const slides = el.querySelectorAll(".carousel-slide");
+      const dots = el.querySelectorAll(".carousel-dots span");
+      slides[idx].classList.remove("active"); if (dots[idx]) dots[idx].classList.remove("active");
+      idx = (idx+1) % slides.length;
+      slides[idx].classList.add("active"); if (dots[idx]) dots[idx].classList.add("active");
+    }, 4000);
+  }
 }
 
 function render(){
@@ -648,7 +738,18 @@ document.getElementById("openDrawerBtn").addEventListener("click", openDrawer);
 document.getElementById("drawerClose").addEventListener("click", closeDrawer);
 drawerBackdrop.addEventListener("click", closeDrawer);
 
+document.getElementById("payPanelTransfer").innerHTML = `Realiza tu transferencia SPEI a:<br><b>Banco:</b> ${BANK_INFO.banco} · <b>CLABE:</b> ${BANK_INFO.clabe}<br><b>A nombre de:</b> ${BANK_INFO.titular}<br><br>Envía tu comprobante por WhatsApp para confirmar tu pedido.`;
+document.querySelectorAll(".pay-opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".pay-opt").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("payPanelTransfer").style.display = btn.dataset.pay === "transfer" ? "block" : "none";
+    document.getElementById("payPanelCard").style.display = btn.dataset.pay === "card" ? "block" : "none";
+  });
+});
+
 buildFilterUI();
+buildCarousel();
 render();
 </script>
 </body>
