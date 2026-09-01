@@ -71,6 +71,14 @@
 </style>
 </head>
 <body>
+<div id="lockScreen" style="position:fixed;inset:0;z-index:999;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <div style="font-family:var(--font-display);font-weight:680;font-size:22px;">Panel <span style="color:var(--foil-bright);">PokeBaúl</span></div>
+  <p style="color:var(--slate);font-size:13px;">Escribe la contraseña para entrar</p>
+  <input type="password" id="lockPassInput" placeholder="Contraseña" style="width:220px;text-align:center;">
+  <button class="btn btn-foil" id="lockUnlockBtn" type="button">Entrar</button>
+  <p id="lockError" style="color:var(--ember);font-size:12.5px;display:none;">Contraseña incorrecta.</p>
+</div>
+<div id="adminContent" style="display:none;">
 <div class="wrap">
   <h1>Panel <span>PokeBaúl</span> · Administración</h1>
   <p class="lede">Busca la carta real por nombre, elige la impresión exacta y llena precio/condición. No necesitas fotografiar nada: la imagen se toma de la base de datos pública de Pokémon TCG.</p>
@@ -143,7 +151,21 @@
   </div>
 
   <div class="panel">
-    <h2>4 · Actualizar imágenes y precios automáticamente</h2>
+    <h2>4 · Importar/actualizar desde CSV de Collectr</h2>
+    <p class="hint">
+      Sube el export.csv de tu portafolio "ventas" cuando quieras. Compara contra lo que ya tienes (por set + número + nombre)
+      y <b>solo agrega las piezas nuevas</b> — las que ya existen no se tocan (conservan su imagen y precio ya buscados).
+      Si el stock cambió en Collectr, lo actualiza.
+    </p>
+    <div class="row">
+      <button class="btn btn-ghost" id="csvImportBtn" type="button">Elegir CSV de Collectr</button>
+      <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
+    </div>
+    <div class="status-msg" id="csvImportStatus"></div>
+  </div>
+
+  <div class="panel">
+    <h2>5 · Actualizar imágenes y precios automáticamente</h2>
     <p class="hint">
       Busca en pokemontcg.io la imagen real y el precio actual de TCGplayer para cada <b>carta suelta</b> de tu catálogo
       que no tenga imagen (o para todas si marcas la casilla), y convierte el precio a MXN con el tipo de cambio del día.
@@ -163,7 +185,7 @@
   </div>
 
   <div class="panel">
-    <h2>5 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
+    <h2>6 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
     <table id="catalogTable">
       <thead><tr><th></th><th>Nombre</th><th>Set</th><th>Precio</th><th>Imagen (URL)</th><th>Stock</th><th></th></tr></thead>
       <tbody id="catalogBody"></tbody>
@@ -425,9 +447,94 @@ document.getElementById("aiPasteBtn").addEventListener("click", () => {
   }
 });
 
-renderCatalog();
+/* ---- importar/actualizar CSV de Collectr, fusionando solo lo nuevo ---- */
+function parseCsv(text){
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i=0;i<text.length;i++){
+    const ch = text[i];
+    if (inQuotes){
+      if (ch === '"'){ if (text[i+1] === '"'){ field += '"'; i++; } else inQuotes = false; }
+      else field += ch;
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === ','){ row.push(field); field = ""; }
+      else if (ch === '\n' || ch === '\r'){
+        if (field !== "" || row.length){ row.push(field); rows.push(row); row = []; field = ""; }
+        if (ch === '\r' && text[i+1] === '\n') i++;
+      } else field += ch;
+    }
+  }
+  if (field !== "" || row.length){ row.push(field); rows.push(row); }
+  if (!rows.length) return [];
+  const headers = rows[0];
+  return rows.slice(1).filter(r => r.length > 1).map(r => {
+    const obj = {};
+    headers.forEach((h,i) => obj[h.trim()] = (r[i] || "").trim());
+    return obj;
+  });
+}
+function cleanRowName(name){ return name.replace(/\s*\([^)]*\)\s*$/, "").trim(); }
+function catalogKey(name, set, num){ return `${cleanRowName(name)}|${set}|${num}`.toLowerCase(); }
 
-/* ---- tipo de cambio USD -> MXN (gratis, sin llave, corre en el navegador) ---- */
+document.getElementById("csvImportBtn").addEventListener("click", () => document.getElementById("csvFileInput").click());
+document.getElementById("csvFileInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById("csvImportStatus");
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const rows = parseCsv(reader.result);
+      const existingKeys = new Set(catalog.map(c => catalogKey(c.name, c.set, c.num)));
+      let added = 0, updatedStock = 0, skipped = 0;
+      rows.forEach(r => {
+        const name = (r["Product Name"] || "").trim();
+        if (!name) return;
+        const setName = (r["Set"] || "").trim();
+        const cardNumRaw = (r["Card Number"] || "").trim();
+        let num = 0, total = 0;
+        if (cardNumRaw.includes("/")){
+          const [a,b] = cardNumRaw.split("/");
+          num = parseInt(a.replace(/\D/g,"")) || 0;
+          total = parseInt(b.replace(/\D/g,"")) || 0;
+        } else if (cardNumRaw){ num = parseInt(cardNumRaw.replace(/\D/g,"")) || 0; }
+        const key = catalogKey(name, setName, num);
+        const stockVal = Math.round(parseFloat(r["Quantity"]) || 1);
+
+        if (existingKeys.has(key)){
+          const existing = catalog.find(c => catalogKey(c.name, c.set, c.num) === key);
+          if (existing && existing.stock !== stockVal){ existing.stock = stockVal; updatedStock++; }
+          else skipped++;
+          return;
+        }
+        const priceKey = Object.keys(r).find(k => k.startsWith("Market Price"));
+        const priceRaw = (priceKey ? r[priceKey] : "").replace(/,/g,"").replace(/"/g,"");
+        let price = Math.round(parseFloat(priceRaw)) || 1;
+        if (price <= 0) price = 1;
+        let language = "Inglés";
+        if (name.includes("(JP)")) language = "Japonés";
+        else if (name.includes("(CN)")) language = "Chino";
+        catalog.push({
+          id: nextId++, name, set: setName, code: "", num, total,
+          rarity: (r["Rarity"] || (cardNumRaw ? "Rare" : "Sellado")), condition: "NM", language,
+          type: "incoloro", kind: cardNumRaw ? "single" : "sellado", price, stock: stockVal,
+          isNew: true, featured: false, image: ""
+        });
+        existingKeys.add(key);
+        added++;
+      });
+      persist();
+      renderCatalog();
+      status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${skipped} ya estaban igual (no se tocaron). Corre "Actualizar todo" para buscarles imagen y precio solo a las nuevas.`;
+    } catch(err){
+      status.textContent = "No se pudo leer ese archivo. Asegúrate de que sea el export.csv de Collectr sin modificar.";
+    }
+  };
+  reader.readAsText(file);
+});
+
+renderCatalog();
 const FX_STORAGE_KEY = "vitrina_admin_fx_mxn";
 document.getElementById("fxRate").value = localStorage.getItem(FX_STORAGE_KEY) || "18.5";
 
@@ -546,6 +653,26 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
   if (notFoundList.length) msg += ` NO se encontraron: ${notFoundList.join(", ")}. Prueba correr "Actualizar todo" otra vez (algunas fallan solo por saturación, no porque no existan) — funciona mucho mejor con una API key puesta.`;
   status.textContent = msg;
 });
+
+/* ---- pantalla de bloqueo con contraseña ---- */
+const ADMIN_PASSWORD = "pokebaul2026"; // <-- cámbiala por la tuya
+function tryUnlock(){
+  const val = document.getElementById("lockPassInput").value;
+  if (val === ADMIN_PASSWORD){
+    sessionStorage.setItem("vitrina_admin_unlocked", "1");
+    document.getElementById("lockScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+  } else {
+    document.getElementById("lockError").style.display = "block";
+  }
+}
+if (sessionStorage.getItem("vitrina_admin_unlocked") === "1"){
+  document.getElementById("lockScreen").style.display = "none";
+  document.getElementById("adminContent").style.display = "block";
+}
+document.getElementById("lockUnlockBtn").addEventListener("click", tryUnlock);
+document.getElementById("lockPassInput").addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
 </script>
+</div>
 </body>
 </html>
