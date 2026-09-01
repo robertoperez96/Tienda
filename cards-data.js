@@ -1,4 +1,4 @@
-/* cards-data.js — generado desde admin.html el 1/9/2026, 12:43:31 a.m. */
+/* cards-data.js — generado desde admin.html el 1/9/2026, 2:31:04 a.m. */
 window.CARDS = [
   {
     "id": 1,
@@ -16,7 +16,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/xy0/34_hires.png"
+    "image": ""
   },
   {
     "id": 2,
@@ -34,7 +34,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/me1/118_hires.png"
+    "image": ""
   },
   {
     "id": 3,
@@ -52,7 +52,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/mcd19/8_hires.png"
+    "image": ""
   },
   {
     "id": 4,
@@ -70,7 +70,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me5-55/large"
+    "image": ""
   },
   {
     "id": 5,
@@ -88,7 +88,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm1/41_hires.png"
+    "image": ""
   },
   {
     "id": 6,
@@ -106,7 +106,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me5-45/large"
+    "image": ""
   },
   {
     "id": 7,
@@ -142,7 +142,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm115/12_hires.png"
+    "image": ""
   },
   {
     "id": 9,
@@ -160,7 +160,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/swsh3/113_hires.png"
+    "image": ""
   },
   {
     "id": 10,
@@ -214,7 +214,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm8/7_hires.png"
+    "image": ""
   },
   {
     "id": 13,
@@ -232,7 +232,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-13/large"
+    "image": ""
   },
   {
     "id": 14,
@@ -250,7 +250,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-147/large"
+    "image": ""
   },
   {
     "id": 15,
@@ -286,7 +286,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm8/117_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me2pt5-117/large"
   },
   {
     "id": 17,
@@ -304,7 +304,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/me1/8_hires.png"
+    "image": ""
   },
   {
     "id": 18,
@@ -466,7 +466,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/swsh11/60_hires.png"
+    "image": ""
   },
   {
     "id": 27,
@@ -502,7 +502,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-6/large"
+    "image": ""
   },
   {
     "id": 29,
@@ -592,7 +592,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/mcd19/7_hires.png"
+    "image": ""
   },
   {
     "id": 34,
@@ -628,7 +628,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-108/large"
+    "image": ""
   },
   {
     "id": 36,
@@ -646,7 +646,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-124/large"
+    "image": ""
   },
   {
     "id": 37,
@@ -664,7 +664,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/swsh2/63_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me2pt5-63/large"
   },
   {
     "id": 38,
@@ -682,7 +682,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/swsh2/63_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me2pt5-63/large"
   },
   {
     "id": 39,
@@ -736,7 +736,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-177/large"
+    "image": ""
   },
   {
     "id": 42,
@@ -754,7 +754,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-96/large"
+    "image": ""
   },
   {
     "id": 43,
@@ -790,7 +790,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-163/large"
+    "image": ""
   },
   {
     "id": 45,
@@ -898,7 +898,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-192/large"
+    "image": ""
   },
   {
     "id": 51,
@@ -952,7 +952,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/si1/11_hires.png"
+    "image": ""
   },
   {
     "id": 54,
@@ -1078,7 +1078,7 @@ window.CARDS = [
     "stock": 2,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-262/large"
+    "image": ""
   },
   {
     "id": 61,
@@ -1168,7 +1168,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/pop1/3_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me2pt5-153/large"
   },
   {
     "id": 66,
@@ -1186,7 +1186,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/pop1/3_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me2pt5-153/large"
   },
   {
     "id": 67,
@@ -1204,7 +1204,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/pop6/8_hires.png"
+    "image": ""
   },
   {
     "id": 68,
@@ -1222,7 +1222,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-35/large"
+    "image": ""
   },
   {
     "id": 69,
@@ -1276,7 +1276,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/neo3/24_hires.png"
+    "image": ""
   },
   {
     "id": 72,
@@ -1312,7 +1312,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-100/large"
+    "image": ""
   },
   {
     "id": 74,
@@ -1402,7 +1402,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-82/large"
+    "image": ""
   },
   {
     "id": 79,
@@ -1420,7 +1420,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/mcd16/5_hires.png"
+    "image": ""
   },
   {
     "id": 80,
@@ -1438,7 +1438,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/swsh11/59_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me2pt5-59/large"
   },
   {
     "id": 81,
@@ -1474,7 +1474,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-45/large"
+    "image": ""
   },
   {
     "id": 83,
@@ -1528,7 +1528,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me4-90/large"
+    "image": ""
   },
   {
     "id": 86,
@@ -1618,7 +1618,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me4-51/large"
+    "image": ""
   },
   {
     "id": 91,
@@ -1672,7 +1672,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sma/SV12_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me4-21/large"
   },
   {
     "id": 94,
@@ -1690,7 +1690,7 @@ window.CARDS = [
     "stock": 2,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/dp3/10_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me4-10/large"
   },
   {
     "id": 95,
@@ -1798,7 +1798,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/pop2/15_hires.png"
+    "image": "https://images.scrydex.com/pokemon/me4-44/large"
   },
   {
     "id": 101,
@@ -1870,7 +1870,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/base3/2_hires.png"
+    "image": ""
   },
   {
     "id": 105,
@@ -1884,11 +1884,11 @@ window.CARDS = [
     "language": "Chino",
     "type": "incoloro",
     "kind": "single",
-    "price": 13,
+    "price": 40,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm8/3_hires.png"
+    "image": "https://images.pokemontcg.io/sv3pt5/123_hires.png"
   },
   {
     "id": 106,
@@ -1906,7 +1906,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm115/21_hires.png"
+    "image": ""
   },
   {
     "id": 107,
@@ -1924,7 +1924,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/swsh12pt5/84_hires.png"
+    "image": ""
   },
   {
     "id": 108,
@@ -1942,7 +1942,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/dp1/8_hires.png"
+    "image": ""
   },
   {
     "id": 109,
@@ -2212,7 +2212,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/swshp/SWSH087_hires.png"
+    "image": ""
   },
   {
     "id": 124,
@@ -2230,7 +2230,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv1/106_hires.png"
+    "image": ""
   },
   {
     "id": 125,
@@ -2518,7 +2518,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/basep/18_hires.png"
+    "image": ""
   },
   {
     "id": 141,
@@ -2536,7 +2536,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv1/40_hires.png"
+    "image": ""
   },
   {
     "id": 142,
@@ -2554,7 +2554,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/ex14/13_hires.png"
+    "image": ""
   },
   {
     "id": 143,
@@ -2572,7 +2572,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv9/10_hires.png"
+    "image": ""
   },
   {
     "id": 144,
@@ -2640,11 +2640,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 74,
+    "price": 4,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sma/SV16_hires.png"
+    "image": "https://images.pokemontcg.io/sv9/59_hires.png"
   },
   {
     "id": 148,
@@ -2680,7 +2680,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv1/13_hires.png"
+    "image": ""
   },
   {
     "id": 150,
@@ -2698,7 +2698,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": true,
-    "image": "https://images.pokemontcg.io/sv10/81_hires.png"
+    "image": ""
   },
   {
     "id": 151,
@@ -2712,11 +2712,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 21,
+    "price": 6,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm8/7_hires.png"
+    "image": "https://images.pokemontcg.io/me1/9_hires.png"
   },
   {
     "id": 152,
@@ -2770,7 +2770,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/neo2/7_hires.png"
+    "image": ""
   },
   {
     "id": 155,
@@ -2788,7 +2788,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/me1/46_hires.png"
+    "image": ""
   },
   {
     "id": 156,
@@ -2824,7 +2824,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/me1/50_hires.png"
+    "image": ""
   },
   {
     "id": 158,
@@ -2842,7 +2842,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/me1/94_hires.png"
+    "image": ""
   },
   {
     "id": 159,
@@ -2856,11 +2856,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 2717,
+    "price": 5,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/neo1/10_hires.png"
+    "image": "https://images.pokemontcg.io/me1/10_hires.png"
   },
   {
     "id": 160,
@@ -2878,7 +2878,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/me1/70_hires.png"
+    "image": ""
   },
   {
     "id": 161,
@@ -2896,7 +2896,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/ex7/10_hires.png"
+    "image": ""
   },
   {
     "id": 162,
@@ -2914,7 +2914,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/dpp/DP02_hires.png"
+    "image": ""
   },
   {
     "id": 163,
@@ -2932,7 +2932,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/dpp/DP03_hires.png"
+    "image": ""
   },
   {
     "id": 164,
@@ -2950,7 +2950,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/dpp/DP01_hires.png"
+    "image": ""
   },
   {
     "id": 165,
@@ -2968,7 +2968,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/xy0/15_hires.png"
+    "image": ""
   },
   {
     "id": 166,
@@ -3058,7 +3058,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-29/large"
+    "image": ""
   },
   {
     "id": 171,
@@ -3076,7 +3076,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-41/large"
+    "image": ""
   },
   {
     "id": 172,
@@ -3130,7 +3130,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/basep/1_hires.png"
+    "image": ""
   },
   {
     "id": 175,
@@ -3162,11 +3162,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 497,
+    "price": 4,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/ex11/2_hires.png"
+    "image": "https://images.pokemontcg.io/sv4/112_hires.png"
   },
   {
     "id": 177,
@@ -3180,11 +3180,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 1219,
+    "price": 3,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/base5/7_hires.png"
+    "image": "https://images.pokemontcg.io/sv4/111_hires.png"
   },
   {
     "id": 178,
@@ -3274,7 +3274,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/pl1/12_hires.png"
+    "image": ""
   },
   {
     "id": 183,
@@ -3292,7 +3292,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/hgss4/7_hires.png"
+    "image": ""
   },
   {
     "id": 184,
@@ -3400,7 +3400,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me3-27/large"
+    "image": ""
   },
   {
     "id": 190,
@@ -3418,7 +3418,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me3-103/large"
+    "image": ""
   },
   {
     "id": 191,
@@ -3490,7 +3490,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/dp3/61_hires.png"
+    "image": ""
   },
   {
     "id": 195,
@@ -3544,7 +3544,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me3-1/large"
+    "image": ""
   },
   {
     "id": 198,
@@ -3576,11 +3576,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 48,
+    "price": 4,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/swsh35/22_hires.png"
+    "image": "https://images.pokemontcg.io/me2/44_hires.png"
   },
   {
     "id": 200,
@@ -3634,7 +3634,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/bw4/14_hires.png"
+    "image": ""
   },
   {
     "id": 203,
@@ -3666,11 +3666,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 23,
+    "price": 4,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm12/73_hires.png"
+    "image": "https://images.pokemontcg.io/me2/73_hires.png"
   },
   {
     "id": 205,
@@ -3688,7 +3688,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/xy7/3_hires.png"
+    "image": ""
   },
   {
     "id": 206,
@@ -3706,7 +3706,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv3pt5/135_hires.png"
+    "image": ""
   },
   {
     "id": 207,
@@ -3756,11 +3756,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 110,
+    "price": 6,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/xy7/13_hires.png"
+    "image": "https://images.pokemontcg.io/sv8pt5/13_hires.png"
   },
   {
     "id": 210,
@@ -3796,7 +3796,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/xy7/13_hires.png"
+    "image": ""
   },
   {
     "id": 212,
@@ -3814,7 +3814,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv8pt5/26_hires.png"
+    "image": ""
   },
   {
     "id": 213,
@@ -3850,7 +3850,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv8pt5/47_hires.png"
+    "image": ""
   },
   {
     "id": 215,
@@ -3868,7 +3868,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv8pt5/5_hires.png"
+    "image": ""
   },
   {
     "id": 216,
@@ -3900,11 +3900,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 9,
+    "price": 2,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/xy8/3_hires.png"
+    "image": "https://images.pokemontcg.io/sv8pt5/3_hires.png"
   },
   {
     "id": 218,
@@ -3918,11 +3918,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 1791,
+    "price": 9,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/hgss3/10_hires.png"
+    "image": "https://images.pokemontcg.io/sv8pt5/59_hires.png"
   },
   {
     "id": 219,
@@ -3940,7 +3940,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv8pt5/60_hires.png"
+    "image": ""
   },
   {
     "id": 220,
@@ -3958,7 +3958,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": true,
-    "image": "https://images.pokemontcg.io/sv8pt5/149_hires.png"
+    "image": ""
   },
   {
     "id": 221,
@@ -3994,7 +3994,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv1/154_hires.png"
+    "image": ""
   },
   {
     "id": 223,
@@ -4012,7 +4012,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv1/106_hires.png"
+    "image": ""
   },
   {
     "id": 224,
@@ -4030,7 +4030,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv10/104_hires.png"
+    "image": ""
   },
   {
     "id": 225,
@@ -4084,7 +4084,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/neo3/24_hires.png"
+    "image": "https://images.pokemontcg.io/sv6pt5/13_hires.png"
   },
   {
     "id": 228,
@@ -4102,7 +4102,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.scrydex.com/pokemon/me2pt5-84/large"
+    "image": ""
   },
   {
     "id": 229,
@@ -4120,7 +4120,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv7/134_hires.png"
+    "image": ""
   },
   {
     "id": 230,
@@ -4134,11 +4134,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 132,
+    "price": 7,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/bw8/50_hires.png"
+    "image": "https://images.pokemontcg.io/sv7/50_hires.png"
   },
   {
     "id": 231,
@@ -4156,7 +4156,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv7/77_hires.png"
+    "image": ""
   },
   {
     "id": 232,
@@ -4174,7 +4174,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv7/162_hires.png"
+    "image": ""
   },
   {
     "id": 233,
@@ -4192,7 +4192,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv7/24_hires.png"
+    "image": ""
   },
   {
     "id": 234,
@@ -4228,7 +4228,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv7/53_hires.png"
+    "image": ""
   },
   {
     "id": 236,
@@ -4282,7 +4282,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv8/29_hires.png"
+    "image": ""
   },
   {
     "id": 239,
@@ -4336,7 +4336,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/pl1/12_hires.png"
+    "image": ""
   },
   {
     "id": 242,
@@ -4404,11 +4404,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 694,
+    "price": 4,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/hgss3/70_hires.png"
+    "image": "https://images.pokemontcg.io/sv8/70_hires.png"
   },
   {
     "id": 246,
@@ -4422,11 +4422,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 694,
+    "price": 4,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/hgss3/70_hires.png"
+    "image": "https://images.pokemontcg.io/sv8/70_hires.png"
   },
   {
     "id": 247,
@@ -4530,11 +4530,11 @@ window.CARDS = [
     "language": "Inglés",
     "type": "incoloro",
     "kind": "single",
-    "price": 53,
+    "price": 6,
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/det1/11_hires.png"
+    "image": "https://images.pokemontcg.io/sv3pt5/122_hires.png"
   },
   {
     "id": 253,
@@ -4552,7 +4552,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv3pt5/89_hires.png"
+    "image": ""
   },
   {
     "id": 254,
@@ -4624,7 +4624,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sm12/97_hires.png"
+    "image": ""
   },
   {
     "id": 258,
@@ -4642,7 +4642,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/base3/6_hires.png"
+    "image": ""
   },
   {
     "id": 259,
@@ -4678,7 +4678,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/sv6/94_hires.png"
+    "image": ""
   },
   {
     "id": 261,
@@ -4696,7 +4696,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/pgo/31_hires.png"
+    "image": ""
   },
   {
     "id": 262,
@@ -4714,6 +4714,6 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "https://images.pokemontcg.io/mcd19/7_hires.png"
+    "image": ""
   }
 ];
