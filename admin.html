@@ -496,23 +496,7 @@ function parseCsv(text){
     return obj;
   });
 }
-const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de PokeBaúl
-
-async function tryWorkerJp(item, fx){
-  if (WORKER_URL.includes("TU-WORKER")) return null;
-  try{
-    const params = new URLSearchParams({ name: cleanSearchName(item.name) });
-    if (item.num) params.set("num", item.num);
-    const res = await fetch(`${WORKER_URL}/jp-lookup?${params.toString()}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.found) return null;
-    return {
-      image: data.image || "",
-      price: data.priceUsd ? Math.round(data.priceUsd * fx) : null
-    };
-  } catch(e){ return null; }
-}
+const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de PokeBaúl (usado para el pago, no para buscar imágenes)
 
 async function tryTcgdex(item, fx){
   const searchName = cleanSearchName(item.name);
@@ -753,17 +737,7 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
         updated++;
         highConfidence++;
       } else {
-        // tercer intento: tu Worker (PTCG-database + JustTCG), pensado para japonesas raras
-        const wk = await tryWorkerJp(item, fx);
-        if (wk && wk.image){
-          if (!item.imageLocked) item.image = wk.image;
-          item.imageLocked = true;
-          if (!item.priceLocked && wk.price) item.price = wk.price;
-          updated++;
-          highConfidence++;
-        } else {
-          notFoundList.push(item.name);
-        }
+        notFoundList.push(item.name);
       }
     }
     done++;
