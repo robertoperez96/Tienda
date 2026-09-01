@@ -151,6 +151,10 @@
   .badge{position:absolute;top:9px;font-family:var(--font-mono);font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:5px;letter-spacing:.03em;z-index:3;}
   .badge.left{left:9px;background:rgba(11,14,20,.72);color:var(--foil-bright);border:1px solid var(--foil-dim);}
   .badge.stock{right:9px;top:auto;bottom:9px;background:rgba(11,14,20,.72);color:var(--ok);border:1px solid rgba(76,139,107,.4);}
+  .badge.sold{right:9px;top:auto;bottom:9px;background:rgba(181,72,42,0.85);color:var(--cream);border:1px solid var(--ember);}
+  .card.sold-out{opacity:.55;}
+  .card.sold-out .card-art{cursor:not-allowed;}
+  .add-to-cart-btn:disabled{opacity:.5;cursor:not-allowed;}
   .card-select-dot{position:absolute;top:9px;right:9px;width:22px;height:22px;border-radius:999px;border:1.5px solid rgba(237,230,214,.5);background:rgba(11,14,20,.5);z-index:3;display:flex;align-items:center;justify-content:center;transition:all .15s;}
   .card.selected .card-select-dot{background:var(--foil);border-color:var(--foil);}
   .card-select-dot svg{width:12px;height:12px;opacity:0;transition:opacity .1s;}
@@ -538,8 +542,9 @@ function sortCards(list){
 
 function renderCard(card){
   const qty = state.selected[card.id] || 0;
+  const soldOut = card.stock <= 0;
   const el = document.createElement("article");
-  el.className = "card" + (qty>0 ? " selected" : "");
+  el.className = "card" + (qty>0 ? " selected" : "") + (soldOut ? " sold-out" : "");
   el.dataset.id = card.id;
   el.style.setProperty("--art-grad", TYPE_COLORS[card.type] || TYPE_COLORS.incoloro);
   const artImg = card.image ? `<img class="real" src="${card.image}" alt="${card.name}" loading="lazy" onerror="this.remove()">` : "";
@@ -547,8 +552,8 @@ function renderCard(card){
     <div class="card-art" data-toggle="1">
       <div class="sheen"></div>
       ${artImg || GEM_ICON}
-      ${card.isNew ? '<span class="badge left">NUEVO</span>' : ''}
-      ${card.stock === 1 ? '<span class="badge stock">Última pieza</span>' : (card.kind==="sellado" ? `<span class="badge stock">Disponible: ${card.stock}</span>` : '')}
+      ${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}
+      ${soldOut ? '<span class="badge sold">Agotado</span>' : (card.stock === 1 ? '<span class="badge stock">Última pieza</span>' : (card.kind==="sellado" ? `<span class="badge stock">Disponible: ${card.stock}</span>` : ''))}
       <span class="card-select-dot">${CHECK_ICON}</span>
     </div>
     <div class="card-info">
@@ -558,14 +563,15 @@ function renderCard(card){
       <div class="card-price-row"><span class="card-price">${money(card.price)}</span><span class="card-cond">${card.condition}</span></div>
       ${card.kind==="sellado" ? `
       <div class="qty-stepper">
-        <button class="qty-minus" aria-label="Quitar uno">−</button>
+        <button class="qty-minus" aria-label="Quitar uno" ${soldOut?'disabled':''}>−</button>
         <span>${qty} en tu selección</span>
-        <button class="qty-plus" aria-label="Agregar uno">+</button>
+        <button class="qty-plus" aria-label="Agregar uno" ${soldOut?'disabled':''}>+</button>
       </div>` : `
-      <button type="button" class="add-to-cart-btn ${qty>0 ? 'in-cart' : ''}">${qty>0 ? '✓ En tu carrito' : 'Agregar al carrito'}</button>`}
+      <button type="button" class="add-to-cart-btn ${qty>0 ? 'in-cart' : ''}" ${soldOut?'disabled':''}>${soldOut ? 'Agotado' : (qty>0 ? '✓ En tu carrito' : 'Agregar al carrito')}</button>`}
     </div>
   `;
   const toggleSingle = () => {
+    if (soldOut) return;
     const cur = state.selected[card.id] || 0;
     if (cur > 0) delete state.selected[card.id]; else state.selected[card.id] = 1;
     saveCart(); render();
@@ -573,6 +579,7 @@ function renderCard(card){
   if (card.kind === "sellado"){
     el.querySelector(".qty-plus").addEventListener("click", ev => {
       ev.stopPropagation();
+      if (soldOut) return;
       const cur = state.selected[card.id] || 0;
       if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); }
     });
@@ -583,12 +590,13 @@ function renderCard(card){
       saveCart(); render();
     });
     el.querySelector(".card-art").addEventListener("click", () => {
+      if (soldOut) return;
       const cur = state.selected[card.id] || 0;
       if (cur === 0 && card.stock>0){ state.selected[card.id]=1; saveCart(); render(); }
     });
   } else {
     el.querySelector(".card-art").addEventListener("click", () => {
-      if ((state.selected[card.id]||0) === 0) toggleSingle();
+      if (!soldOut && (state.selected[card.id]||0) === 0) toggleSingle();
     });
     el.querySelector(".add-to-cart-btn").addEventListener("click", ev => { ev.stopPropagation(); toggleSingle(); });
   }

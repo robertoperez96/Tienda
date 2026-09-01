@@ -302,10 +302,14 @@ function renderCatalog(){
       <td><input type="number" class="editPrice" data-id="${c.id}" value="${c.price}" style="width:80px;"></td>
       <td><input type="text" class="editImage" data-id="${c.id}" value="${c.image || ''}" placeholder="URL de imagen" style="width:140px;font-size:11px;"></td>
       <td>${c.stock}</td>
-      <td class="row-actions"><button data-id="${c.id}" class="delBtn">Eliminar</button></td>
+      <td class="row-actions"><button data-id="${c.id}" class="soldBtn">Marcar vendido</button><button data-id="${c.id}" class="delBtn">Eliminar</button></td>
     `;
     body.appendChild(tr);
   });
+  document.querySelectorAll(".soldBtn").forEach(b => b.addEventListener("click", () => {
+    const item = catalog.find(c => c.id === Number(b.dataset.id));
+    if (item){ item.stock = 0; persist(); renderCatalog(); }
+  }));
   document.querySelectorAll(".editPrice").forEach(inp => inp.addEventListener("change", () => {
     const item = catalog.find(c => c.id === Number(inp.dataset.id));
     if (item){ item.price = Number(inp.value) || item.price; persist(); }
@@ -414,6 +418,25 @@ function bestPrice(tcgplayer){
   return null;
 }
 
+function pickBestMatch(results, item){
+  if (!results?.length) return null;
+  // 1) coincidencia exacta de número de carta (la más confiable)
+  if (item.num){
+    const exact = results.find(c => String(parseInt(c.number)) === String(item.num));
+    if (exact) return { card: exact, confidence: "alta" };
+  }
+  // 2) coincidencia por código de set (ej. "PRE", "SV5K") dentro del id o nombre del set
+  if (item.code){
+    const bySet = results.find(c =>
+      (c.set?.id || "").toUpperCase().includes(item.code.toUpperCase()) ||
+      (c.set?.ptcgoCode || "").toUpperCase() === item.code.toUpperCase()
+    );
+    if (bySet) return { card: bySet, confidence: "media" };
+  }
+  // 3) primer resultado, sin más pistas
+  return { card: results[0], confidence: "baja" };
+}
+
 document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
   const status = document.getElementById("autoUpdateStatus");
   const fx = Number(document.getElementById("fxRate").value) || 18.5;
@@ -421,18 +444,30 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
   const targets = catalog.filter(c => c.kind !== "sellado" && (forceAll || !c.image));
   if (!targets.length){ status.textContent = "No hay cartas sueltas pendientes (todas ya tienen imagen, o marca la casilla para revisar todas)."; return; }
 
-  let done = 0, updated = 0;
+  let done = 0, updated = 0, highConfidence = 0, lowConfidence = 0;
+  const reviewList = [];
   for (const item of targets){
     status.textContent = `Buscando ${done+1} de ${targets.length}: ${item.name}…`;
     try{
-      const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=name:"${encodeURIComponent(item.name)}"&pageSize=5`);
+      let query = `name:"${item.name}"`;
+      if (item.num) query += ` number:${item.num}`;
+      const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(query)}&pageSize=10`);
       const data = await res.json();
-      const match = data?.data?.[0];
-      if (match){
+      let picked = pickBestMatch(data?.data, item);
+      // si buscar con número no dio nada, reintenta solo por nombre
+      if (!picked && item.num){
+        const res2 = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(`name:"${item.name}"`)}&pageSize=10`);
+        const data2 = await res2.json();
+        picked = pickBestMatch(data2?.data, item);
+      }
+      if (picked){
+        const match = picked.card;
         if (!item.image || forceAll) item.image = match.images?.large || match.images?.small || item.image;
         const usd = bestPrice(match.tcgplayer);
         if (usd) item.price = Math.round(usd * fx);
         updated++;
+        if (picked.confidence === "alta") highConfidence++; else lowConfidence++;
+        if (picked.confidence !== "alta") reviewList.push(item.name);
       }
     } catch(err){ /* seguimos con la siguiente aunque falle una */ }
     done++;
@@ -440,7 +475,7 @@ document.getElementById("autoUpdateBtn").addEventListener("click", async () => {
     renderCatalog();
     await new Promise(r => setTimeout(r, 350)); // no saturar la API pública
   }
-  status.textContent = `Listo: se actualizaron ${updated} de ${targets.length} piezas. Revisa la tabla y descarga cards-data.js cuando estés conforme.`;
+  status.textContent = `Listo: ${updated} de ${targets.length} actualizadas — ${highConfidence} con coincidencia exacta de número (confiables), ${lowConfidence} por nombre solamente (revisa estas: ${reviewList.slice(0,8).join(", ")}${reviewList.length>8?"…":""}).`;
 });
 </script>
 </body>
