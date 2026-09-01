@@ -372,7 +372,7 @@
         <select class="sort-select" id="sortSelect">
           <option value="relevance">Ordenar: relevancia</option>
           <option value="price-asc">Precio: menor a mayor</option>
-          <option value="price-desc">Precio: mayor a menor</option>
+          <option value="price-desc" selected>Precio: mayor a menor</option>
           <option value="name-asc">Nombre: A–Z</option>
           <option value="new">Recién llegadas</option>
         </select>
@@ -542,7 +542,7 @@ const CHECK_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.
 
 const state = {
   query:"", kind:"all", sets:new Set(), rarities:new Set(), conditions:new Set(), languages:new Set(),
-  priceMin:null, priceMax:null, sort:"relevance",
+  priceMin:null, priceMax:null, sort:"price-desc",
   selected: JSON.parse(localStorage.getItem("vitrina_cart_v2") || "{}") // {id: qty}
 };
 
@@ -767,8 +767,7 @@ function render(){
     const shown = list.slice(0, visibleCount);
     shown.forEach(c => grid.appendChild(renderCard(c)));
     requestAnimationFrame(() => {
-      const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in-view"); obs.unobserve(e.target); } }); }, {threshold:.1});
-      grid.querySelectorAll(".card").forEach(c => obs.observe(c));
+      grid.querySelectorAll(".card").forEach(c => c.classList.add("in-view"));
     });
   }
   const loadMoreWrap = document.getElementById("loadMoreWrap");
