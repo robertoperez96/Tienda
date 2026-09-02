@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel PokeBaúl · Administración de catálogo</title>
+<title>Panel Mi Colección · Administración de catálogo</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@560;680&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -72,7 +72,7 @@
 </head>
 <body>
 <div id="lockScreen" style="position:fixed;inset:0;z-index:999;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
-  <div style="font-family:var(--font-display);font-weight:680;font-size:22px;">Panel <span style="color:var(--foil-bright);">PokeBaúl</span></div>
+  <div style="font-family:var(--font-display);font-weight:680;font-size:22px;">Panel <span style="color:var(--foil-bright);">Mi Colección</span></div>
   <p style="color:var(--slate);font-size:13px;">Escribe la contraseña para entrar</p>
   <input type="password" id="lockPassInput" placeholder="Contraseña" style="width:220px;text-align:center;">
   <button class="btn btn-foil" id="lockUnlockBtn" type="button">Entrar</button>
@@ -80,7 +80,7 @@
 </div>
 <div id="adminContent" style="display:none;">
 <div class="wrap">
-  <h1>Panel <span>PokeBaúl</span> · Administración</h1>
+  <h1>Panel <span>Mi Colección</span> · Administración</h1>
   <p class="lede">Busca la carta real por nombre, elige la impresión exacta y llena precio/condición. No necesitas fotografiar nada: la imagen se toma de la base de datos pública de Pokémon TCG.</p>
   <div class="steps-mini">
     <span>1. Busca</span><span>2. Elige la versión</span><span>3. Completa precio y estado</span><span>4. Agrega</span><span>5. Descarga cards-data.js</span>
@@ -612,7 +612,7 @@ function parseCsv(text){
     return obj;
   });
 }
-const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de PokeBaúl (usado para el pago, no para buscar imágenes)
+const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de Mi Colección (usado para el pago, no para buscar imágenes)
 
 async function tryTcgdex(item, fx){
   const searchName = cleanSearchName(item.name);
