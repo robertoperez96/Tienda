@@ -215,6 +215,22 @@
   </div>
 
   <div class="panel">
+    <h2>6c · Reglas de precio estándar</h2>
+    <p class="hint">
+      Redondea precios chicos a valores estándar (ej. "todo lo que valga menos de $4 sube a $5"), <b>sin bajar nunca</b>
+      un precio que ya sea más alto que el objetivo de la regla. Agrega, edita o borra reglas cuando quieras — quedan
+      guardadas para la próxima vez.
+    </p>
+    <table id="rulesTable" style="margin-bottom:12px;">
+      <thead><tr><th>Tipo</th><th>Mín $</th><th>Máx $</th><th>Rareza contiene</th><th>Precio objetivo</th><th></th></tr></thead>
+      <tbody id="rulesBody"></tbody>
+    </table>
+    <button class="btn btn-ghost" id="addRuleBtn" type="button">+ Agregar regla</button>
+    <div class="add-row"><button class="btn btn-foil" id="applyRulesBtn" type="button">Aplicar reglas a todo el catálogo</button></div>
+    <div class="status-msg" id="rulesStatus"></div>
+  </div>
+
+  <div class="panel">
     <h2>7 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
     <div class="row" style="margin-bottom:14px;">
       <button class="btn btn-ghost" id="lockAllImagesBtn" type="button">🔒 Bloquear todas las imágenes</button>
@@ -369,7 +385,7 @@ function renderCatalog(){
             <span>${c.priceLocked ? "🔒" : "🔓"}</span>
           </label>
         </div>
-        <div style="font-size:10px;color:var(--slate);margin-top:2px;">fuente: ${c.priceSource === "tcgplayer" ? "TCGplayer" : "CSV"}</div>
+        <div style="font-size:10px;color:var(--slate);margin-top:2px;">fuente: ${c.priceSource === "tcgplayer" ? "TCGplayer" : c.priceSource === "regla" ? "Regla" : c.priceSource === "manual" ? "Manual" : "CSV"}</div>
         ${c.suggestedPrice ? `<div style="font-size:11px;color:var(--foil-bright);margin-top:3px;">⚠️ TCGplayer: $${c.suggestedPrice} <button class="useSuggestedBtn" data-id="${c.id}" style="background:none;border:none;color:var(--foil-bright);text-decoration:underline;cursor:pointer;padding:0;">usar</button></div>` : ""}
       </td>
       <td>
@@ -654,6 +670,72 @@ async function refreshFx(){
   }
 }
 document.getElementById("fxRefreshBtn").addEventListener("click", refreshFx);
+
+/* ---- reglas de precio estándar, customizables ---- */
+const RULES_KEY = "vitrina_admin_price_rules";
+let priceRules = JSON.parse(localStorage.getItem(RULES_KEY) || "null") || [
+  {type:"range", min:0, max:3.99, rarity:"", target:5},
+  {type:"range", min:4, max:6, rarity:"", target:8},
+  {type:"range", min:8.01, max:10, rarity:"", target:15},
+  {type:"range", min:10.01, max:15, rarity:"", target:20},
+  {type:"rarity", min:0, max:19.99, rarity:"EX", target:20}
+];
+function saveRules(){ localStorage.setItem(RULES_KEY, JSON.stringify(priceRules)); }
+
+function renderRules(){
+  const body = document.getElementById("rulesBody");
+  body.innerHTML = "";
+  priceRules.forEach((rule, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <select class="ruleType" data-i="${i}">
+          <option value="range" ${rule.type==="range"?"selected":""}>Rango de precio</option>
+          <option value="rarity" ${rule.type==="rarity"?"selected":""}>Rareza + techo de precio</option>
+        </select>
+      </td>
+      <td><input type="number" step="0.01" class="ruleMin" data-i="${i}" value="${rule.min}" style="width:70px;"></td>
+      <td><input type="number" step="0.01" class="ruleMax" data-i="${i}" value="${rule.max}" style="width:70px;"></td>
+      <td><input type="text" class="ruleRarity" data-i="${i}" value="${rule.rarity||''}" placeholder="ej. EX" style="width:70px;" ${rule.type==="range"?"disabled":""}></td>
+      <td><input type="number" step="0.01" class="ruleTarget" data-i="${i}" value="${rule.target}" style="width:70px;"></td>
+      <td><button class="delRuleBtn" data-i="${i}" style="background:none;color:var(--ember-bright);text-decoration:underline;">Eliminar</button></td>
+    `;
+    body.appendChild(tr);
+  });
+  document.querySelectorAll(".ruleType").forEach(el => el.addEventListener("change", e => { priceRules[Number(e.target.dataset.i)].type = e.target.value; saveRules(); renderRules(); }));
+  document.querySelectorAll(".ruleMin").forEach(el => el.addEventListener("change", e => { priceRules[Number(e.target.dataset.i)].min = Number(e.target.value); saveRules(); }));
+  document.querySelectorAll(".ruleMax").forEach(el => el.addEventListener("change", e => { priceRules[Number(e.target.dataset.i)].max = Number(e.target.value); saveRules(); }));
+  document.querySelectorAll(".ruleRarity").forEach(el => el.addEventListener("change", e => { priceRules[Number(e.target.dataset.i)].rarity = e.target.value; saveRules(); }));
+  document.querySelectorAll(".ruleTarget").forEach(el => el.addEventListener("change", e => { priceRules[Number(e.target.dataset.i)].target = Number(e.target.value); saveRules(); }));
+  document.querySelectorAll(".delRuleBtn").forEach(el => el.addEventListener("click", e => { priceRules.splice(Number(e.target.dataset.i),1); saveRules(); renderRules(); }));
+}
+document.getElementById("addRuleBtn").addEventListener("click", () => {
+  priceRules.push({type:"range", min:0, max:0, rarity:"", target:0});
+  saveRules(); renderRules();
+});
+document.getElementById("applyRulesBtn").addEventListener("click", () => {
+  const status = document.getElementById("rulesStatus");
+  let changed = 0;
+  catalog.forEach(item => {
+    if (item.priceLocked || item.kind === "sellado") return;
+    for (const rule of priceRules){
+      if (rule.type === "range"){
+        if (item.price >= rule.min && item.price <= rule.max && rule.target > item.price){
+          item.price = rule.target; item.priceSource = "regla"; changed++;
+        }
+      } else if (rule.type === "rarity"){
+        const rarityText = (rule.rarity || "").toLowerCase();
+        if (rarityText && (item.rarity||"").toLowerCase().includes(rarityText) && item.price < rule.max && rule.target > item.price){
+          item.price = rule.target; item.priceSource = "regla"; changed++;
+        }
+      }
+    }
+  });
+  persist();
+  renderCatalog();
+  status.textContent = `Listo: ${changed} precios ajustados por las reglas.`;
+});
+renderRules();
 
 document.getElementById("suggestPriceBtn").addEventListener("click", async () => {
   const status = document.getElementById("suggestPriceStatus");
