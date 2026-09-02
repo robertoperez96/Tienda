@@ -381,10 +381,11 @@
   @media (max-width:680px){ .zoom-modal{ grid-template-columns:1fr; } }
 
   /* ---- resumen de pedido (abre desde el link de WhatsApp) ---- */
+  #orderBackdrop{z-index:105;}
   .order-modal{
     display:block;position:fixed;top:50%;left:50%;
     transform:translate(-50%,-50%) scale(.94);
-    z-index:111;background:var(--ink-2);border:1px solid var(--line-strong);border-radius:var(--radius-l);
+    z-index:106;background:var(--ink-2);border:1px solid var(--line-strong);border-radius:var(--radius-l);
     width:min(480px,92vw);max-height:88vh;overflow-y:auto;padding:28px 26px 24px;
     box-shadow:0 30px 70px -20px rgba(0,0,0,.7);
     opacity:0;pointer-events:none;
@@ -394,7 +395,10 @@
   .order-head{margin-bottom:16px;}
   .order-head h3{font-family:var(--font-display);font-weight:560;font-size:19px;margin:4px 0 0;}
   .order-list{border-top:1px solid var(--line);}
-  .order-item{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .order-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .oi-thumb{width:38px;height:52px;border-radius:6px;flex-shrink:0;background-size:cover;background-position:center;cursor:pointer;transition:transform .15s ease;box-shadow:0 4px 10px -4px rgba(0,0,0,.6);}
+  .oi-thumb:hover{transform:scale(1.08);}
+  .oi-grow{flex:1;min-width:0;}
   .order-item .oi-name{color:var(--cream);}
   .order-item .oi-sub{color:var(--slate);font-size:11.5px;font-family:var(--font-mono);}
   .order-item .oi-price{font-family:var(--font-mono);color:var(--foil-bright);white-space:nowrap;}
@@ -1364,13 +1368,20 @@ renderToys();
   const list = document.getElementById("orderList");
   list.innerHTML = items.map(({card,qty}) => `
     <div class="order-item">
-      <div>
+      <div class="oi-thumb" data-id="${card.id}" style="${card.image ? `background-image:url('${card.image}')` : `background:${TYPE_COLORS[card.type]}`}"></div>
+      <div class="oi-grow">
         <div class="oi-name">${card.name}${qty>1?` ×${qty}`:''}</div>
         <div class="oi-sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':'')}</div>
       </div>
       <div class="oi-price">${money(card.price*qty)}</div>
     </div>
   `).join("");
+  list.querySelectorAll(".oi-thumb").forEach(thumb => {
+    thumb.addEventListener("click", () => {
+      const card = CARDS.find(c => c.id === Number(thumb.dataset.id));
+      if (card) openZoom(card);
+    });
+  });
 
   const totals = document.getElementById("orderTotals");
   totals.innerHTML = `
