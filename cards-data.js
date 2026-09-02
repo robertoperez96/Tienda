@@ -1,4 +1,4 @@
-/* cards-data.js — generado desde admin.html el 1/9/2026, 10:06:59 p.m. */
+/* cards-data.js — generado desde admin.html el 1/9/2026, 11:02:47 p.m. */
 window.CARDS = [
   {
     "id": 1,
@@ -1801,7 +1801,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "",
+    "image": "https://storage.googleapis.com/images.pricecharting.com/lvrhmdogf5unfjqy/1600.jpg",
     "imageLocked": false,
     "priceLocked": false,
     "priceSource": "manual"
@@ -1822,7 +1822,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "",
+    "image": "https://tcgplayer-cdn.tcgplayer.com/product/684454_in_1000x1000.jpg",
     "imageLocked": false,
     "priceLocked": false,
     "priceSource": "manual"
@@ -1843,7 +1843,7 @@ window.CARDS = [
     "stock": 1,
     "isNew": false,
     "featured": false,
-    "image": "",
+    "image": "https://tcgplayer-cdn.tcgplayer.com/product/684450_in_1000x1000.jpg",
     "imageLocked": false,
     "priceLocked": false,
     "priceSource": "manual"
