@@ -151,7 +151,7 @@
   }
 
   .back-to-top{
-    position:fixed;bottom:96px;right:18px;z-index:70;
+    position:fixed;bottom:18px;left:18px;z-index:70;
     width:44px;height:44px;border-radius:999px;background:var(--ink-4);
     border:1px solid var(--line-strong);color:var(--cream);cursor:pointer;
     display:flex;align-items:center;justify-content:center;
@@ -164,6 +164,8 @@
   @media (prefers-reduced-motion:reduce){.card{opacity:1;transform:none;animation:none;}}
   .card:hover{border-color:var(--foil-dim);}
   .card.selected{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil),var(--shadow-card);}
+  @keyframes card-pulse{0%{box-shadow:0 0 0 0 rgba(201,162,39,.55), var(--shadow-card);}100%{box-shadow:0 0 0 8px rgba(201,162,39,0), var(--shadow-card);}}
+  .card.just-updated{animation:card-pulse .5s ease-out;}
   .card-art{aspect-ratio:3/4;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:16px;transition:transform .2s ease;}
   .card-art::before{content:"";position:absolute;inset:0;background:var(--art-grad);}
   .card:hover .card-art{transform:scale(1.015);}
@@ -278,11 +280,12 @@
   .footer-col a:hover{color:var(--foil-bright);}
   .footer-legal{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);color:var(--slate);font-size:12px;}
 
-  .cart-bar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(140%);z-index:60;background:var(--ink-4);border:1px solid var(--line-strong);border-radius:999px;padding:10px 10px 10px 22px;display:flex;align-items:center;gap:18px;box-shadow:0 20px 40px -12px rgba(0,0,0,.6);transition:transform .25s ease;}
-  .cart-bar.show{transform:translateX(-50%) translateY(0);}
-  .cart-bar-info{font-size:13.5px;}
+  .cart-bar{position:fixed;bottom:18px;right:18px;transform:translateY(140%);z-index:60;background:rgba(28,34,48,0.95);backdrop-filter:blur(8px);border:1px solid var(--line-strong);border-radius:999px;padding:7px 7px 7px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 20px 40px -12px rgba(0,0,0,.6);transition:transform .3s cubic-bezier(.2,.9,.3,1);max-width:min(300px,calc(100vw - 28px));}
+  .cart-bar.show{transform:translateY(0);}
+  .cart-bar-info{font-size:11.5px;white-space:nowrap;}
   .cart-bar-info b{font-family:var(--font-mono);color:var(--foil-bright);}
-  .cart-bar .btn{padding:10px 18px;font-size:13.5px;}
+  .cart-bar .btn{padding:8px 14px;font-size:12.5px;}
+  @media (max-width:640px){ .cart-bar{ right:10px; bottom:12px; padding:6px 6px 6px 12px; gap:8px; } .cart-bar-info{ font-size:10.5px; } .cart-bar .btn{ padding:7px 11px; font-size:11.5px; } }
 
   .drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:95;}
   .drawer-backdrop.open{display:block;}
@@ -342,7 +345,7 @@
 
   /* ---- toast ---- */
   .toast{
-    position:fixed;bottom:22px;right:18px;
+    position:fixed;bottom:88px;right:18px;
     background:rgba(22,27,38,0.92);backdrop-filter:blur(8px);
     border:1px solid var(--line-strong);color:var(--cream);
     padding:10px 16px 10px 12px;border-radius:12px;font-size:12.5px;font-weight:500;
@@ -692,7 +695,7 @@ function renderCard(card){
     if (soldOut) return;
     const cur = state.selected[card.id] || 0;
     if (cur > 0) delete state.selected[card.id]; else { state.selected[card.id] = 1; showToast(`<b>${card.name}</b> agregada`); }
-    saveCart(); render();
+    saveCart(); refreshCardInPlace(card.id); updateCartUI();
     if (opts?.closeZoom) closeZoom();
   };
   if (card.kind === "sellado"){
@@ -700,13 +703,13 @@ function renderCard(card){
       ev.stopPropagation();
       if (soldOut) return;
       const cur = state.selected[card.id] || 0;
-      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); showToast(`<b>${card.name}</b> agregado`); }
+      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); refreshCardInPlace(card.id); updateCartUI(); showToast(`<b>${card.name}</b> agregado`); }
     });
     el.querySelector(".qty-minus").addEventListener("click", ev => {
       ev.stopPropagation();
       const cur = state.selected[card.id] || 0;
       if (cur <= 1) delete state.selected[card.id]; else state.selected[card.id] = cur-1;
-      saveCart(); render();
+      saveCart(); refreshCardInPlace(card.id); updateCartUI();
     });
     el.querySelector(".card-art").addEventListener("click", () => openZoom(card));
   } else {
@@ -714,6 +717,21 @@ function renderCard(card){
     el.querySelector(".add-to-cart-btn").addEventListener("click", ev => { ev.stopPropagation(); toggleSingle(); });
   }
   return el;
+}
+
+/* actualiza solo la tarjeta que cambió (sin re-renderizar toda la cuadrícula) */
+function refreshCardInPlace(cardId){
+  const grid = document.getElementById("cardGrid");
+  const oldEl = grid.querySelector(`.card[data-id="${cardId}"]`);
+  const cardData = CARDS.find(c => c.id === cardId);
+  if (!oldEl || !cardData) return;
+  const newEl = renderCard(cardData);
+  newEl.style.animation = "none";
+  newEl.style.opacity = "1";
+  newEl.style.transform = "none";
+  newEl.classList.add("in-view", "just-updated");
+  grid.replaceChild(newEl, oldEl);
+  setTimeout(() => newEl.classList.remove("just-updated"), 500);
 }
 
 /* ---- zoom modal ---- */
@@ -735,10 +753,10 @@ function openZoom(card){
     if (soldOut) return;
     if (card.kind === "sellado"){
       const cur = state.selected[card.id] || 0;
-      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); showToast(`<b>${card.name}</b> agregado`); }
+      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); refreshCardInPlace(card.id); updateCartUI(); showToast(`<b>${card.name}</b> agregado`); }
     } else {
       const cur = state.selected[card.id] || 0;
-      if (cur === 0){ state.selected[card.id] = 1; saveCart(); render(); showToast(`<b>${card.name}</b> agregada`); }
+      if (cur === 0){ state.selected[card.id] = 1; saveCart(); refreshCardInPlace(card.id); updateCartUI(); showToast(`<b>${card.name}</b> agregada`); }
     }
     closeZoom();
   };
@@ -949,6 +967,22 @@ const infiniteObserver = new IntersectionObserver(entries => {
   });
 }, { rootMargin: "600px" });
 infiniteObserver.observe(document.getElementById("infiniteScrollSentinel"));
+
+/* enlaces a secciones después del catálogo: pausamos la carga automática
+   mientras dura el salto, para que el destino no se mueva a medio camino */
+const sentinelEl = document.getElementById("infiniteScrollSentinel");
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  const targetId = link.getAttribute("href").slice(1);
+  if (["como-comprar","legend","resenas","faq","comunidad"].includes(targetId)){
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      infiniteObserver.unobserve(sentinelEl);
+      const target = document.getElementById(targetId);
+      if (target) target.scrollIntoView({behavior:"smooth", block:"start"});
+      setTimeout(() => infiniteObserver.observe(sentinelEl), 1200);
+    });
+  }
+});
 
 document.getElementById("searchInput").addEventListener("input", e => { state.query = e.target.value; resetAndRender(); });
 document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; resetAndRender(); });
