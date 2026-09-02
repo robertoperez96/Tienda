@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mi Colección · Catálogo Pokémon TCG</title>
-<meta name="description" content="Catálogo de cartas y producto sellado Pokémon TCG. Precios en MXN, estado verificado, paga con MercadoPago, tarjeta o transferencia.">
+<meta name="description" content="Catálogo de cartas y producto sellado Pokémon TCG. Precios en MXN, estado verificado, aparta por WhatsApp y paga por transferencia o efectivo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;0,9..144,680;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -374,7 +374,7 @@
 </head>
 <body>
 
-<div class="announce">Envíos a todo México · Recolección en punto de entrega disponible · <b>Paga con MercadoPago, tarjeta o transferencia</b></div>
+<div class="announce">Envíos a todo México · Recolección en punto de entrega disponible · <b>Aparta por WhatsApp · Pago por transferencia o efectivo</b></div>
 
 <header class="site">
   <div class="wrap site-bar">
@@ -407,7 +407,7 @@
       <div>
         <span class="eyebrow">Catálogo curado · Actualizado a diario</span>
         <h1 class="hero-title">Encuentra el próximo <em>tesoro</em> para tu colección.</h1>
-        <p class="hero-sub">Singles y producto sellado, coleccionables y más. Estado verificado y pago seguro con MercadoPago, tarjeta o transferencia.</p>
+        <p class="hero-sub">Singles y producto sellado, coleccionables y más. Estado verificado — aparta por WhatsApp y coordina pago por transferencia o efectivo, con entrega en persona.</p>
         <div class="stat-strip">
           <div class="stat"><b id="statSold">184</b><span>vendidas este mes</span></div>
           <div class="stat"><b id="statTotal">0</b><span>piezas activas</span></div>
@@ -496,7 +496,7 @@
       <div class="steps">
         <div class="step"><span class="num">01</span><h3>Elige tus piezas</h3><p>Filtra por tipo (singles o sellado), set, rareza o condición.</p></div>
         <div class="step"><span class="num">02</span><h3>Ajusta cantidades</h3><p>En sellado puedes pedir más de una pieza; en singles cada carta es única.</p></div>
-        <div class="step"><span class="num">03</span><h3>Paga seguro</h3><p>Elige MercadoPago, tarjeta de crédito o transferencia bancaria directo en el carrito.</p></div>
+        <div class="step"><span class="num">03</span><h3>Confirma por WhatsApp</h3><p>Te escribimos para coordinar el pago (transferencia o efectivo) y la entrega en persona.</p></div>
         <div class="step"><span class="num">04</span><h3>Recibe tu pedido</h3><p>Envío protegido a todo México o entrega en persona, según prefieras.</p></div>
       </div>
     </div>
@@ -528,7 +528,8 @@
   <section class="faq" id="faq">
     <div class="wrap">
       <div class="faq-head"><span class="eyebrow">Dudas rápidas</span><h2>Preguntas frecuentes</h2></div>
-      <details class="faq-item" open><summary>¿Cómo sé el estado real de la carta?</summary><p>Cada pieza indica su condición (M, NM, LP, MP o HP) según la escala estándar de grading. Si tienes dudas, pide fotos por WhatsApp antes de confirmar.</p></details>
+      <details class="faq-item" open><summary>¿Cómo pago mi pedido?</summary><p>Por ahora, apartas tu selección por WhatsApp y coordinamos el pago por transferencia o efectivo, con entrega en persona. El pago con tarjeta/MercadoPago está en camino.</p></details>
+      <details class="faq-item"><summary>¿Cómo sé el estado real de la carta?</summary><p>Cada pieza indica su condición (M, NM, LP, MP o HP) según la escala estándar de grading. Si tienes dudas, pide fotos por WhatsApp antes de confirmar.</p></details>
       <details class="faq-item"><summary>¿Hacen envíos a toda la República?</summary><p>Sí. Enviamos a todo México con paquetería asegurada. El costo se confirma junto con tu apartado por WhatsApp.</p></details>
       <details class="faq-item"><summary>¿Puedo recoger en persona?</summary><p>Sí, coordina punto y horario de entrega directamente por WhatsApp al confirmar tu pedido.</p></details>
       <details class="faq-item"><summary>¿Los precios pueden cambiar?</summary><p>Los precios son sugeridos y se actualizan a diario según mercado; siempre se confirma el total exacto antes de pagar.</p></details>
@@ -592,24 +593,26 @@
   <div class="drawer-scroll" id="drawerScroll">
     <div id="drawerList"></div>
     <div class="pay-methods">
-      <div class="pay-methods-label">Método de pago</div>
+      <div class="pay-methods-label">¿Cómo se hace la compra?</div>
       <div class="pay-options">
-        <button type="button" class="pay-opt active" data-pay="card">💳 Tarjeta / MercadoPago</button>
-        <button type="button" class="pay-opt" data-pay="transfer">🏦 Transferencia</button>
-        <button type="button" class="pay-opt" data-pay="whatsapp">💬 Confirmar por WhatsApp</button>
+        <button type="button" class="pay-opt active" data-pay="whatsapp">💬 Apartar por WhatsApp</button>
+        <button type="button" class="pay-opt" data-pay="transfer">🏦 Datos de transferencia</button>
+        <button type="button" class="pay-opt" data-pay="card">💳 Tarjeta / MercadoPago</button>
+      </div>
+      <div class="pay-panel" id="payPanelWhatsapp">
+        <p style="margin:0;">Apartas tu selección por WhatsApp, coordinamos el pago por <b>transferencia o efectivo</b>, y la entrega es <b>en persona</b> (o envío, según acordemos).</p>
       </div>
       <div class="pay-panel" id="payPanelTransfer" style="display:none;"></div>
-      <div class="pay-panel" id="payPanelCard">
-        <p style="margin:0 0 10px;">Pago seguro con tarjeta, MercadoPago, OXXO o transferencia, procesado por MercadoPago.</p>
-        <div class="pay-trust"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 4v6c0 5-3.4 8.4-7 10-3.6-1.6-7-5-7-10V6l7-4z" stroke="currentColor" stroke-width="1.6"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Encriptado y verificado por MercadoPago</div>
+      <div class="pay-panel" id="payPanelCard" style="display:none;">
+        <p style="margin:0;">Pago con tarjeta / MercadoPago llega muy pronto — por ahora usa "Apartar por WhatsApp" para tu compra.</p>
       </div>
     </div>
   </div>
   <div class="drawer-foot">
     <div class="drawer-total"><span>Total aproximado</span><b id="drawerTotal">$0</b></div>
-    <button type="button" class="btn btn-foil" id="mpPayBtn">Pagar con MercadoPago</button>
+    <a href="#" class="btn btn-foil" id="whatsappBtn" target="_blank" rel="noopener">Apartar por WhatsApp</a>
+    <button type="button" class="btn btn-ghost" id="mpPayBtn" style="margin-top:8px;opacity:.6;">Pagar con MercadoPago (próximamente)</button>
     <p id="mpPayStatus" style="font-size:11px;color:var(--slate);margin-top:6px;text-align:center;"></p>
-    <a href="#" class="btn btn-ghost" id="whatsappBtn" target="_blank" rel="noopener" style="margin-top:8px;">Solicitar por WhatsApp</a>
     <p class="drawer-note">El apartado se confirma por WhatsApp según disponibilidad.</p>
   </div>
 </div>
@@ -623,6 +626,7 @@
    ===================================================================== */
 const WHATSAPP_PHONE = "528111707319"; // <-- tu número real
 const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de Mi Colección
+const MERCADOPAGO_ENABLED = false; // <-- ponlo en true cuando quieras activar el cobro real de nuevo
 const BANK_INFO = { // <-- reemplaza con tus datos reales para transferencia
   banco: "Tu banco",
   clabe: "0000 0000 0000 0000 00",
@@ -966,6 +970,7 @@ function updateCartUI(){
 
   document.getElementById("mpPayBtn").onclick = async () => {
     const mpStatus = document.getElementById("mpPayStatus");
+    if (!MERCADOPAGO_ENABLED){ mpStatus.textContent = "Pago con tarjeta/MercadoPago llega muy pronto — usa \"Apartar por WhatsApp\" por ahora."; return; }
     if (!count){ mpStatus.textContent = "Agrega algo al carrito primero."; return; }
     if (WORKER_URL.includes("TU-WORKER")){ mpStatus.textContent = "Falta configurar WORKER_URL en el código (ver worker.js)."; return; }
     mpStatus.textContent = "Abriendo pago seguro…";
@@ -1090,6 +1095,7 @@ document.querySelectorAll(".pay-opt").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".pay-opt").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
+    document.getElementById("payPanelWhatsapp").style.display = btn.dataset.pay === "whatsapp" ? "block" : "none";
     document.getElementById("payPanelTransfer").style.display = btn.dataset.pay === "transfer" ? "block" : "none";
     document.getElementById("payPanelCard").style.display = btn.dataset.pay === "card" ? "block" : "none";
   });
