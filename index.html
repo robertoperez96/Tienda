@@ -92,6 +92,9 @@
 
   section.catalog{padding:8px 0 36px;}
   .catalog-head{margin-bottom:18px;}
+  section.toys{padding:20px 0 8px;border-top:1px solid var(--line);margin-top:20px;}
+  .toys-head{margin-bottom:16px;}
+  .toys-head h2{font-size:22px;}
   .kind-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
   .kind-tab{background:var(--ink-2);border:1px solid var(--line-strong);color:var(--cream-dim);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:500;}
   .kind-tab.active{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);font-weight:600;}
@@ -381,6 +384,7 @@
     </a>
     <nav class="main-nav">
       <a href="#catalogo">Catálogo</a>
+      <a href="#juguetes">Juguetes y Coleccionables</a>
       <a href="#como-comprar">Cómo comprar</a>
       <a href="#legend">Estados y grados</a>
       <a href="#resenas">Reseñas</a>
@@ -456,6 +460,25 @@
           <span id="loadMoreText" style="color:var(--slate);font-size:13px;">Cargando más piezas…</span>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="toys" id="juguetes">
+    <div class="wrap">
+      <div class="toys-head"><span class="eyebrow">Colección especial</span><h2>Juguetes y Coleccionables</h2></div>
+      <div class="toolbar" style="margin-bottom:18px;">
+        <div class="search-field">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <input type="text" id="toySearchInput" placeholder="Buscar juguete o coleccionable…">
+        </div>
+        <select class="sort-select" id="toySortSelect">
+          <option value="relevance">Ordenar: relevancia</option>
+          <option value="price-asc">Precio: menor a mayor</option>
+          <option value="price-desc">Precio: mayor a menor</option>
+        </select>
+        <span class="results-count" id="toyResultsCount"></span>
+      </div>
+      <div class="grid" id="toyGrid"></div>
     </div>
   </section>
 
@@ -648,6 +671,7 @@ function buildFilterUI(){
 }
 
 function matches(card){
+  if (card.category === "toy") return false;
   const q = state.query.trim().toLowerCase();
   if (state.kind !== "all" && card.kind !== state.kind) return false;
   if (q && !(`${card.name} ${card.set} ${card.code}${card.num}`.toLowerCase().includes(q))) return false;
@@ -729,8 +753,7 @@ function renderCard(card){
 
 /* actualiza solo la tarjeta que cambió (sin re-renderizar toda la cuadrícula) */
 function refreshCardInPlace(cardId){
-  const grid = document.getElementById("cardGrid");
-  const oldEl = grid.querySelector(`.card[data-id="${cardId}"]`);
+  const oldEl = document.querySelector(`.card[data-id="${cardId}"]`);
   const cardData = CARDS.find(c => c.id === cardId);
   if (!oldEl || !cardData) return;
   const newEl = renderCard(cardData);
@@ -738,7 +761,7 @@ function refreshCardInPlace(cardId){
   newEl.style.opacity = "1";
   newEl.style.transform = "none";
   newEl.classList.add("in-view", "just-updated");
-  grid.replaceChild(newEl, oldEl);
+  oldEl.parentNode.replaceChild(newEl, oldEl);
   setTimeout(() => newEl.classList.remove("just-updated"), 500);
 }
 
@@ -1042,6 +1065,33 @@ window.addEventListener("scroll", () => {
   backToTopBtn.classList.toggle("show", y > 700);
 }, { passive: true });
 backToTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+/* ---- Juguetes y Coleccionables (sección separada, sin los filtros de cartas) ---- */
+const toyState = { query: "", sort: "relevance" };
+function renderToys(){
+  const grid = document.getElementById("toyGrid");
+  if (!grid) return;
+  let list = CARDS.filter(c => c.category === "toy");
+  const q = toyState.query.trim().toLowerCase();
+  if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
+  if (toyState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
+  else if (toyState.sort === "price-desc") list = [...list].sort((a,b)=>b.price-a.price);
+
+  document.getElementById("toyResultsCount").textContent = `${list.length} producto${list.length===1?'':'s'}`;
+  grid.innerHTML = "";
+  if (!list.length){
+    grid.innerHTML = `<div class="empty-state"><h3>${CARDS.some(c=>c.category==="toy") ? "No hay productos con esa búsqueda" : "Aún no hay juguetes en el catálogo"}</h3><p>${CARDS.some(c=>c.category==="toy") ? "Prueba con otra palabra." : "Agrégalos desde admin.html, sección 1."}</p></div>`;
+    return;
+  }
+  list.forEach(c => {
+    const el = renderCard(c);
+    el.classList.add("in-view");
+    grid.appendChild(el);
+  });
+}
+document.getElementById("toySearchInput")?.addEventListener("input", e => { toyState.query = e.target.value; renderToys(); });
+document.getElementById("toySortSelect")?.addEventListener("change", e => { toyState.sort = e.target.value; renderToys(); });
+renderToys();
 
 buildFilterUI();
 buildCarousel();

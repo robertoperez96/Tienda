@@ -87,7 +87,59 @@
   </div>
 
   <div class="panel">
-    <h2>1 · Buscar carta</h2>
+    <h2>1 · Agregar producto individual (con foto)</h2>
+    <p class="hint">
+      La forma más rápida de agregar algo nuevo tú mismo: elige el tipo, llena los datos, sube o pega una foto, y listo.
+      Sirve tanto para cartas Pokémon como para juguetes y coleccionables.
+    </p>
+    <div class="row" style="margin-top:12px;">
+      <select id="quickCategory" style="flex:1;">
+        <option value="pokemon">🃏 Carta Pokémon</option>
+        <option value="toy">🧸 Juguete / Coleccionable</option>
+      </select>
+    </div>
+
+    <div class="form-grid" style="margin-top:14px;">
+      <div class="field"><label>Nombre del producto</label><input type="text" id="quickName" placeholder="Ej. Muñeco de peluche Pikachu 30cm"></div>
+      <div class="field"><label>Precio (MXN)</label><input type="number" id="quickPrice" placeholder="450"></div>
+      <div class="field" id="quickToyTypeField" style="display:none;"><label>Tipo de juguete</label><input type="text" id="quickToyType" placeholder="Ej. Peluche, Figura, Set de construcción"></div>
+      <div class="field" id="quickKindField"><label>Tipo</label>
+        <select id="quickKind"><option value="single">Carta suelta (single)</option><option value="sellado">Producto sellado</option></select>
+      </div>
+      <div class="field" id="quickCondField"><label>Condición</label>
+        <select id="quickCond"><option>Nuevo</option><option selected>M</option><option>NM</option><option>LP</option><option>MP</option><option>HP</option></select>
+      </div>
+      <div class="field"><label>Existencias (stock)</label><input type="number" id="quickStock" value="1" min="1"></div>
+    </div>
+
+    <div id="quickSetFields" class="form-grid" style="margin-top:0;">
+      <div class="field"><label>Set / Colección</label><input type="text" id="quickSet" placeholder="Ej. Scarlet & Violet"></div>
+      <div class="field"><label>Número (opcional)</label><input type="number" id="quickNum" placeholder="Ej. 25"></div>
+      <div class="field"><label>Rareza</label><input type="text" id="quickRarity" placeholder="Ej. Holo Rara"></div>
+      <div class="field"><label>Idioma</label>
+        <select id="quickLang"><option>Español</option><option>Inglés</option><option>Japonés</option><option>Chino</option></select>
+      </div>
+    </div>
+
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--cream-dim);">
+      <input type="checkbox" id="quickFeatured" style="width:16px;height:16px;"> Destacado (aparece en el carrusel del inicio)
+    </label>
+
+    <div style="margin-top:16px;">
+      <label>Foto del producto</label>
+      <div id="quickDropZone" style="margin-top:8px;border:1.5px dashed var(--line-strong);border-radius:10px;padding:22px;text-align:center;cursor:pointer;background:var(--ink);">
+        <div id="quickDropPreview"></div>
+        <p style="margin:0;color:var(--slate);font-size:13px;">Toca para elegir una foto, o pega un screenshot aquí (Ctrl+V)</p>
+        <input type="file" id="quickFileInput" accept="image/*" style="display:none;">
+      </div>
+    </div>
+
+    <div class="add-row"><button class="btn btn-foil" id="quickAddBtn" type="button">Agregar al catálogo</button></div>
+    <div class="status-msg" id="quickAddStatus"></div>
+  </div>
+
+  <div class="panel">
+    <h2>2 · Buscar carta</h2>
     <p class="hint">Escribe el nombre en inglés funciona mejor (ej. "Charizard", "Pikachu"). Puedes agregar varias impresiones distintas de la misma carta.</p>
     <div class="row search-row">
       <input type="text" id="searchName" placeholder="Nombre de la carta…">
@@ -103,7 +155,7 @@
   </div>
 
   <div class="panel" id="detailsPanel" style="display:none;">
-    <h2>2 · Detalles de la publicación</h2>
+    <h2>3 · Detalles de la publicación</h2>
     <div class="preview-box">
       <img id="prevImg" src="" alt="">
       <div class="ptxt"><b id="prevName"></b><span id="prevMeta"></span></div>
@@ -137,7 +189,7 @@
   </div>
 
   <div class="panel">
-    <h2>3 · Identificar cartas con IA usando tus propias fotos</h2>
+    <h2>4 · Identificar cartas con IA usando tus propias fotos</h2>
     <p class="hint">
       Este panel no puede traer una IA integrada sin exponer una llave de pago en el código — cualquiera podría robarla.
       En su lugar: abre un chat con Claude, sube las fotos de tus cartas y pide algo como
@@ -151,7 +203,7 @@
   </div>
 
   <div class="panel">
-    <h2>4 · Buscar imágenes en Serebii.net (por set)</h2>
+    <h2>5 · Buscar imágenes en Serebii.net (por set)</h2>
     <p class="hint">
       Para sets que TCGplayer/pokemontcg.io/TCGdex no tienen (como "Abyss Eye"), Serebii.net sí suele tener galería completa
       con URLs predecibles por número de carta. Escribe el nombre del set tal como lo tienes guardado y el "slug" que usa
@@ -167,7 +219,7 @@
   </div>
 
   <div class="panel">
-    <h2>5 · Importar/actualizar desde CSV de Collectr</h2>
+    <h2>6 · Importar/actualizar desde CSV de Collectr</h2>
     <p class="hint">
       Sube el export.csv de tu portafolio "ventas" cuando quieras. Compara contra lo que ya tienes (por set + número + nombre)
       y <b>solo agrega piezas nuevas al catálogo</b> — la imagen no se toca. La <b>rareza</b> siempre se sincroniza con el CSV
@@ -186,7 +238,7 @@
   </div>
 
   <div class="panel">
-    <h2>6 · Buscar imágenes automáticamente</h2>
+    <h2>7 · Buscar imágenes automáticamente</h2>
     <p class="hint">
       Busca en pokemontcg.io / TCGdex la imagen real de cada <b>carta suelta</b> sin imagen, y la <b>bloquea 🔒</b> apenas la confirma
       (nombre + número + set exactos) — así nunca se vuelve a buscar, aunque corras esto mil veces. Solo tarda en las piezas
@@ -203,7 +255,7 @@
   </div>
 
   <div class="panel">
-    <h2>6b · Sugerir precio de TCGplayer</h2>
+    <h2>7b · Sugerir precio de TCGplayer</h2>
     <p class="hint">
       El precio base de cada carta es el de tu CSV de Collectr. Este botón busca el precio actual de TCGplayer y,
       <b>solo si es más alto</b> que el que ya tienes, te avisa aquí para que decidas si lo usas — nunca lo cambia solo.
@@ -219,7 +271,7 @@
   </div>
 
   <div class="panel">
-    <h2>6c · Reglas de precio estándar</h2>
+    <h2>7c · Reglas de precio estándar</h2>
     <p class="hint">
       Redondea precios chicos a valores estándar (ej. "todo lo que valga menos de $4 sube a $5"), <b>sin bajar nunca</b>
       un precio que ya sea más alto que el objetivo de la regla. Agrega, edita o borra reglas cuando quieras — quedan
@@ -235,7 +287,7 @@
   </div>
 
   <div class="panel">
-    <h2>7 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
+    <h2>8 · Mi catálogo <span class="count-pill" id="countPill">(0)</span></h2>
     <div class="row" style="margin-bottom:14px;">
       <button class="btn btn-ghost" id="lockAllImagesBtn" type="button">🔒 Bloquear todas las imágenes</button>
       <button class="btn btn-ghost" id="unlockAllImagesBtn" type="button">🔓 Desbloquear todas las imágenes</button>
@@ -1012,6 +1064,112 @@ document.getElementById("lockAllPricesBtn").addEventListener("click", () => {
 document.getElementById("unlockAllPricesBtn").addEventListener("click", () => {
   catalog.forEach(c => { c.priceLocked = false; });
   persist(); renderCatalog();
+});
+
+/* ---- 1 · agregar producto individual con foto (cartas o juguetes) ---- */
+let quickImageData = "";
+
+function updateQuickFieldsVisibility(){
+  const isToy = document.getElementById("quickCategory").value === "toy";
+  document.getElementById("quickToyTypeField").style.display = isToy ? "block" : "none";
+  document.getElementById("quickSetFields").style.display = isToy ? "none" : "grid";
+  document.getElementById("quickKindField").style.display = isToy ? "none" : "block";
+  document.getElementById("quickCondField").style.display = isToy ? "none" : "block";
+}
+document.getElementById("quickCategory").addEventListener("change", updateQuickFieldsVisibility);
+updateQuickFieldsVisibility();
+
+function setQuickImage(dataUrl){
+  quickImageData = dataUrl;
+  document.getElementById("quickDropPreview").innerHTML = `<img src="${dataUrl}" style="max-height:120px;border-radius:8px;margin-bottom:10px;">`;
+}
+document.getElementById("quickDropZone").addEventListener("click", () => document.getElementById("quickFileInput").click());
+document.getElementById("quickFileInput").addEventListener("change", () => {
+  const file = document.getElementById("quickFileInput").files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => setQuickImage(reader.result);
+  reader.readAsDataURL(file);
+});
+document.getElementById("quickDropZone").addEventListener("paste", ev => {
+  const items = ev.clipboardData?.items;
+  if (!items) return;
+  for (const it of items){
+    if (it.type.startsWith("image/")){
+      const file = it.getAsFile();
+      const reader = new FileReader();
+      reader.onload = () => setQuickImage(reader.result);
+      reader.readAsDataURL(file);
+      break;
+    }
+  }
+});
+document.getElementById("quickDropZone").setAttribute("tabindex", "0");
+window.addEventListener("paste", ev => {
+  if (document.activeElement !== document.getElementById("quickDropZone")) return;
+  const items = ev.clipboardData?.items;
+  if (!items) return;
+  for (const it of items){
+    if (it.type.startsWith("image/")){
+      const file = it.getAsFile();
+      const reader = new FileReader();
+      reader.onload = () => setQuickImage(reader.result);
+      reader.readAsDataURL(file);
+      break;
+    }
+  }
+});
+
+document.getElementById("quickAddBtn").addEventListener("click", () => {
+  const status = document.getElementById("quickAddStatus");
+  const category = document.getElementById("quickCategory").value;
+  const name = document.getElementById("quickName").value.trim();
+  const price = Number(document.getElementById("quickPrice").value);
+  if (!name){ status.textContent = "Ponle un nombre al producto."; return; }
+  if (!price){ status.textContent = "Ponle un precio en MXN."; return; }
+
+  const stock = Number(document.getElementById("quickStock").value) || 1;
+  const isFeatured = document.getElementById("quickFeatured").checked;
+
+  let entry;
+  if (category === "toy"){
+    entry = {
+      id: nextId++, name, set: "", code: "", num: 0, total: 0,
+      rarity: document.getElementById("quickToyType").value.trim() || "Coleccionable",
+      condition: "Nuevo", language: "", type: "incoloro",
+      category: "toy", kind: "toy", price, stock,
+      isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
+      priceSource: "manual", image: quickImageData
+    };
+  } else {
+    entry = {
+      id: nextId++, name,
+      set: document.getElementById("quickSet").value.trim(),
+      code: "", num: Number(document.getElementById("quickNum").value) || 0, total: 0,
+      rarity: document.getElementById("quickRarity").value.trim() || "Rare",
+      condition: document.getElementById("quickCond").value,
+      language: document.getElementById("quickLang").value,
+      type: "incoloro", category: "pokemon",
+      kind: document.getElementById("quickKind").value, price, stock,
+      isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
+      priceSource: "manual", image: quickImageData
+    };
+  }
+  catalog.push(entry);
+  persist();
+  renderCatalog();
+  status.textContent = `"${name}" agregado a tu catálogo.`;
+
+  document.getElementById("quickName").value = "";
+  document.getElementById("quickPrice").value = "";
+  document.getElementById("quickToyType").value = "";
+  document.getElementById("quickSet").value = "";
+  document.getElementById("quickNum").value = "";
+  document.getElementById("quickRarity").value = "";
+  document.getElementById("quickStock").value = "1";
+  document.getElementById("quickFeatured").checked = false;
+  document.getElementById("quickDropPreview").innerHTML = "";
+  quickImageData = "";
 });
 </script>
 </div>
