@@ -30,7 +30,8 @@
   @media (max-width:640px){.wrap{padding:0 16px;}}
   .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--foil-bright);}
 
-  header.site{position:sticky;top:0;z-index:50;background:rgba(11,14,20,0.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  header.site{position:sticky;top:0;z-index:50;background:rgba(11,14,20,0.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);transition:box-shadow .3s ease, background .3s ease;}
+  header.site.scrolled{background:rgba(11,14,20,0.96);box-shadow:0 8px 24px -12px rgba(0,0,0,0.5);}
   .announce{background:var(--ink-4);text-align:center;font-size:12.5px;color:var(--cream-dim);padding:7px 12px;border-bottom:1px solid var(--line);font-family:var(--font-mono);}
   .announce b{color:var(--foil-bright);}
   .site-bar{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px;}
@@ -138,6 +139,28 @@
   .card{background:var(--ink-3);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;position:relative;box-shadow:var(--shadow-card);opacity:0;transform:translateY(14px);transition:border-color .15s,transform .15s ease;}
   .card.in-view{animation:card-in .5s ease forwards;}
   @keyframes card-in{to{opacity:1;transform:translateY(0);}}
+  .grid{transition:opacity .16s ease;}
+  .grid.grid-fading{opacity:0;}
+
+  @keyframes img-shimmer{0%{background-position:-300px 0;}100%{background-position:300px 0;}}
+  .card-art.loading::before{
+    content:"";position:absolute;inset:0;z-index:1;
+    background:linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%);
+    background-size:300px 100%; background-repeat:no-repeat;
+    animation:img-shimmer 1.3s ease-in-out infinite;
+  }
+
+  .back-to-top{
+    position:fixed;bottom:96px;right:18px;z-index:70;
+    width:44px;height:44px;border-radius:999px;background:var(--ink-4);
+    border:1px solid var(--line-strong);color:var(--cream);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transform:translateY(10px);
+    transition:opacity .25s ease, transform .25s ease, border-color .2s;
+    box-shadow:0 10px 24px -10px rgba(0,0,0,.6);
+  }
+  .back-to-top.show{opacity:1;pointer-events:auto;transform:translateY(0);}
+  .back-to-top:hover{border-color:var(--foil-dim);}
   @media (prefers-reduced-motion:reduce){.card{opacity:1;transform:none;animation:none;}}
   .card:hover{border-color:var(--foil-dim);}
   .card.selected{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil),var(--shadow-card);}
@@ -177,17 +200,30 @@
 
   /* carrusel de destacados */
   .hero-visual{position:relative;height:210px;border-radius:16px;overflow:hidden;background:var(--ink-2);border:1px solid var(--line-strong);box-shadow:var(--shadow-card);}
-  .carousel-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:18px;opacity:0;transition:opacity .7s ease;cursor:pointer;}
-  .carousel-slide.active{opacity:1;z-index:1;}
-  .carousel-slide img{max-height:150px;max-width:42%;object-fit:contain;border-radius:10px;box-shadow:0 14px 30px rgba(0,0,0,.5);}
+  .hero-visual::before, .hero-visual::after{
+    content:""; position:absolute; top:0; bottom:0; width:60px; z-index:3; pointer-events:none;
+  }
+  .hero-visual::before{ left:0; background:linear-gradient(90deg, var(--ink-2), transparent); }
+  .hero-visual::after{ right:0; background:linear-gradient(270deg, var(--ink-2), transparent); }
+  .carousel-track{
+    position:absolute; inset:0; display:flex; align-items:center; gap:0;
+    animation: carousel-scroll var(--carousel-duration, 32s) linear infinite;
+  }
+  .hero-visual:hover .carousel-track{ animation-play-state: paused; }
+  @keyframes carousel-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  .carousel-card{
+    flex:0 0 auto; display:flex; align-items:center; gap:14px;
+    padding:16px 30px; cursor:pointer; height:100%; box-sizing:border-box;
+    border-right:1px solid var(--line);
+  }
+  .carousel-card img{max-height:150px;max-width:110px;object-fit:contain;border-radius:10px;box-shadow:0 14px 30px rgba(0,0,0,.5);transition:transform .3s ease;}
+  .carousel-card:hover img{ transform: scale(1.05) translateY(-2px); }
   .carousel-info .featured-tag{font-family:var(--font-mono);font-size:10px;color:var(--foil-bright);letter-spacing:.08em;text-transform:uppercase;}
-  .carousel-info .name{font-family:var(--font-display);font-weight:560;font-size:16px;margin:6px 0 4px;max-width:20ch;}
+  .carousel-info .name{font-family:var(--font-display);font-weight:560;font-size:15px;margin:6px 0 4px;max-width:18ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .carousel-info .price{font-family:var(--font-mono);color:var(--foil-bright);font-size:16px;}
-  .carousel-info .set{font-size:10.5px;color:var(--slate);margin-top:3px;}
-  .carousel-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
-  .carousel-dots span{width:6px;height:6px;border-radius:999px;background:var(--line-strong);transition:all .2s;}
-  .carousel-dots span.active{background:var(--foil-bright);width:18px;}
-  @media (max-width:900px){.hero-visual{height:170px;} .carousel-slide{padding:14px;gap:10px;} .carousel-slide img{max-height:100px;max-width:38%;}}
+  .carousel-info .set{font-size:10.5px;color:var(--slate);margin-top:3px;white-space:nowrap;}
+  @media (max-width:900px){.hero-visual{height:170px;} .carousel-card{padding:12px 20px;} .carousel-card img{max-height:110px;max-width:80px;}}
+  @media (prefers-reduced-motion: reduce){ .carousel-track{ animation: none; } }
 
   /* métodos de pago */
   .pay-methods{margin-bottom:14px;}
@@ -271,16 +307,22 @@
   .drawer-note{font-size:11px;color:var(--slate);margin-top:10px;text-align:center;}
 
   /* ---- zoom de carta ---- */
-  .zoom-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:110;}
-  .zoom-backdrop.open{display:block;}
+  .zoom-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:110;
+    opacity:0;pointer-events:none;transition:opacity .28s ease;
+  }
+  .zoom-backdrop.open{opacity:1;pointer-events:auto;}
   .zoom-modal{
-    display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    display:grid;position:fixed;top:50%;left:50%;
+    transform:translate(-50%,-50%) scale(.94);
     z-index:111;background:var(--ink-2);border:1px solid var(--line-strong);border-radius:var(--radius-l);
     width:min(760px,92vw);max-height:88vh;overflow-y:auto;
     grid-template-columns:1fr 1fr;gap:0;box-shadow:0 30px 70px -20px rgba(0,0,0,.7);
+    opacity:0;pointer-events:none;
+    transition:opacity .28s cubic-bezier(.2,.9,.3,1), transform .32s cubic-bezier(.2,.9,.3,1);
   }
-  .zoom-modal.open{display:grid;}
-  @media (max-width:680px){ .zoom-modal.open{ grid-template-columns:1fr; } }
+  .zoom-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+  @media (max-width:680px){ .zoom-modal{ grid-template-columns:1fr; } }
   .zoom-close{position:absolute;top:14px;right:14px;z-index:2;background:rgba(11,14,20,.6);}
   .zoom-art{
     background:linear-gradient(160deg,var(--ink-4),var(--ink-3));
@@ -300,13 +342,23 @@
 
   /* ---- toast ---- */
   .toast{
-    position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:var(--ink-4);border:1px solid var(--foil);color:var(--foil-bright);
-    padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:600;
-    z-index:120;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
-    box-shadow:0 12px 26px -8px rgba(0,0,0,.6);
+    position:fixed;bottom:22px;right:18px;
+    background:rgba(22,27,38,0.92);backdrop-filter:blur(8px);
+    border:1px solid var(--line-strong);color:var(--cream);
+    padding:10px 16px 10px 12px;border-radius:12px;font-size:12.5px;font-weight:500;
+    z-index:120;opacity:0;pointer-events:none;
+    transform:translateX(16px) scale(.96);
+    transition:opacity .25s ease, transform .3s cubic-bezier(.2,.9,.3,1);
+    box-shadow:0 14px 30px -10px rgba(0,0,0,.55);
+    display:flex;align-items:center;gap:9px;max-width:240px;
   }
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.show{opacity:1;transform:translateX(0) scale(1);}
+  .toast .toast-icon{
+    flex-shrink:0;width:26px;height:26px;border-radius:999px;
+    background:var(--foil-dim);display:flex;align-items:center;justify-content:center;
+  }
+  .toast .toast-icon svg{width:14px;height:14px;color:var(--foil-bright);}
+  .toast .toast-text b{color:var(--foil-bright);font-weight:600;}
 </style>
 </head>
 <body>
@@ -391,8 +443,9 @@
           <button class="clear-filters" id="clearFilters">Quitar todos los filtros</button>
         </aside>
         <div class="grid" id="cardGrid"></div>
+        <div id="infiniteScrollSentinel" style="height:1px;"></div>
         <div class="load-more-wrap" id="loadMoreWrap">
-          <button type="button" class="btn btn-ghost" id="loadMoreBtn">Ver más</button>
+          <span id="loadMoreText" style="color:var(--slate);font-size:13px;">Cargando más piezas…</span>
         </div>
       </div>
     </div>
@@ -487,7 +540,13 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast">
+  <span class="toast-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h2l1.6 9.6a2 2 0 002 1.7h7.4a2 2 0 002-1.6L20 9H7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.3" fill="currentColor"/><circle cx="17" cy="20" r="1.3" fill="currentColor"/></svg></span>
+  <span class="toast-text" id="toastText"></span>
+</div>
+<button class="back-to-top" id="backToTop" aria-label="Volver arriba">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
 
 <div class="drawer" id="drawer">
   <div class="drawer-head"><h3>Tu selección</h3><button class="icon-btn" id="drawerClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
@@ -606,9 +665,9 @@ function renderCard(card){
   el.className = "card" + (qty>0 ? " selected" : "") + (soldOut ? " sold-out" : "");
   el.dataset.id = card.id;
   el.style.setProperty("--art-grad", TYPE_COLORS[card.type] || TYPE_COLORS.incoloro);
-  const artImg = card.image ? `<img class="real" src="${card.image}" alt="${card.name}" loading="lazy" onerror="this.remove()">` : "";
+  const artImg = card.image ? `<img class="real" src="${card.image}" alt="${card.name}" loading="lazy" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.closest('.card-art')?.classList.remove('loading');this.remove()">` : "";
   el.innerHTML = `
-    <div class="card-art" data-toggle="1">
+    <div class="card-art${card.image ? ' loading' : ''}" data-toggle="1">
       <div class="sheen"></div>
       ${artImg || GEM_ICON}
       ${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}
@@ -632,7 +691,7 @@ function renderCard(card){
   const toggleSingle = (opts) => {
     if (soldOut) return;
     const cur = state.selected[card.id] || 0;
-    if (cur > 0) delete state.selected[card.id]; else { state.selected[card.id] = 1; showToast(`✓ ${card.name} agregada al carrito`); }
+    if (cur > 0) delete state.selected[card.id]; else { state.selected[card.id] = 1; showToast(`<b>${card.name}</b> agregada`); }
     saveCart(); render();
     if (opts?.closeZoom) closeZoom();
   };
@@ -641,7 +700,7 @@ function renderCard(card){
       ev.stopPropagation();
       if (soldOut) return;
       const cur = state.selected[card.id] || 0;
-      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); showToast(`✓ ${card.name} agregado al carrito`); }
+      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); showToast(`<b>${card.name}</b> agregado`); }
     });
     el.querySelector(".qty-minus").addEventListener("click", ev => {
       ev.stopPropagation();
@@ -676,10 +735,10 @@ function openZoom(card){
     if (soldOut) return;
     if (card.kind === "sellado"){
       const cur = state.selected[card.id] || 0;
-      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); showToast(`✓ ${card.name} agregado al carrito`); }
+      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); render(); showToast(`<b>${card.name}</b> agregado`); }
     } else {
       const cur = state.selected[card.id] || 0;
-      if (cur === 0){ state.selected[card.id] = 1; saveCart(); render(); showToast(`✓ ${card.name} agregada al carrito`); }
+      if (cur === 0){ state.selected[card.id] = 1; saveCart(); render(); showToast(`<b>${card.name}</b> agregada`); }
     }
     closeZoom();
   };
@@ -697,10 +756,10 @@ document.getElementById("zoomBackdrop").addEventListener("click", closeZoom);
 let toastTimer;
 function showToast(msg){
   const t = document.getElementById("toast");
-  t.textContent = msg;
+  document.getElementById("toastText").innerHTML = msg;
   t.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
 function buildCarousel(){
@@ -708,11 +767,12 @@ function buildCarousel(){
   if (!el) return;
   const featured = CARDS.filter(c => c.featured && c.image);
   if (!featured.length){
-    el.innerHTML = `<div class="carousel-slide active"><div class="carousel-info" style="text-align:center;"><div class="featured-tag">PokeBaúl</div><p class="name" style="max-width:none;">Marca piezas como "destacado" en admin.html<br>para que aparezcan aquí en rotación automática.</p></div></div>`;
+    el.innerHTML = `<div class="carousel-track" style="animation:none;"><div class="carousel-card" style="border-right:none;cursor:default;"><div class="carousel-info" style="text-align:center;"><div class="featured-tag">PokeBaúl</div><p class="name" style="max-width:none;white-space:normal;">Marca piezas como "destacado" en admin.html para que aparezcan aquí.</p></div></div></div>`;
     return;
   }
-  el.innerHTML = featured.map((c,i) => `
-    <div class="carousel-slide${i===0?' active':''}" data-id="${c.id}">
+
+  const cardHtml = c => `
+    <div class="carousel-card" data-id="${c.id}">
       <img src="${c.image}" alt="${c.name}">
       <div class="carousel-info">
         <div class="featured-tag">Destacado</div>
@@ -720,16 +780,21 @@ function buildCarousel(){
         <div class="price">${money(c.price)}</div>
         <div class="set">${c.set || ''}</div>
       </div>
-    </div>`).join("") +
-    (featured.length>1 ? `<div class="carousel-dots">${featured.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join("")}</div>` : "");
+    </div>`;
 
-  el.querySelectorAll(".carousel-slide").forEach(slide => {
-    slide.addEventListener("click", () => {
-      const id = Number(slide.dataset.id);
-      const list = sortCards(CARDS.filter(matches));
+  const track = document.createElement("div");
+  track.className = "carousel-track";
+  track.innerHTML = featured.map(cardHtml).join("") + featured.map(cardHtml).join("");
+  track.style.setProperty("--carousel-duration", `${Math.max(featured.length * 5, 14)}s`);
+  el.innerHTML = "";
+  el.appendChild(track);
+
+  el.querySelectorAll(".carousel-card[data-id]").forEach(cardEl => {
+    cardEl.addEventListener("click", () => {
+      const id = Number(cardEl.dataset.id);
+      const list = currentList();
       const idx = list.findIndex(c => c.id === id);
-      if (idx >= visibleCount) visibleCount = idx + 1;
-      render();
+      if (idx >= visibleCount) { visibleCount = idx + 1; render(); }
       document.getElementById("catalogo").scrollIntoView({behavior:"smooth"});
       setTimeout(() => {
         const target = document.querySelector(`.card[data-id="${id}"]`);
@@ -741,48 +806,68 @@ function buildCarousel(){
       }, 450);
     });
   });
-
-  if (featured.length > 1){
-    let idx = 0;
-    setInterval(() => {
-      const slides = el.querySelectorAll(".carousel-slide");
-      const dots = el.querySelectorAll(".carousel-dots span");
-      slides[idx].classList.remove("active"); if (dots[idx]) dots[idx].classList.remove("active");
-      idx = (idx+1) % slides.length;
-      slides[idx].classList.add("active"); if (dots[idx]) dots[idx].classList.add("active");
-    }, 4000);
-  }
 }
+
 
 const PAGE_SIZE = 24;
 let visibleCount = PAGE_SIZE;
 
+function currentList(){
+  return sortCards(CARDS.filter(matches));
+}
+
 function render(){
   document.querySelectorAll(".kind-tab").forEach(t => t.classList.toggle("active", t.dataset.kind === state.kind));
   const grid = document.getElementById("cardGrid");
-  grid.innerHTML = "";
-  let list = CARDS.filter(matches);
-  list = sortCards([...list]);
+  grid.classList.add("grid-fading");
+  const list = currentList();
   document.getElementById("resultsCount").textContent = `${list.length} pieza${list.length===1?'':'s'}`;
-  if (!list.length){
-    grid.innerHTML = CARDS.length
-      ? `<div class="empty-state"><h3>No hay piezas con esos filtros</h3><p>Prueba quitando alguno de los filtros activos.</p></div>`
-      : `<div class="empty-state"><h3>Tu catálogo está vacío</h3><p>Agrega tu primera pieza desde admin.html.</p></div>`;
-  } else {
-    const shown = list.slice(0, visibleCount);
-    shown.forEach(c => grid.appendChild(renderCard(c)));
-    requestAnimationFrame(() => {
-      grid.querySelectorAll(".card").forEach(c => c.classList.add("in-view"));
+  setTimeout(() => {
+    grid.innerHTML = "";
+    if (!list.length){
+      grid.innerHTML = CARDS.length
+        ? `<div class="empty-state"><h3>No hay piezas con esos filtros</h3><p>Prueba quitando alguno de los filtros activos.</p></div>`
+        : `<div class="empty-state"><h3>Tu catálogo está vacío</h3><p>Agrega tu primera pieza desde admin.html.</p></div>`;
+    } else {
+      const shown = list.slice(0, visibleCount);
+      shown.forEach((c, i) => {
+        const el = renderCard(c);
+        el.style.animationDelay = `${Math.min(i, 23) * 28}ms`;
+        grid.appendChild(el);
+      });
+      requestAnimationFrame(() => {
+        grid.querySelectorAll(".card").forEach(c => c.classList.add("in-view"));
+      });
+    }
+    grid.classList.remove("grid-fading");
+    updateLoadMoreVisibility(list.length);
+    updateCartUI();
+  }, 140);
+}
+
+function loadMoreCards(){
+  const grid = document.getElementById("cardGrid");
+  const list = currentList();
+  const previousCount = visibleCount;
+  visibleCount = Math.min(visibleCount + PAGE_SIZE, list.length);
+  const newSlice = list.slice(previousCount, visibleCount);
+  newSlice.forEach((c, i) => {
+    const el = renderCard(c);
+    el.style.animationDelay = `${i * 35}ms`;
+    grid.appendChild(el);
+  });
+  requestAnimationFrame(() => {
+    newSlice.forEach((c) => {
+      const el = grid.querySelector(`.card[data-id="${c.id}"]`);
+      if (el) el.classList.add("in-view");
     });
-  }
+  });
+  updateLoadMoreVisibility(list.length);
+}
+
+function updateLoadMoreVisibility(totalLen){
   const loadMoreWrap = document.getElementById("loadMoreWrap");
-  if (list.length > visibleCount){
-    loadMoreWrap.style.display = "flex";
-    document.getElementById("loadMoreBtn").textContent = `Ver más (${list.length - visibleCount} restantes)`;
-  } else {
-    loadMoreWrap.style.display = "none";
-  }
-  updateCartUI();
+  loadMoreWrap.style.display = totalLen > visibleCount ? "flex" : "none";
 }
 
 function updateCartUI(){
@@ -855,7 +940,15 @@ document.getElementById("cardGrid").addEventListener("mousemove", e => {
 
 function resetAndRender(){ visibleCount = PAGE_SIZE; render(); }
 
-document.getElementById("loadMoreBtn").addEventListener("click", () => { visibleCount += PAGE_SIZE; render(); });
+const infiniteObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting){
+      const list = currentList();
+      if (list.length > visibleCount) loadMoreCards();
+    }
+  });
+}, { rootMargin: "600px" });
+infiniteObserver.observe(document.getElementById("infiniteScrollSentinel"));
 
 document.getElementById("searchInput").addEventListener("input", e => { state.query = e.target.value; resetAndRender(); });
 document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; resetAndRender(); });
@@ -897,6 +990,15 @@ document.querySelectorAll(".pay-opt").forEach(btn => {
     document.getElementById("payPanelCard").style.display = btn.dataset.pay === "card" ? "block" : "none";
   });
 });
+
+const siteHeader = document.querySelector("header.site");
+const backToTopBtn = document.getElementById("backToTop");
+window.addEventListener("scroll", () => {
+  const y = window.scrollY;
+  siteHeader.classList.toggle("scrolled", y > 12);
+  backToTopBtn.classList.toggle("show", y > 700);
+}, { passive: true });
+backToTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
 buildFilterUI();
 buildCarousel();
