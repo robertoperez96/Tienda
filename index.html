@@ -379,6 +379,29 @@
   }
   .zoom-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
   @media (max-width:680px){ .zoom-modal{ grid-template-columns:1fr; } }
+
+  /* ---- resumen de pedido (abre desde el link de WhatsApp) ---- */
+  .order-modal{
+    display:block;position:fixed;top:50%;left:50%;
+    transform:translate(-50%,-50%) scale(.94);
+    z-index:111;background:var(--ink-2);border:1px solid var(--line-strong);border-radius:var(--radius-l);
+    width:min(480px,92vw);max-height:88vh;overflow-y:auto;padding:28px 26px 24px;
+    box-shadow:0 30px 70px -20px rgba(0,0,0,.7);
+    opacity:0;pointer-events:none;
+    transition:opacity .28s cubic-bezier(.2,.9,.3,1), transform .32s cubic-bezier(.2,.9,.3,1);
+  }
+  .order-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+  .order-head{margin-bottom:16px;}
+  .order-head h3{font-family:var(--font-display);font-weight:560;font-size:19px;margin:4px 0 0;}
+  .order-list{border-top:1px solid var(--line);}
+  .order-item{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .order-item .oi-name{color:var(--cream);}
+  .order-item .oi-sub{color:var(--slate);font-size:11.5px;font-family:var(--font-mono);}
+  .order-item .oi-price{font-family:var(--font-mono);color:var(--foil-bright);white-space:nowrap;}
+  .order-totals{padding-top:12px;}
+  .order-totals .row{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px;}
+  .order-totals .row.total b{font-family:var(--font-mono);font-size:19px;color:var(--foil-bright);}
+  .order-totals .row.discount{color:var(--ok);}
   .zoom-close{position:absolute;top:14px;right:14px;z-index:2;background:rgba(11,14,20,.6);}
   .zoom-art{
     background:linear-gradient(160deg,var(--ink-4),var(--ink-3));
@@ -655,6 +678,18 @@
     <p>Muéstralo al confirmar tu compra por WhatsApp para tu 5% de descuento.</p>
     <div class="promo-code">BIENVENIDO5</div>
   </div>
+</div>
+
+<div class="zoom-backdrop" id="orderBackdrop"></div>
+<div class="order-modal" id="orderModal">
+  <button class="zoom-close icon-btn" id="orderClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  <div class="order-head">
+    <span class="eyebrow">Resumen de pedido</span>
+    <h3>Estas son las piezas seleccionadas</h3>
+  </div>
+  <div class="order-list" id="orderList"></div>
+  <div class="order-totals" id="orderTotals"></div>
+  <a href="#" class="btn btn-foil" id="orderWhatsappBtn" target="_blank" rel="noopener" style="width:100%;justify-content:center;margin-top:14px;">Confirmar por WhatsApp</a>
 </div>
 
 <div class="drawer" id="drawer">
@@ -1057,9 +1092,12 @@ function updateCartUI(){
   document.getElementById("drawerTotal").textContent = money(finalTotal);
   document.getElementById("cartBarTotal").textContent = money(finalTotal);
 
-  const lines = entries.map(({card,qty}) => `• ${card.name}${qty>1?` x${qty}`:''} (${card.set}${card.num?`, ${card.code}${String(card.num).padStart(3,"0")}`:''}, ${card.condition}) — ${money(card.price*qty)}`);
-  const couponLine = discount ? `%0ACupón BIENVENIDO5 (-5%25): -${money(discount)}%0ATotal con descuento: ${money(finalTotal)}` : `%0ATotal aprox: ${money(total)}`;
-  const msg = `Hola, me interesa apartar:%0A%0A${lines.join("%0A")}%0A${couponLine}`;
+  // en vez de meter todo el detalle en el mensaje (WhatsApp corta mensajes largos),
+  // mandamos un link corto a un resumen de pedido en el propio sitio — funciona
+  // igual de bien con 2 piezas que con 50
+  const itemsCode = entries.map(({card,qty}) => `${card.id}x${qty}`).join(",");
+  const orderUrl = `${location.origin}${location.pathname}?pedido=${encodeURIComponent(itemsCode)}${state.couponApplied ? "&c=1" : ""}`;
+  const msg = `Hola, quiero apartar mi pedido:%0A${encodeURIComponent(orderUrl)}%0A%0ATotal: ${money(finalTotal)}`;
   document.getElementById("whatsappBtn").href = count ? `https://wa.me/${WHATSAPP_PHONE}?text=${msg}` : `https://wa.me/${WHATSAPP_PHONE}`;
 
   document.getElementById("mpPayBtn").onclick = async () => {
@@ -1304,6 +1342,56 @@ function renderToys(){
 document.getElementById("toySearchInput")?.addEventListener("input", e => { toyState.query = e.target.value; renderToys(); });
 document.getElementById("toySortSelect")?.addEventListener("change", e => { toyState.sort = e.target.value; renderToys(); });
 renderToys();
+
+/* ---- resumen de pedido: se abre solo si el link trae ?pedido=... ---- */
+(function(){
+  const params = new URLSearchParams(location.search);
+  const code = params.get("pedido");
+  if (!code) return;
+
+  const items = code.split(",").map(pair => {
+    const [id, qty] = pair.split("x");
+    return { card: CARDS.find(c => c.id === Number(id)), qty: Number(qty) || 1 };
+  }).filter(e => e.card);
+
+  if (!items.length) return;
+
+  const hasCoupon = params.get("c") === "1";
+  const subtotal = items.reduce((s,e) => s + e.card.price*e.qty, 0);
+  const discount = hasCoupon ? Math.round(subtotal * 0.05) : 0;
+  const total = subtotal - discount;
+
+  const list = document.getElementById("orderList");
+  list.innerHTML = items.map(({card,qty}) => `
+    <div class="order-item">
+      <div>
+        <div class="oi-name">${card.name}${qty>1?` ×${qty}`:''}</div>
+        <div class="oi-sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':'')}</div>
+      </div>
+      <div class="oi-price">${money(card.price*qty)}</div>
+    </div>
+  `).join("");
+
+  const totals = document.getElementById("orderTotals");
+  totals.innerHTML = `
+    ${hasCoupon ? `<div class="row"><span>Subtotal</span><span>${money(subtotal)}</span></div>
+    <div class="row discount"><span>Cupón BIENVENIDO5 (-5%)</span><span>-${money(discount)}</span></div>` : ""}
+    <div class="row total"><span>Total</span><b>${money(total)}</b></div>
+  `;
+
+  const lines = items.map(({card,qty}) => `• ${card.name}${qty>1?` x${qty}`:''} — ${money(card.price*qty)}`);
+  const waMsg = `Hola, quiero confirmar mi pedido:%0A%0A${lines.join("%0A")}%0A${hasCoupon ? `%0ACupón BIENVENIDO5 (-5%25): -${money(discount)}` : ""}%0ATotal: ${money(total)}`;
+  document.getElementById("orderWhatsappBtn").href = `https://wa.me/${WHATSAPP_PHONE}?text=${waMsg}`;
+
+  document.getElementById("orderModal").classList.add("open");
+  document.getElementById("orderBackdrop").classList.add("open");
+  const closeOrder = () => {
+    document.getElementById("orderModal").classList.remove("open");
+    document.getElementById("orderBackdrop").classList.remove("open");
+  };
+  document.getElementById("orderClose").addEventListener("click", closeOrder);
+  document.getElementById("orderBackdrop").addEventListener("click", closeOrder);
+})();
 
 buildFilterUI();
 buildCarousel();
