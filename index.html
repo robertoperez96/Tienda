@@ -383,8 +383,8 @@
       <span class="brand-word">PokeBaúl<span>.</span></span>
     </a>
     <nav class="main-nav">
-      <a href="#catalogo">Catálogo</a>
-      <a href="#juguetes">Juguetes y Coleccionables</a>
+      <a href="#catalogo" data-view="cartas">Catálogo</a>
+      <a href="#juguetes" data-view="juguetes">Juguetes y Coleccionables</a>
       <a href="#como-comprar">Cómo comprar</a>
       <a href="#legend">Estados y grados</a>
       <a href="#resenas">Reseñas</a>
@@ -401,6 +401,7 @@
 </header>
 
 <main id="top">
+  <div id="cardsView">
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
@@ -462,9 +463,15 @@
       </div>
     </div>
   </section>
+  </div>
 
+  <div id="toysView" style="display:none;">
   <section class="toys" id="juguetes">
     <div class="wrap">
+      <a href="#" id="backToCardsLink" style="display:inline-flex;align-items:center;gap:6px;color:var(--slate);text-decoration:none;font-size:13px;margin-bottom:16px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Volver al catálogo de cartas
+      </a>
       <div class="toys-head"><span class="eyebrow">Colección especial</span><h2>Juguetes y Coleccionables</h2></div>
       <div class="toolbar" style="margin-bottom:18px;">
         <div class="search-field">
@@ -481,6 +488,7 @@
       <div class="grid" id="toyGrid"></div>
     </div>
   </section>
+  </div>
 
   <section class="how" id="como-comprar">
     <div class="wrap">
@@ -544,7 +552,7 @@
       <p>Catálogo independiente de cartas y producto sellado Pokémon TCG para coleccionistas. Precios sugeridos, sujetos a disponibilidad.</p>
     </div>
     <div class="footer-links">
-      <div class="footer-col"><h5>Catálogo</h5><a href="#catalogo">Todas las piezas</a><a href="#legend">Estados y grados</a></div>
+      <div class="footer-col"><h5>Catálogo</h5><a href="#catalogo" data-view="cartas">Todas las piezas</a><a href="#legend">Estados y grados</a></div>
       <div class="footer-col"><h5>Tienda</h5><a href="#como-comprar">Cómo comprar</a><a href="#comunidad">Comunidad</a></div>
     </div>
   </div>
@@ -1000,21 +1008,51 @@ const infiniteObserver = new IntersectionObserver(entries => {
 }, { rootMargin: "600px" });
 infiniteObserver.observe(document.getElementById("infiniteScrollSentinel"));
 
-/* enlaces a secciones después del catálogo: pausamos la carga automática
-   mientras dura el salto, para que el destino no se mueva a medio camino */
-const sentinelEl = document.getElementById("infiniteScrollSentinel");
+/* enlaces a secciones después del catálogo: cargamos TODO el catálogo antes
+   de saltar, así el destino ya nunca se mueve a medio camino */
+function expandFullCatalogInstant(){
+  const list = currentList();
+  if (list.length <= visibleCount) return;
+  visibleCount = list.length;
+  const grid = document.getElementById("cardGrid");
+  grid.innerHTML = "";
+  list.forEach(c => {
+    const el = renderCard(c);
+    el.classList.add("in-view");
+    grid.appendChild(el);
+  });
+  updateLoadMoreVisibility(list.length);
+}
 document.querySelectorAll('a[href^="#"]').forEach(link => {
   const targetId = link.getAttribute("href").slice(1);
   if (["como-comprar","legend","resenas","faq","comunidad"].includes(targetId)){
     link.addEventListener("click", e => {
       e.preventDefault();
-      infiniteObserver.unobserve(sentinelEl);
+      if (document.getElementById("cardsView").style.display !== "none") expandFullCatalogInstant();
       const target = document.getElementById(targetId);
       if (target) target.scrollIntoView({behavior:"smooth", block:"start"});
-      setTimeout(() => infiniteObserver.observe(sentinelEl), 1200);
     });
   }
 });
+
+/* ---- vistas: catálogo de cartas VS juguetes y coleccionables ---- */
+function showCardsView(){
+  document.getElementById("cardsView").style.display = "";
+  document.getElementById("toysView").style.display = "none";
+  window.scrollTo({top:0, behavior:"auto"});
+}
+function showToysView(){
+  document.getElementById("cardsView").style.display = "none";
+  document.getElementById("toysView").style.display = "";
+  window.scrollTo({top:0, behavior:"auto"});
+}
+document.querySelectorAll('a[href="#catalogo"]').forEach(link => {
+  link.addEventListener("click", e => { e.preventDefault(); showCardsView(); document.getElementById("catalogo").scrollIntoView({behavior:"auto", block:"start"}); });
+});
+document.querySelectorAll('a[href="#juguetes"]').forEach(link => {
+  link.addEventListener("click", e => { e.preventDefault(); showToysView(); });
+});
+document.getElementById("backToCardsLink").addEventListener("click", e => { e.preventDefault(); showCardsView(); });
 
 document.getElementById("searchInput").addEventListener("input", e => { state.query = e.target.value; resetAndRender(); });
 document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; resetAndRender(); });

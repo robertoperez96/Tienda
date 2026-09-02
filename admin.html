@@ -127,10 +127,13 @@
 
     <div style="margin-top:16px;">
       <label>Foto del producto</label>
-      <div id="quickDropZone" style="margin-top:8px;border:1.5px dashed var(--line-strong);border-radius:10px;padding:22px;text-align:center;cursor:pointer;background:var(--ink);">
-        <div id="quickDropPreview"></div>
-        <p style="margin:0;color:var(--slate);font-size:13px;">Toca para elegir una foto, o pega un screenshot aquí (Ctrl+V)</p>
+      <div id="quickDropPreview" style="margin-top:8px;"></div>
+      <div class="row" style="margin-top:8px;">
+        <button type="button" class="btn btn-ghost" id="quickUploadBtn" style="flex:1;">📎 Subir foto desde tu dispositivo</button>
         <input type="file" id="quickFileInput" accept="image/*" style="display:none;">
+      </div>
+      <div style="margin-top:8px;">
+        <input type="text" id="quickPasteInput" placeholder="O pega aquí una imagen (Ctrl+V) o un link de imagen…" style="width:100%;">
       </div>
     </div>
 
@@ -1081,9 +1084,9 @@ updateQuickFieldsVisibility();
 
 function setQuickImage(dataUrl){
   quickImageData = dataUrl;
-  document.getElementById("quickDropPreview").innerHTML = `<img src="${dataUrl}" style="max-height:120px;border-radius:8px;margin-bottom:10px;">`;
+  document.getElementById("quickDropPreview").innerHTML = `<img src="${dataUrl}" style="max-height:120px;border-radius:8px;">`;
 }
-document.getElementById("quickDropZone").addEventListener("click", () => document.getElementById("quickFileInput").click());
+document.getElementById("quickUploadBtn").addEventListener("click", () => document.getElementById("quickFileInput").click());
 document.getElementById("quickFileInput").addEventListener("change", () => {
   const file = document.getElementById("quickFileInput").files[0];
   if (!file) return;
@@ -1091,85 +1094,84 @@ document.getElementById("quickFileInput").addEventListener("change", () => {
   reader.onload = () => setQuickImage(reader.result);
   reader.readAsDataURL(file);
 });
-document.getElementById("quickDropZone").addEventListener("paste", ev => {
+document.getElementById("quickPasteInput").addEventListener("paste", ev => {
   const items = ev.clipboardData?.items;
   if (!items) return;
   for (const it of items){
     if (it.type.startsWith("image/")){
+      ev.preventDefault();
       const file = it.getAsFile();
       const reader = new FileReader();
-      reader.onload = () => setQuickImage(reader.result);
+      reader.onload = () => { setQuickImage(reader.result); document.getElementById("quickPasteInput").value = "(imagen pegada)"; };
       reader.readAsDataURL(file);
-      break;
+      return;
     }
   }
+  // si no hay imagen en el portapapeles, dejamos que se pegue el texto normal (probablemente un link)
 });
-document.getElementById("quickDropZone").setAttribute("tabindex", "0");
-window.addEventListener("paste", ev => {
-  if (document.activeElement !== document.getElementById("quickDropZone")) return;
-  const items = ev.clipboardData?.items;
-  if (!items) return;
-  for (const it of items){
-    if (it.type.startsWith("image/")){
-      const file = it.getAsFile();
-      const reader = new FileReader();
-      reader.onload = () => setQuickImage(reader.result);
-      reader.readAsDataURL(file);
-      break;
-    }
-  }
+document.getElementById("quickPasteInput").addEventListener("change", () => {
+  const val = document.getElementById("quickPasteInput").value.trim();
+  if (val && val.startsWith("http")) setQuickImage(val);
 });
 
-document.getElementById("quickAddBtn").addEventListener("click", () => {
+document.addEventListener("click", (e) => {
+  if (e.target.id !== "quickAddBtn") return;
   const status = document.getElementById("quickAddStatus");
-  const category = document.getElementById("quickCategory").value;
-  const name = document.getElementById("quickName").value.trim();
-  const price = Number(document.getElementById("quickPrice").value);
-  if (!name){ status.textContent = "Ponle un nombre al producto."; return; }
-  if (!price){ status.textContent = "Ponle un precio en MXN."; return; }
+  try {
+    const category = document.getElementById("quickCategory").value;
+    const name = document.getElementById("quickName").value.trim();
+    const priceRaw = document.getElementById("quickPrice").value;
+    const price = Number(priceRaw);
+    if (!name){ status.textContent = "Ponle un nombre al producto."; return; }
+    if (!priceRaw || !price || price <= 0){ status.textContent = `Ponle un precio en MXN válido (recibí: "${priceRaw}").`; return; }
 
-  const stock = Number(document.getElementById("quickStock").value) || 1;
-  const isFeatured = document.getElementById("quickFeatured").checked;
+    const stock = Number(document.getElementById("quickStock").value) || 1;
+    const isFeatured = document.getElementById("quickFeatured").checked;
 
-  let entry;
-  if (category === "toy"){
-    entry = {
-      id: nextId++, name, set: "", code: "", num: 0, total: 0,
-      rarity: document.getElementById("quickToyType").value.trim() || "Coleccionable",
-      condition: "Nuevo", language: "", type: "incoloro",
-      category: "toy", kind: "toy", price, stock,
-      isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
-      priceSource: "manual", image: quickImageData
-    };
-  } else {
-    entry = {
-      id: nextId++, name,
-      set: document.getElementById("quickSet").value.trim(),
-      code: "", num: Number(document.getElementById("quickNum").value) || 0, total: 0,
-      rarity: document.getElementById("quickRarity").value.trim() || "Rare",
-      condition: document.getElementById("quickCond").value,
-      language: document.getElementById("quickLang").value,
-      type: "incoloro", category: "pokemon",
-      kind: document.getElementById("quickKind").value, price, stock,
-      isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
-      priceSource: "manual", image: quickImageData
-    };
+    let entry;
+    if (category === "toy"){
+      entry = {
+        id: nextId++, name, set: "", code: "", num: 0, total: 0,
+        rarity: document.getElementById("quickToyType").value.trim() || "Coleccionable",
+        condition: "Nuevo", language: "", type: "incoloro",
+        category: "toy", kind: "toy", price, stock,
+        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
+        priceSource: "manual", image: quickImageData
+      };
+    } else {
+      entry = {
+        id: nextId++, name,
+        set: document.getElementById("quickSet").value.trim(),
+        code: "", num: Number(document.getElementById("quickNum").value) || 0, total: 0,
+        rarity: document.getElementById("quickRarity").value.trim() || "Rare",
+        condition: document.getElementById("quickCond").value,
+        language: document.getElementById("quickLang").value,
+        type: "incoloro", category: "pokemon",
+        kind: document.getElementById("quickKind").value, price, stock,
+        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
+        priceSource: "manual", image: quickImageData
+      };
+    }
+    catalog.push(entry);
+    persist();
+    renderCatalog();
+    status.textContent = `"${name}" agregado a tu catálogo (id ${entry.id}). Ya lo puedes ver en la tabla de abajo.`;
+
+    document.getElementById("quickName").value = "";
+    document.getElementById("quickPrice").value = "";
+    document.getElementById("quickToyType").value = "";
+    document.getElementById("quickSet").value = "";
+    document.getElementById("quickNum").value = "";
+    document.getElementById("quickRarity").value = "";
+    document.getElementById("quickStock").value = "1";
+    document.getElementById("quickFeatured").checked = false;
+    document.getElementById("quickDropPreview").innerHTML = "";
+    document.getElementById("quickPasteInput").value = "";
+    quickImageData = "";
+  } catch (err) {
+    status.textContent = "Error al agregar: " + err.message;
+    console.error(err);
   }
-  catalog.push(entry);
-  persist();
-  renderCatalog();
-  status.textContent = `"${name}" agregado a tu catálogo.`;
-
-  document.getElementById("quickName").value = "";
-  document.getElementById("quickPrice").value = "";
-  document.getElementById("quickToyType").value = "";
-  document.getElementById("quickSet").value = "";
-  document.getElementById("quickNum").value = "";
-  document.getElementById("quickRarity").value = "";
-  document.getElementById("quickStock").value = "1";
-  document.getElementById("quickFeatured").checked = false;
-  document.getElementById("quickDropPreview").innerHTML = "";
-  quickImageData = "";
 });
 </script>
 </div>
