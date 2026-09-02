@@ -296,7 +296,9 @@
       <button class="btn btn-ghost" id="unlockAllImagesBtn" type="button">🔓 Desbloquear todas las imágenes</button>
       <button class="btn btn-ghost" id="lockAllPricesBtn" type="button">🔒 Bloquear todos los precios</button>
       <button class="btn btn-ghost" id="unlockAllPricesBtn" type="button">🔓 Desbloquear todos los precios</button>
+      <button class="btn btn-ghost" id="compressAllBtn" type="button" style="color:var(--ember-bright);">🗜️ Comprimir fotos pesadas ya guardadas</button>
     </div>
+    <div class="status-msg" id="compressStatus"></div>
     <table id="catalogTable">
       <thead><tr><th></th><th>Nombre</th><th>Set</th><th>Precio</th><th>Imagen (URL)</th><th>Stock</th><th></th></tr></thead>
       <tbody id="catalogBody"></tbody>
@@ -419,9 +421,45 @@ document.getElementById("addBtn").addEventListener("click", () => {
   document.getElementById("fFeatured").checked = false;
 });
 
+function compressImage(file, maxDim, callback){
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim){
+        if (width > height){ height = Math.round(height * maxDim / width); width = maxDim; }
+        else { width = Math.round(width * maxDim / height); height = maxDim; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      callback(canvas.toDataURL("image/jpeg", 0.82));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function persist(){
-  localStorage.setItem("vitrina_admin_catalog", JSON.stringify(catalog));
-  localStorage.setItem("vitrina_admin_next_id", String(nextId));
+  try{
+    localStorage.setItem("vitrina_admin_catalog", JSON.stringify(catalog));
+    localStorage.setItem("vitrina_admin_next_id", String(nextId));
+    const warn = document.getElementById("quotaWarning");
+    if (warn) warn.style.display = "none";
+  } catch(err){
+    // el navegador tiene un límite de guardado local (~5-10MB) — si se llena,
+    // seguimos trabajando en memoria pero avisamos para que descargues pronto
+    let warn = document.getElementById("quotaWarning");
+    if (!warn){
+      warn = document.createElement("div");
+      warn.id = "quotaWarning";
+      warn.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:998;background:var(--ember);color:#fff;text-align:center;padding:10px;font-size:13px;font-weight:600;";
+      document.body.prepend(warn);
+    }
+    warn.textContent = "⚠️ El guardado automático del navegador se llenó (demasiadas fotos pesadas). Tus cambios de esta sesión SÍ están aquí, pero descarga cards-data.js YA para no perderlos si cierras la pestaña.";
+    warn.style.display = "block";
+  }
 }
 
 function renderCatalog(){
@@ -497,12 +535,10 @@ function renderCatalog(){
         if (it.type.startsWith("image/")){
           ev.preventDefault();
           const file = it.getAsFile();
-          const reader = new FileReader();
-          reader.onload = () => {
+          compressImage(file, 700, dataUrl => {
             const item = catalog.find(c => c.id === Number(inp.dataset.id));
-            if (item){ item.image = reader.result; persist(); renderCatalog(); }
-          };
-          reader.readAsDataURL(file);
+            if (item){ item.image = dataUrl; persist(); renderCatalog(); }
+          });
           break;
         }
       }
@@ -512,12 +548,10 @@ function renderCatalog(){
     fileInp.addEventListener("change", () => {
       const file = fileInp.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
+      compressImage(file, 700, dataUrl => {
         const item = catalog.find(c => c.id === Number(fileInp.dataset.id));
-        if (item){ item.image = reader.result; persist(); renderCatalog(); }
-      };
-      reader.readAsDataURL(file);
+        if (item){ item.image = dataUrl; persist(); renderCatalog(); }
+      });
     });
   });
   document.querySelectorAll(".delBtn").forEach(b => b.addEventListener("click", () => {
@@ -1090,9 +1124,7 @@ document.getElementById("quickUploadBtn").addEventListener("click", () => docume
 document.getElementById("quickFileInput").addEventListener("change", () => {
   const file = document.getElementById("quickFileInput").files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => setQuickImage(reader.result);
-  reader.readAsDataURL(file);
+  compressImage(file, 700, setQuickImage);
 });
 document.getElementById("quickPasteInput").addEventListener("paste", ev => {
   const items = ev.clipboardData?.items;
@@ -1101,9 +1133,7 @@ document.getElementById("quickPasteInput").addEventListener("paste", ev => {
     if (it.type.startsWith("image/")){
       ev.preventDefault();
       const file = it.getAsFile();
-      const reader = new FileReader();
-      reader.onload = () => { setQuickImage(reader.result); document.getElementById("quickPasteInput").value = "(imagen pegada)"; };
-      reader.readAsDataURL(file);
+      compressImage(file, 700, dataUrl => { setQuickImage(dataUrl); document.getElementById("quickPasteInput").value = "(imagen pegada)"; });
       return;
     }
   }
@@ -1172,6 +1202,25 @@ document.addEventListener("click", (e) => {
     status.textContent = "Error al agregar: " + err.message;
     console.error(err);
   }
+});
+
+document.getElementById("compressAllBtn").addEventListener("click", async () => {
+  const status = document.getElementById("compressStatus");
+  const heavy = catalog.filter(c => c.image && c.image.startsWith("data:") && c.image.length > 120000);
+  if (!heavy.length){ status.textContent = "No encontré fotos pesadas guardadas como archivo — el problema debe venir de otro lado."; return; }
+  let done = 0;
+  for (const item of heavy){
+    status.textContent = `Comprimiendo ${done+1} de ${heavy.length}: ${item.name}…`;
+    await new Promise(resolve => {
+      fetch(item.image).then(r => r.blob()).then(blob => {
+        compressImage(blob, 600, dataUrl => { item.image = dataUrl; resolve(); });
+      }).catch(() => resolve());
+    });
+    done++;
+  }
+  persist();
+  renderCatalog();
+  status.textContent = `Listo: se comprimieron ${done} fotos. Intenta guardar/descargar de nuevo.`;
 });
 </script>
 </div>
