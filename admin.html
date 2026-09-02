@@ -178,6 +178,9 @@
       <button class="btn btn-ghost" id="csvImportBtn" type="button">Elegir CSV de Collectr</button>
       <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
     </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--ember-bright);">
+      <input type="checkbox" id="forceCsvPrice" style="width:16px;height:16px;"> ⚠️ Forzar precio EXACTO del CSV (permite que baje) — úsalo solo para corregir errores, no para el uso normal
+    </label>
     <div class="status-msg" id="csvImportStatus"></div>
   </div>
 
@@ -619,13 +622,16 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
           const existing = catalog.find(c => catalogKey(c.name, c.set, c.num) === key);
           if (existing){
             if (existing.stock !== stockVal){ existing.stock = stockVal; updatedStock++; }
-            // el precio nunca baja solo: se actualiza únicamente si el CSV resulta MAYOR que el que ya tienes
-            if (!existing.priceLocked && price > existing.price){
-              existing.price = price;
-              existing.priceSource = "csv";
-              priceRestored++;
+            const forcePrice = document.getElementById("forceCsvPrice").checked;
+            if (!existing.priceLocked){
+              if (forcePrice){
+                if (existing.price !== price){ existing.price = price; existing.priceSource = "csv"; priceRestored++; }
+              } else if (price > existing.price){
+                // el precio nunca baja solo: se actualiza únicamente si el CSV resulta MAYOR que el que ya tienes
+                existing.price = price; existing.priceSource = "csv"; priceRestored++;
+              }
             }
-            if (existing.stock === stockVal && price <= existing.price) skipped++;
+            if (existing.stock === stockVal && (forcePrice ? existing.price === price : price <= existing.price)) skipped++;
           }
           return;
         }
@@ -643,7 +649,8 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
       });
       persist();
       renderCatalog();
-      status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${priceRestored} con precio ajustado al del CSV (protegiendo las que editaste a mano, salvo que el CSV resultó mayor), ${skipped} ya estaban igual (no se tocaron). Corre "Buscar imágenes" para las nuevas.`;
+      const forceMode = document.getElementById("forceCsvPrice").checked;
+      status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${priceRestored} con precio ${forceMode ? "forzado al valor EXACTO del CSV" : "ajustado (solo si el CSV resultó mayor)"}, ${skipped} ya estaban igual (no se tocaron). Corre "Buscar imágenes" para las nuevas.`;
     } catch(err){
       status.textContent = "No se pudo leer ese archivo. Asegúrate de que sea el export.csv de Collectr sin modificar.";
     }
