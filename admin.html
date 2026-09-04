@@ -96,6 +96,7 @@
       <select id="quickCategory" style="flex:1;">
         <option value="pokemon">🃏 Carta Pokémon</option>
         <option value="toy">🧸 Juguete / Coleccionable</option>
+        <option value="acrylic">🖼️ Acrílico</option>
       </select>
     </div>
 
@@ -103,6 +104,7 @@
       <div class="field"><label>Nombre del producto</label><input type="text" id="quickName" placeholder="Ej. Muñeco de peluche Pikachu 30cm"></div>
       <div class="field"><label>Precio (MXN)</label><input type="number" id="quickPrice" placeholder="450"></div>
       <div class="field" id="quickToyTypeField" style="display:none;"><label>Tipo de juguete</label><input type="text" id="quickToyType" placeholder="Ej. Peluche, Figura, Set de construcción"></div>
+      <div class="field" id="quickAcrylicTypeField" style="display:none;"><label>Descripción / diseño</label><input type="text" id="quickAcrylicType" placeholder="Ej. Charizard holográfico 10cm"></div>
       <div class="field" id="quickKindField"><label>Tipo</label>
         <select id="quickKind"><option value="single">Carta suelta (single)</option><option value="sellado">Producto sellado</option></select>
       </div>
@@ -473,7 +475,7 @@ function renderCatalog(){
     tr.innerHTML = `
       <td>${c.image ? `<img src="${c.image}" alt="">` : "📦"}</td>
       <td><input type="text" class="editName" data-id="${c.id}" value="${c.name.replace(/"/g,'&quot;')}" style="width:150px;"><div style="color:var(--slate);font-size:11px;">${c.set}</div></td>
-      <td>${c.kind === "sellado" ? "Sellado" : "Single"}</td>
+      <td>${c.kind === "sellado" ? "Sellado" : c.kind === "toy" ? "🧸 Juguete" : c.kind === "acrylic" ? "🖼️ Acrílico" : "Single"}</td>
       <td>
         <div style="display:flex;gap:4px;align-items:center;">
           <input type="number" class="editPrice" data-id="${c.id}" value="${c.price}" style="width:70px;">
@@ -562,7 +564,8 @@ function renderCatalog(){
 
 document.getElementById("exportBtn").addEventListener("click", () => {
   if (!catalog.length){ alert("Agrega al menos una pieza antes de exportar."); return; }
-  const content = `/* cards-data.js — generado desde admin.html el ${new Date().toLocaleString("es-MX")} */\nwindow.CARDS = ${JSON.stringify(catalog, null, 2)};\n`;
+  const csvUpdatedIso = localStorage.getItem("vitrina_admin_csv_updated") || new Date().toISOString();
+  const content = `/* cards-data.js — generado desde admin.html el ${new Date().toLocaleString("es-MX")} */\nwindow.CARDS = ${JSON.stringify(catalog, null, 2)};\nwindow.CATALOG_UPDATED = "${csvUpdatedIso}";\n`;
   const blob = new Blob([content], {type:"text/javascript"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -744,6 +747,7 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
         added++;
       });
       persist();
+      localStorage.setItem("vitrina_admin_csv_updated", new Date().toISOString());
       renderCatalog();
       const forceMode = document.getElementById("forceCsvPrice").checked;
       status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${rarityFixed} con rareza corregida (ej. Common → Holo), ${priceRestored} con precio ${forceMode ? "forzado al valor EXACTO del CSV" : "ajustado (solo si el CSV resultó mayor)"}, ${skipped} ya estaban igual (no se tocaron). Corre "Buscar imágenes" para las nuevas.`;
@@ -1107,11 +1111,15 @@ document.getElementById("unlockAllPricesBtn").addEventListener("click", () => {
 let quickImageData = "";
 
 function updateQuickFieldsVisibility(){
-  const isToy = document.getElementById("quickCategory").value === "toy";
+  const cat = document.getElementById("quickCategory").value;
+  const isToy = cat === "toy";
+  const isAcrylic = cat === "acrylic";
+  const isPokemon = cat === "pokemon";
   document.getElementById("quickToyTypeField").style.display = isToy ? "block" : "none";
-  document.getElementById("quickSetFields").style.display = isToy ? "none" : "grid";
-  document.getElementById("quickKindField").style.display = isToy ? "none" : "block";
-  document.getElementById("quickCondField").style.display = isToy ? "none" : "block";
+  document.getElementById("quickAcrylicTypeField").style.display = isAcrylic ? "block" : "none";
+  document.getElementById("quickSetFields").style.display = isPokemon ? "grid" : "none";
+  document.getElementById("quickKindField").style.display = isPokemon ? "block" : "none";
+  document.getElementById("quickCondField").style.display = isPokemon ? "block" : "none";
 }
 document.getElementById("quickCategory").addEventListener("change", updateQuickFieldsVisibility);
 updateQuickFieldsVisibility();
@@ -1168,6 +1176,15 @@ document.addEventListener("click", (e) => {
         isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
         priceSource: "manual", image: quickImageData
       };
+    } else if (category === "acrylic"){
+      entry = {
+        id: nextId++, name, set: "", code: "", num: 0, total: 0,
+        rarity: document.getElementById("quickAcrylicType").value.trim() || "Acrílico",
+        condition: "Nuevo", language: "", type: "incoloro",
+        category: "acrylic", kind: "acrylic", price, stock,
+        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
+        priceSource: "manual", image: quickImageData
+      };
     } else {
       entry = {
         id: nextId++, name,
@@ -1190,6 +1207,7 @@ document.addEventListener("click", (e) => {
     document.getElementById("quickName").value = "";
     document.getElementById("quickPrice").value = "";
     document.getElementById("quickToyType").value = "";
+    document.getElementById("quickAcrylicType").value = "";
     document.getElementById("quickSet").value = "";
     document.getElementById("quickNum").value = "";
     document.getElementById("quickRarity").value = "";

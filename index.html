@@ -32,7 +32,28 @@
 
   header.site{position:sticky;top:0;z-index:50;background:rgba(11,14,20,0.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);transition:box-shadow .3s ease, background .3s ease;}
   header.site.scrolled{background:rgba(11,14,20,0.96);box-shadow:0 8px 24px -12px rgba(0,0,0,0.5);}
-  .announce{background:var(--ink-4);text-align:center;font-size:12.5px;color:var(--cream-dim);padding:7px 12px;border-bottom:1px solid var(--line);font-family:var(--font-mono);}
+  .announce{
+    background:linear-gradient(180deg,#05070a,#0b0e14);
+    border-bottom:1px solid var(--line);
+    overflow:hidden;position:relative;padding:9px 0;
+  }
+  .announce::before, .announce::after{
+    content:"";position:absolute;top:0;bottom:0;width:70px;z-index:2;pointer-events:none;
+  }
+  .announce::before{left:0;background:linear-gradient(90deg,#05070a,transparent);}
+  .announce::after{right:0;background:linear-gradient(270deg,#05070a,transparent);}
+  .ticker-track{display:flex;width:max-content;animation:ticker-scroll var(--ticker-duration,38s) linear infinite;}
+  .announce:hover .ticker-track{animation-play-state:paused;}
+  @keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .ticker-item{
+    display:flex;align-items:center;gap:10px;flex-shrink:0;
+    font-family:var(--font-mono);font-size:12.5px;letter-spacing:.02em;
+    padding:0 22px;color:var(--cream-dim);white-space:nowrap;
+  }
+  .ticker-item .dot{width:5px;height:5px;border-radius:999px;background:var(--foil);box-shadow:0 0 6px 1px rgba(232,199,102,.7);flex-shrink:0;}
+  .ticker-item b{color:var(--foil-bright);font-weight:600;text-shadow:0 0 10px rgba(232,199,102,.35);}
+  @media (prefers-reduced-motion:reduce){ .ticker-track{animation:none;} }
+  @media (max-width:640px){ .ticker-item{font-size:11.5px;padding:0 16px;} }
   .announce b{color:var(--foil-bright);}
   .site-bar{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px;}
   .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
@@ -50,6 +71,45 @@
   .cart-pill{position:relative;}
   .cart-count{position:absolute;top:-6px;right:-6px;background:var(--ember);color:var(--cream);font-family:var(--font-mono);font-size:11px;font-weight:600;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--ink);}
   @media (max-width:860px){nav.main-nav{display:none;}}
+  .mobile-menu-btn{display:none;}
+  .mobile-nav{
+    display:flex;flex-direction:column;max-height:0;overflow:hidden;
+    background:var(--ink-2);border-bottom:1px solid var(--line);
+    transition:max-height .3s ease;
+  }
+  .mobile-nav.open{max-height:400px;}
+  .mobile-nav a{
+    padding:14px 20px;color:var(--cream-dim);text-decoration:none;font-size:14.5px;
+    border-top:1px solid var(--line);
+  }
+  .mobile-nav a:active{background:var(--ink-3);}
+  @media (max-width:860px){ .mobile-menu-btn{display:flex;} }
+
+  /* ---- barra de categorías: visual, solo arriba, se oculta al hacer scroll ---- */
+  .category-nav{
+    position:sticky;top:72px;z-index:45;
+    background:linear-gradient(180deg,rgba(11,14,20,0.98),rgba(11,14,20,0.9));
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+    max-height:80px;overflow:hidden;
+    transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .3s ease, border-color .3s ease;
+  }
+  .category-nav.hide{max-height:0;opacity:0;border-color:transparent;}
+  .category-nav-inner{display:flex;gap:10px;padding:12px 24px;overflow-x:auto;}
+  .cat-tab{
+    display:flex;align-items:center;gap:8px;flex-shrink:0;
+    padding:10px 20px;border-radius:999px;text-decoration:none;
+    background:var(--ink-2);border:1px solid var(--line-strong);
+    color:var(--cream-dim);font-size:13.5px;font-weight:560;
+    transition:all .2s ease;
+  }
+  .cat-tab .cat-icon{font-size:16px;}
+  .cat-tab:hover{border-color:var(--foil-dim);color:var(--cream);transform:translateY(-1px);}
+  .cat-tab.active{
+    background:linear-gradient(135deg,var(--foil-dim),rgba(201,162,39,0.06));
+    border-color:var(--foil);color:var(--foil-bright);
+    box-shadow:0 6px 16px -6px rgba(201,162,39,.35);
+  }
+  @media (max-width:640px){ .category-nav-inner{padding:10px 16px;gap:8px;} .cat-tab{padding:9px 16px;font-size:12.5px;} }
 
   section.hero{padding:28px 0 22px;position:relative;overflow:hidden;}
   .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;}
@@ -65,9 +125,11 @@
   .btn-foil:hover{filter:brightness(1.06);}
   .btn-ghost{background:transparent;border-color:var(--line-strong);color:var(--cream);}
   .btn-ghost:hover{border-color:var(--foil-dim);}
-  .stat-strip{margin-top:12px;display:flex;gap:18px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line);}
-  .stat b{display:block;font-family:var(--font-mono);font-size:15px;color:var(--foil-bright);}
-  .stat span{font-size:11px;color:var(--slate);}
+  .stat-strip{margin-top:12px;display:flex;gap:22px;flex-wrap:wrap;padding-top:9px;border-top:1px solid var(--line);}
+  .stat{display:flex;align-items:baseline;gap:5px;position:relative;}
+  .stat:not(:first-child)::before{content:"";position:absolute;left:-11px;top:2px;bottom:2px;width:1px;background:var(--line-strong);}
+  .stat b{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--foil-bright);}
+  .stat span{font-size:10px;color:var(--slate);letter-spacing:.01em;}
   .hero-visual{position:relative;display:flex;align-items:center;justify-content:center;}
   .stack-card{position:absolute;width:200px;height:280px;border-radius:16px;border:1px solid var(--line-strong);background:linear-gradient(160deg,var(--ink-4),var(--ink-2));box-shadow:var(--shadow-card);}
   .stack-card.c1{transform:rotate(-11deg) translate(-66px,10px);z-index:1;opacity:.7;}
@@ -446,7 +508,18 @@
 </head>
 <body>
 
-<div class="announce">Envíos a todo México · Entregas en Monterrey punto medio o Y Griega · <b>Separa por WhatsApp · Paga por transferencia, tarjeta o efectivo</b></div>
+<div class="announce">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="dot"></span>Envíos a todo México</span>
+    <span class="ticker-item"><span class="dot"></span>Entregas en Monterrey: punto medio o Y Griega</span>
+    <span class="ticker-item"><span class="dot"></span><b>Separa por WhatsApp</b></span>
+    <span class="ticker-item"><span class="dot"></span><b>Paga por transferencia, tarjeta o efectivo</b></span>
+    <span class="ticker-item"><span class="dot"></span>Envíos a todo México</span>
+    <span class="ticker-item"><span class="dot"></span>Entregas en Monterrey: punto medio o Y Griega</span>
+    <span class="ticker-item"><span class="dot"></span><b>Separa por WhatsApp</b></span>
+    <span class="ticker-item"><span class="dot"></span><b>Paga por transferencia, tarjeta o efectivo</b></span>
+  </div>
+</div>
 
 <header class="site">
   <div class="wrap site-bar">
@@ -455,8 +528,6 @@
       <span class="brand-word">Mi Colección<span>.</span></span>
     </a>
     <nav class="main-nav">
-      <a href="#catalogo" data-view="cartas">Catálogo</a>
-      <a href="#juguetes" data-view="juguetes">Juguetes y Coleccionables</a>
       <a href="#como-comprar">Cómo comprar</a>
       <a href="#legend">Estados y grados</a>
       <a href="#resenas">Reseñas</a>
@@ -468,18 +539,40 @@
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h2l1.6 9.6a2 2 0 002 1.7h7.4a2 2 0 002-1.6L20 9H7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.2" fill="currentColor"/><circle cx="17" cy="20" r="1.2" fill="currentColor"/></svg>
         <span class="cart-count" id="cartCount" style="display:none;">0</span>
       </button>
+      <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" aria-label="Menú">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </button>
     </div>
   </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#como-comprar">Cómo comprar</a>
+    <a href="#legend">Estados y grados</a>
+    <a href="#resenas">Reseñas</a>
+    <a href="#comunidad">Comunidad</a>
+  </div>
 </header>
+
+<div class="category-nav" id="categoryNav">
+  <div class="wrap category-nav-inner">
+    <a href="#catalogo" class="cat-tab active" data-cat="cartas">
+      <span class="cat-icon">🃏</span><span>Catálogo</span>
+    </a>
+    <a href="#acrilicos" class="cat-tab" data-cat="acrilicos">
+      <span class="cat-icon">🖼️</span><span>Acrílicos</span>
+    </a>
+    <a href="#juguetes" class="cat-tab" data-cat="juguetes">
+      <span class="cat-icon">🧸</span><span>Coleccionables y Juguetes</span>
+    </a>
+  </div>
+</div>
 
 <main id="top">
   <div id="cardsView">
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
-        <span class="eyebrow">Catálogo curado · Actualizado a diario</span>
         <h1 class="hero-title">Encuentra el producto que <em>falta</em> en tu colección.</h1>
-        <p class="hero-sub">Singles y producto sellado, artículos exclusivos del Pokémon Center, coleccionables y juguetes.</p>
+        <p class="hero-sub">Singles y producto sellado, artículos exclusivos del Pokémon Center, acrílicos, coleccionables y juguetes.</p>
         <div class="stat-strip">
           <div class="stat"><b id="statSold">19</b><span>vendidas este mes</span></div>
           <div class="stat"><b id="statTotal">0</b><span>piezas activas</span></div>
@@ -537,14 +630,39 @@
   </section>
   </div>
 
-  <div id="toysView" style="display:none;">
-  <section class="toys" id="juguetes">
+  <div id="acrylicsView" style="display:none;">
+  <section class="toys" id="acrilicos">
     <div class="wrap">
-      <a href="#" id="backToCardsLink" style="display:inline-flex;align-items:center;gap:6px;color:var(--slate);text-decoration:none;font-size:13px;margin-bottom:16px;">
+      <a href="#" class="backToCardsLink" style="display:inline-flex;align-items:center;gap:6px;color:var(--slate);text-decoration:none;font-size:13px;margin-bottom:16px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Volver al catálogo de cartas
       </a>
-      <div class="toys-head"><span class="eyebrow">Colección especial</span><h2>Juguetes y Coleccionables</h2></div>
+      <div class="toys-head"><span class="eyebrow">Colección especial</span><h2>Acrílicos</h2></div>
+      <div class="toolbar" style="margin-bottom:18px;">
+        <div class="search-field">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <input type="text" id="acrylicSearchInput" placeholder="Buscar acrílico…">
+        </div>
+        <select class="sort-select" id="acrylicSortSelect">
+          <option value="relevance">Ordenar: relevancia</option>
+          <option value="price-asc">Precio: menor a mayor</option>
+          <option value="price-desc">Precio: mayor a menor</option>
+        </select>
+        <span class="results-count" id="acrylicResultsCount"></span>
+      </div>
+      <div class="grid" id="acrylicGrid"></div>
+    </div>
+  </section>
+  </div>
+
+  <div id="toysView" style="display:none;">
+  <section class="toys" id="juguetes">
+    <div class="wrap">
+      <a href="#" class="backToCardsLink" style="display:inline-flex;align-items:center;gap:6px;color:var(--slate);text-decoration:none;font-size:13px;margin-bottom:16px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Volver al catálogo de cartas
+      </a>
+      <div class="toys-head"><span class="eyebrow">Colección especial</span><h2>Coleccionables y Juguetes</h2></div>
       <div class="toolbar" style="margin-bottom:18px;">
         <div class="search-field">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -806,7 +924,7 @@ function buildFilterUI(){
 }
 
 function matches(card){
-  if (card.category === "toy") return false;
+  if (card.category === "toy" || card.category === "acrylic") return false;
   const q = state.query.trim().toLowerCase();
   if (state.kind !== "all" && card.kind !== state.kind) return false;
   if (q && !(`${card.name} ${card.set} ${card.code}${card.num}`.toLowerCase().includes(q))) return false;
@@ -1128,6 +1246,10 @@ function updateCartUI(){
     }
   };
   document.getElementById("statTotal").textContent = CARDS.length;
+  if (typeof CATALOG_UPDATED !== "undefined" && CATALOG_UPDATED){
+    const d = new Date(CATALOG_UPDATED);
+    if (!isNaN(d)) document.getElementById("statUpdated").textContent = d.toLocaleDateString("es-MX", {day:"numeric", month:"short"});
+  }
 }
 
 document.getElementById("cardGrid").addEventListener("mousemove", e => {
@@ -1177,14 +1299,28 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 });
 
 /* ---- vistas: catálogo de cartas VS juguetes y coleccionables ---- */
+function setActiveCatTab(cat){
+  document.querySelectorAll(".cat-tab").forEach(t => t.classList.toggle("active", t.dataset.cat === cat));
+}
 function showCardsView(){
   document.getElementById("cardsView").style.display = "";
   document.getElementById("toysView").style.display = "none";
+  document.getElementById("acrylicsView").style.display = "none";
+  setActiveCatTab("cartas");
   window.scrollTo({top:0, behavior:"auto"});
 }
 function showToysView(){
   document.getElementById("cardsView").style.display = "none";
   document.getElementById("toysView").style.display = "";
+  document.getElementById("acrylicsView").style.display = "none";
+  setActiveCatTab("juguetes");
+  window.scrollTo({top:0, behavior:"auto"});
+}
+function showAcrylicsView(){
+  document.getElementById("cardsView").style.display = "none";
+  document.getElementById("toysView").style.display = "none";
+  document.getElementById("acrylicsView").style.display = "";
+  setActiveCatTab("acrilicos");
   window.scrollTo({top:0, behavior:"auto"});
 }
 document.querySelectorAll('a[href="#catalogo"]').forEach(link => {
@@ -1193,7 +1329,12 @@ document.querySelectorAll('a[href="#catalogo"]').forEach(link => {
 document.querySelectorAll('a[href="#juguetes"]').forEach(link => {
   link.addEventListener("click", e => { e.preventDefault(); showToysView(); });
 });
-document.getElementById("backToCardsLink").addEventListener("click", e => { e.preventDefault(); showCardsView(); });
+document.querySelectorAll('a[href="#acrilicos"]').forEach(link => {
+  link.addEventListener("click", e => { e.preventDefault(); showAcrylicsView(); });
+});
+document.querySelectorAll(".backToCardsLink").forEach(link => {
+  link.addEventListener("click", e => { e.preventDefault(); showCardsView(); });
+});
 
 document.getElementById("searchInput").addEventListener("input", e => { state.query = e.target.value; resetAndRender(); });
 document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; resetAndRender(); });
@@ -1207,6 +1348,13 @@ document.getElementById("clearFilters").addEventListener("click", () => {
   resetAndRender();
 });
 document.getElementById("searchToggle").addEventListener("click", () => document.getElementById("searchInput").focus());
+
+document.getElementById("mobileMenuBtn").addEventListener("click", () => {
+  document.getElementById("mobileNav").classList.toggle("open");
+});
+document.querySelectorAll(".mobile-nav a").forEach(a => {
+  a.addEventListener("click", () => document.getElementById("mobileNav").classList.remove("open"));
+});
 document.querySelectorAll(".kind-tab").forEach(tab => tab.addEventListener("click", () => { state.kind = tab.dataset.kind; resetAndRender(); }));
 
 const filtersPanel = document.getElementById("filtersPanel");
@@ -1239,10 +1387,12 @@ document.querySelectorAll(".pay-opt").forEach(btn => {
 
 const siteHeader = document.querySelector("header.site");
 const backToTopBtn = document.getElementById("backToTop");
+const categoryNav = document.getElementById("categoryNav");
 window.addEventListener("scroll", () => {
   const y = window.scrollY;
   siteHeader.classList.toggle("scrolled", y > 12);
   backToTopBtn.classList.toggle("show", y > 700);
+  categoryNav.classList.toggle("hide", y > 90);
 }, { passive: true });
 backToTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
@@ -1347,6 +1497,33 @@ document.getElementById("toySearchInput")?.addEventListener("input", e => { toyS
 document.getElementById("toySortSelect")?.addEventListener("change", e => { toyState.sort = e.target.value; renderToys(); });
 renderToys();
 
+/* ---- Acrílicos (sección separada, misma lógica que Juguetes) ---- */
+const acrylicState = { query: "", sort: "relevance" };
+function renderAcrylics(){
+  const grid = document.getElementById("acrylicGrid");
+  if (!grid) return;
+  let list = CARDS.filter(c => c.category === "acrylic");
+  const q = acrylicState.query.trim().toLowerCase();
+  if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
+  if (acrylicState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
+  else if (acrylicState.sort === "price-desc") list = [...list].sort((a,b)=>b.price-a.price);
+
+  document.getElementById("acrylicResultsCount").textContent = `${list.length} producto${list.length===1?'':'s'}`;
+  grid.innerHTML = "";
+  if (!list.length){
+    grid.innerHTML = `<div class="empty-state"><h3>${CARDS.some(c=>c.category==="acrylic") ? "No hay productos con esa búsqueda" : "Aún no hay acrílicos en el catálogo"}</h3><p>${CARDS.some(c=>c.category==="acrylic") ? "Prueba con otra palabra." : "Agrégalos desde admin.html, sección 1."}</p></div>`;
+    return;
+  }
+  list.forEach(c => {
+    const el = renderCard(c);
+    el.classList.add("in-view");
+    grid.appendChild(el);
+  });
+}
+document.getElementById("acrylicSearchInput")?.addEventListener("input", e => { acrylicState.query = e.target.value; renderAcrylics(); });
+document.getElementById("acrylicSortSelect")?.addEventListener("change", e => { acrylicState.sort = e.target.value; renderAcrylics(); });
+renderAcrylics();
+
 /* ---- resumen de pedido: se abre solo si el link trae ?pedido=... ---- */
 (function(){
   const params = new URLSearchParams(location.search);
@@ -1371,7 +1548,7 @@ renderToys();
       <div class="oi-thumb" data-id="${card.id}" style="${card.image ? `background-image:url('${card.image}')` : `background:${TYPE_COLORS[card.type]}`}"></div>
       <div class="oi-grow">
         <div class="oi-name">${card.name}${qty>1?` ×${qty}`:''}</div>
-        <div class="oi-sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':'')}</div>
+        <div class="oi-sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':card.category==='acrylic'?'Acrílico':'')}</div>
       </div>
       <div class="oi-price">${money(card.price*qty)}</div>
     </div>
