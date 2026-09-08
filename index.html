@@ -60,22 +60,39 @@
   .announce{
     background:linear-gradient(180deg,#05070a,#0b0e14);
     border-bottom:1px solid var(--line);
-    overflow:hidden;position:relative;padding:9px 0;
+    position:relative;padding:10px 0;
   }
   .announce::before, .announce::after{
-    content:"";position:absolute;top:0;bottom:0;width:70px;z-index:2;pointer-events:none;
+    content:"";position:absolute;top:0;bottom:0;width:36px;z-index:2;pointer-events:none;
   }
   .announce::before{left:0;background:linear-gradient(90deg,#05070a,transparent);}
   .announce::after{right:0;background:linear-gradient(270deg,#05070a,transparent);}
-  .ticker-track{display:flex;width:max-content;}
+  .ticker-track{
+    display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;
+    padding:0 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  }
+  .ticker-track::-webkit-scrollbar{display:none;}
   .ticker-item{
-    display:flex;align-items:center;gap:10px;flex-shrink:0;
-    font-family:var(--font-mono);font-size:12.5px;letter-spacing:.02em;
-    padding:0 22px;color:var(--cream-dim);white-space:nowrap;
+    display:flex;align-items:center;gap:7px;flex-shrink:0;scroll-snap-align:start;
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.01em;
+    padding:6px 14px;color:var(--cream-dim);white-space:nowrap;
+    background:rgba(237,230,214,0.045);border:1px solid var(--line-strong);border-radius:999px;
   }
   .ticker-item .dot{width:5px;height:5px;border-radius:999px;background:var(--foil);box-shadow:0 0 6px 1px rgba(232,199,102,.7);flex-shrink:0;}
-  .ticker-item b{color:var(--foil-bright);font-weight:600;text-shadow:0 0 10px rgba(232,199,102,.35);}
-  @media (max-width:640px){ .ticker-item{font-size:11.5px;padding:0 16px;} }
+  .ticker-item b{color:var(--foil-bright);font-weight:600;}
+  @media (max-width:640px){
+    .ticker-item{font-size:12.5px;padding:8px 16px;}
+    /* en cel: uno a la vez con fundido, en vez de deslizar */
+    .announce.fade-mode .ticker-track{
+      display:block;overflow:visible;padding:0 16px;position:relative;height:34px;
+    }
+    .announce.fade-mode .ticker-item{
+      position:absolute;inset:0;display:flex;justify-content:center;
+      opacity:0;pointer-events:none;transition:opacity .5s ease;
+      white-space:normal;text-align:center;padding:8px 20px;
+    }
+    .announce.fade-mode .ticker-item.active{opacity:1;pointer-events:auto;}
+  }
   .announce b{color:var(--foil-bright);}
   .site-bar{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px;}
   .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
@@ -392,15 +409,17 @@
   /* carrusel de destacados */
   .hero-visual{position:relative;height:210px;border-radius:16px;overflow:hidden;background:var(--ink-2);border:1px solid var(--line-strong);box-shadow:var(--shadow-card);}
   .hero-visual::before, .hero-visual::after{
-    content:""; position:absolute; top:0; bottom:0; width:60px; z-index:3; pointer-events:none;
+    content:""; position:absolute; top:0; bottom:0; width:40px; z-index:3; pointer-events:none;
   }
   .hero-visual::before{ left:0; background:linear-gradient(90deg, var(--ink-2), transparent); }
   .hero-visual::after{ right:0; background:linear-gradient(270deg, var(--ink-2), transparent); }
   .carousel-track{
     position:absolute; inset:0; display:flex; align-items:center; gap:0;
+    overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
+  .carousel-track::-webkit-scrollbar{display:none;}
   .carousel-card{
-    flex:0 0 auto; display:flex; align-items:center; gap:14px;
+    flex:0 0 auto; display:flex; align-items:center; gap:14px; scroll-snap-align:start;
     padding:16px 30px; cursor:pointer; height:100%; box-sizing:border-box;
     border-right:1px solid var(--line);
   }
@@ -411,6 +430,17 @@
   .carousel-info .price{font-family:var(--font-mono);color:var(--foil-bright);font-size:16px;}
   .carousel-info .set{font-size:10.5px;color:var(--slate);margin-top:3px;white-space:nowrap;}
   @media (max-width:900px){.hero-visual{height:170px;} .carousel-card{padding:12px 20px;} .carousel-card img{max-height:110px;max-width:80px;}}
+  @media (max-width:640px){
+    /* en cel: una pieza a la vez con fundido, en vez de deslizar */
+    .hero-visual.fade-mode .carousel-track{
+      display:block;overflow:visible;position:absolute;inset:0;
+    }
+    .hero-visual.fade-mode .carousel-card{
+      position:absolute;inset:0;display:flex;justify-content:center;
+      opacity:0;pointer-events:none;transition:opacity .5s ease;border-right:none;
+    }
+    .hero-visual.fade-mode .carousel-card.active{opacity:1;pointer-events:auto;}
+  }
 
   /* métodos de pago */
   .pay-methods{margin:18px 0 4px;padding-top:16px;border-top:1px solid var(--line);}
@@ -598,10 +628,6 @@
 
 <div class="announce">
   <div class="ticker-track">
-    <span class="ticker-item"><span class="dot"></span>Envíos a todo México</span>
-    <span class="ticker-item"><span class="dot"></span>Entregas en Monterrey: punto medio o Y Griega</span>
-    <span class="ticker-item"><span class="dot"></span><b>Separa por WhatsApp</b></span>
-    <span class="ticker-item"><span class="dot"></span><b>Paga por transferencia, tarjeta o efectivo</b></span>
     <span class="ticker-item"><span class="dot"></span>Envíos a todo México</span>
     <span class="ticker-item"><span class="dot"></span>Entregas en Monterrey: punto medio o Y Griega</span>
     <span class="ticker-item"><span class="dot"></span><b>Separa por WhatsApp</b></span>
@@ -1329,11 +1355,11 @@ function showToast(msg){
   toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
-/* ---- movimiento continuo por JS (más confiable entre navegadores que animación CSS) ---- */
+/* ---- movimiento automático: SOLO en computadora (mouse). En cel se desliza a mano. ---- */
+const isDesktopHover = window.matchMedia && window.matchMedia("(hover:hover) and (min-width:641px)").matches;
 const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 function startMarquee(track, pxPerSecond){
-  if (!track) return () => {};
-  if (reduceMotion) return () => {}; // respeta accesibilidad, no la forzamos
+  if (!track || !isDesktopHover || reduceMotion) return;
   let pos = 0, lastTs = null, paused = false, halfWidth = 0;
   function measure(){ halfWidth = track.scrollWidth / 2; }
   measure();
@@ -1351,13 +1377,34 @@ function startMarquee(track, pxPerSecond){
   }
   requestAnimationFrame(step);
   const wrap = track.parentElement;
-  if (window.matchMedia("(hover: hover)").matches && wrap){
-    wrap.addEventListener("mouseenter", () => paused = true);
-    wrap.addEventListener("mouseleave", () => paused = false);
-  }
-  return measure;
+  wrap.addEventListener("mouseenter", () => paused = true);
+  wrap.addEventListener("mouseleave", () => paused = false);
 }
-startMarquee(document.querySelector(".ticker-track"), 40);
+
+/* el ticker de arriba: en compu se duplica para el bucle y gira solo; en cel se queda sencillo y deslizable */
+(function initTicker(){
+  const track = document.querySelector(".ticker-track");
+  const announce = document.querySelector(".announce");
+  if (!track) return;
+  if (isDesktopHover){
+    track.innerHTML += track.innerHTML; // duplica una vez para el bucle continuo
+    startMarquee(track, 40);
+  } else {
+    // celular: un texto a la vez con fundido, sin depender de scroll ni de gestos
+    announce.classList.add("fade-mode");
+    const items = [...track.querySelectorAll(".ticker-item")];
+    if (!items.length) return;
+    let i = 0;
+    items[0].classList.add("active");
+    if (!reduceMotion){
+      setInterval(() => {
+        items[i].classList.remove("active");
+        i = (i + 1) % items.length;
+        items[i].classList.add("active");
+      }, 3200);
+    }
+  }
+})();
 
 function buildCarousel(){
   const el = document.getElementById("featuredCarousel");
@@ -1381,10 +1428,29 @@ function buildCarousel(){
 
   const track = document.createElement("div");
   track.className = "carousel-track";
-  track.innerHTML = featured.map(cardHtml).join("") + featured.map(cardHtml).join("");
+  track.innerHTML = isDesktopHover ? (featured.map(cardHtml).join("") + featured.map(cardHtml).join("")) : featured.map(cardHtml).join("");
   el.innerHTML = "";
   el.appendChild(track);
-  setTimeout(() => startMarquee(track, 35), 50); // pequeño respiro para que el navegador calcule el ancho real
+
+  if (isDesktopHover){
+    el.classList.remove("fade-mode");
+    setTimeout(() => startMarquee(track, 35), 50);
+  } else {
+    // celular: una pieza a la vez con fundido, sin depender de deslizar
+    el.classList.add("fade-mode");
+    const cards = [...track.querySelectorAll(".carousel-card")];
+    if (cards.length){
+      let ci = 0;
+      cards[0].classList.add("active");
+      if (!reduceMotion && cards.length > 1){
+        setInterval(() => {
+          cards[ci].classList.remove("active");
+          ci = (ci + 1) % cards.length;
+          cards[ci].classList.add("active");
+        }, 4200);
+      }
+    }
+  }
 
   el.querySelectorAll(".carousel-card[data-id]").forEach(cardEl => {
     cardEl.addEventListener("click", () => {
