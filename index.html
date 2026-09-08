@@ -367,6 +367,9 @@
   .wish-btn:hover svg{color:#e8607a;transform:scale(1.12);}
   .wish-btn.active svg{color:#e8607a;}
   .wish-btn.active{background:rgba(232,96,122,.14);}
+  .admin-edit-btn{position:absolute;bottom:9px;left:9px;width:26px;height:26px;border-radius:999px;border:none;background:rgba(201,162,39,.85);z-index:3;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 4px 10px -3px rgba(0,0,0,.6);}
+  .admin-edit-btn svg{width:13px;height:13px;color:#171205;}
+  .admin-edit-btn:hover{background:var(--foil-bright);transform:scale(1.08);}
   .card.selected .card-select-dot{background:var(--foil);border-color:var(--foil);}
   .card-select-dot svg{width:12px;height:12px;opacity:0;transition:opacity .1s;}
   .card.selected .card-select-dot svg{opacity:1;}
@@ -950,6 +953,7 @@
     <div class="zoom-price" id="zoomPrice"></div>
     <div id="zoomStock" class="zoom-stock"></div>
     <button type="button" class="btn btn-foil" id="zoomAddBtn" style="width:100%;justify-content:center;margin-top:14px;">Agregar al carrito</button>
+    <button type="button" id="zoomEditBtn" style="display:none;width:100%;justify-content:center;margin-top:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:10px;padding:9px;font-size:12.5px;cursor:pointer;">✏️ Editar (solo tú lo ves)</button>
   </div>
 </div>
 
@@ -1100,6 +1104,8 @@ const TYPE_COLORS = {
 const GEM_ICON = `<svg class="gem" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7l9 5 9-5-9-5z" stroke="#ede6d6" stroke-width="1.3" stroke-linejoin="round"/><path d="M3 7v10l9 5 9-5V7" stroke="#ede6d6" stroke-width="1.3" stroke-linejoin="round"/><path d="M12 12v10" stroke="#ede6d6" stroke-width="1.3"/></svg>`;
 const CHECK_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#171205" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const HEART_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-7.5-4.6-10-9.3C.5 8 2 4.5 5.5 4c2-.3 3.8.7 4.9 2.3l1.6 2.2 1.6-2.2C14.7 4.7 16.5 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.5 4.7-10 9.3-10 9.3z" fill="currentColor"/></svg>`;
+const EDIT_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function isAdminSession(){ return !!sessionStorage.getItem("vitrina_admin_pass"); }
 
 const state = {
   query:"", kind:"all", sets:new Set(), rarities:new Set(), conditions:new Set(), languages:new Set(),
@@ -1147,7 +1153,11 @@ function buildFilterUI(){
       const id = `chk-${key}-${val}`.replace(/\s+/g,"-");
       const row = document.createElement("label");
       row.className = "check-row"; row.innerHTML = `<input type="checkbox" id="${id}"> ${val}`;
-      row.querySelector("input").addEventListener("change", e => { e.target.checked ? targetSet.add(val) : targetSet.delete(val); resetAndRender(); });
+      row.querySelector("input").addEventListener("change", e => {
+        e.target.checked ? targetSet.add(val) : targetSet.delete(val);
+        if (e.target.checked) trackEvent(`filter_${key}`, val);
+        resetAndRender();
+      });
       container.appendChild(row);
     });
   };
@@ -1195,6 +1205,7 @@ function renderCard(card){
       ${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}
       ${soldOut ? '<span class="badge sold">Agotado</span>' : (card.stock === 1 ? '<span class="badge stock">Última pieza</span>' : (card.kind==="sellado" ? `<span class="badge stock">Disponible: ${card.stock}</span>` : ''))}
       <button type="button" class="wish-btn${wished ? ' active' : ''}" data-id="${card.id}" aria-label="Guardar para después">${HEART_ICON}</button>
+      ${isAdminSession() ? `<button type="button" class="admin-edit-btn" data-id="${card.id}" aria-label="Editar (admin)" title="Editar (solo tú lo ves)">${EDIT_ICON}</button>` : ''}
       <span class="card-select-dot">${CHECK_ICON}</span>
     </div>
     <div class="card-info">
@@ -1244,6 +1255,8 @@ function renderCard(card){
     refreshCardInPlace(card.id);
     updateWishlistUI();
   });
+  const editBtn = el.querySelector(".admin-edit-btn");
+  if (editBtn) editBtn.addEventListener("click", ev => { ev.stopPropagation(); window.quickEditProduct(card.id); });
   return el;
 }
 
@@ -1264,6 +1277,7 @@ function refreshCardInPlace(cardId){
 /* ---- zoom modal ---- */
 function openZoom(card){
   trackEvent("view", card.id);
+  if (card.stock === 1) trackEvent("low_stock_view", card.id);
   const artWrap = document.getElementById("zoomArt");
   artWrap.innerHTML = card.image ? `<img src="${card.image}" alt="${card.name}" onerror="this.remove()">` : GEM_ICON;
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
@@ -1288,6 +1302,13 @@ function openZoom(card){
     }
     closeZoom();
   };
+  const zoomEditBtn = document.getElementById("zoomEditBtn");
+  if (isAdminSession()){
+    zoomEditBtn.style.display = "block";
+    zoomEditBtn.onclick = () => { closeZoom(); window.quickEditProduct(card.id); };
+  } else {
+    zoomEditBtn.style.display = "none";
+  }
   document.getElementById("zoomModal").classList.add("open");
   document.getElementById("zoomBackdrop").classList.add("open");
 }
@@ -1619,8 +1640,17 @@ document.getElementById("searchInput").addEventListener("input", e => {
   if (term.length >= 3) searchTrackTimer = setTimeout(() => trackEvent("search", term.toLowerCase()), 900);
 });
 document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; resetAndRender(); });
-document.getElementById("priceMin").addEventListener("input", e => { state.priceMin = e.target.value ? Number(e.target.value) : null; resetAndRender(); });
-document.getElementById("priceMax").addEventListener("input", e => { state.priceMax = e.target.value ? Number(e.target.value) : null; resetAndRender(); });
+let priceTrackTimer;
+function trackPriceFilter(){
+  clearTimeout(priceTrackTimer);
+  priceTrackTimer = setTimeout(() => {
+    if (state.priceMin != null || state.priceMax != null){
+      trackEvent("price_range_search", `${state.priceMin ?? "0"}-${state.priceMax ?? "+"}`);
+    }
+  }, 1200);
+}
+document.getElementById("priceMin").addEventListener("input", e => { state.priceMin = e.target.value ? Number(e.target.value) : null; resetAndRender(); trackPriceFilter(); });
+document.getElementById("priceMax").addEventListener("input", e => { state.priceMax = e.target.value ? Number(e.target.value) : null; resetAndRender(); trackPriceFilter(); });
 document.getElementById("clearFilters").addEventListener("click", () => {
   state.query=""; state.sets.clear(); state.rarities.clear(); state.conditions.clear(); state.languages.clear(); state.priceMin=null; state.priceMax=null;
   document.getElementById("searchInput").value=""; document.getElementById("priceMin").value=""; document.getElementById("priceMax").value="";
@@ -1971,13 +2001,35 @@ fetch(`${WORKER_URL}/edits`)
 
 /* ---- tracking silencioso de interacción (para las analíticas privadas) ---- */
 function trackEvent(type, key){
+  if (isAdminSession()) return; // no contamos tus propios clics de prueba, para no ensuciar los datos reales
   fetch(`${WORKER_URL}/track`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ type, key: String(key) })
   }).catch(() => {});
 }
-document.getElementById("whatsappBtn").addEventListener("click", () => trackEvent("whatsapp_click", "carrito"));
+
+/* una sola vez por visita: qué tipo de dispositivo y de dónde llegó */
+if (!sessionStorage.getItem("vitrina_session_tracked")){
+  sessionStorage.setItem("vitrina_session_tracked", "1");
+  trackEvent("device_type", window.matchMedia("(max-width:640px)").matches ? "movil" : "escritorio");
+  let source = "directo";
+  const ref = document.referrer;
+  if (ref.includes("wa.me") || ref.includes("whatsapp")) source = "whatsapp";
+  else if (ref.includes("instagram")) source = "instagram";
+  else if (ref.includes("facebook")) source = "facebook";
+  else if (ref.includes("google")) source = "google";
+  else if (ref) source = "otro-sitio";
+  trackEvent("traffic_source", source);
+}
+document.getElementById("whatsappBtn").addEventListener("click", () => {
+  trackEvent("whatsapp_click", "carrito");
+  trackEvent("delivery_choice", state.delivery);
+  const entries = Object.entries(state.selected).map(([id,qty]) => ({card: CARDS.find(c=>c.id==id), qty})).filter(e=>e.card);
+  const total = entries.reduce((s,e)=>s+e.card.price*e.qty,0);
+  const bucket = total < 300 ? "0-300" : total < 800 ? "300-800" : total < 1500 ? "800-1500" : total < 3000 ? "1500-3000" : "3000+";
+  trackEvent("cart_value_bucket", bucket);
+});
 
 const whatsappFloatBtn = document.getElementById("whatsappFloat");
 whatsappFloatBtn.href = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent("Hola, tengo una duda sobre un producto 🙂")}`;
@@ -2142,18 +2194,46 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       events.forEach(e => { (byType[e.type] = byType[e.type] || []).push(e); });
       Object.values(byType).forEach(list => list.sort((a,b) => b.count - a.count));
 
+      // agrupa búsquedas parecidas (ej. "pika", "pikachu", "pikachu ex" cuentan juntas bajo la más buscada)
+      function groupSimilarSearches(list){
+        if (!list) return [];
+        const sorted = [...list].sort((a,b) => b.count - a.count);
+        const groups = []; // {rep, count, variants:[]}
+        sorted.forEach(item => {
+          const k = item.key.toLowerCase().trim();
+          let matched = groups.find(g => g.rep.includes(k) || k.includes(g.rep));
+          if (matched){ matched.count += item.count; matched.variants.push(item.key); }
+          else groups.push({ rep: k, count: item.count, variants: [item.key] });
+        });
+        groups.sort((a,b) => b.count - a.count);
+        return groups.map(g => ({ key: g.variants.length > 1 ? `${g.rep} (+${g.variants.length - 1} parecidas)` : g.rep, count: g.count }));
+      }
+
       const section = (title, list, labelFn, max) => {
         if (!list || !list.length) return "";
         const rows = list.slice(0, max || 8).map(e => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px;">${labelFn(e.key)}</span><b style="color:var(--foil-bright);flex-shrink:0;margin-left:8px;">${e.count}</b></div>`).join("");
         return `<div style="margin-bottom:16px;"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:6px;">${title}</div>${rows}</div>`;
       };
 
+      const deliveryLabelFn = k => DELIVERY_LABELS[k] || k;
+      const bucketLabelFn = k => `$${k}`;
+
       body.innerHTML =
         section("👁️ Más vistos", byType.view, nameFor) +
         section("🛒 Más agregados al carrito", byType.add_cart, nameFor) +
-        section("💬 Clics en \"Apartar por WhatsApp\"", byType.whatsapp_click, () => "Total") +
-        section("🔍 Qué busca la gente", byType.search, k => `"${k}"`) +
+        section("♡ Más guardados para después", byType.wishlist_add, nameFor) +
+        section("⚠️ Vistas con solo 1 pieza (urgencia real)", byType.low_stock_view, nameFor) +
+        section("💬 Clics en \"Apartar por WhatsApp\"", byType.whatsapp_click, k => k === "flotante" ? "Botón flotante" : "Desde el carrito") +
+        section("💰 Valor típico del carrito al pedir", byType.cart_value_bucket, bucketLabelFn) +
+        section("📍 Método de entrega preferido", byType.delivery_choice, deliveryLabelFn) +
+        section("🔍 Qué busca la gente", groupSimilarSearches(byType.search), k => `"${k}"`) +
+        section("💵 Rango de precio que buscan", byType.price_range_search, k => `$${k.replace("-"," a $")}`) +
+        section("🏷️ Rareza más filtrada", byType.filter_rarity, k => k) +
+        section("🩺 Condición más filtrada", byType.filter_condition, k => k) +
+        section("🌐 Idioma más filtrado", byType.filter_language, k => k) +
         section("📂 Secciones más visitadas", byType.category_view, k => ({cartas:"Catálogo",juguetes:"Coleccionables y Juguetes",acrilicos:"Acrílicos"}[k] || k)) +
+        section("📱 Dispositivo", byType.device_type, k => k === "movil" ? "Celular" : "Escritorio") +
+        section("🔗 De dónde llega la gente", byType.traffic_source, k => k) +
         section("🎁 Uso del cupón", byType.coupon_used, () => "BIENVENIDO5 usado");
     } catch (err) {
       body.innerHTML = `<p style="color:var(--ember-bright);">No se pudo conectar.</p>`;
@@ -2176,6 +2256,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     sessionStorage.setItem("vitrina_admin_pass", pass);
     loginStep.style.display = "none";
     addStep.style.display = "block";
+    refreshAllViews();
   });
 
   function setAdminImage(dataUrl){
@@ -2269,6 +2350,16 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       status.textContent = "No se pudo conectar con el servidor.";
     }
   });
+
+  // acceso rápido: abre el modal directo en "Editar" con la pieza ya cargada,
+  // usado por el lápiz en las tarjetas y en el zoom (solo visible si ya entraste como admin)
+  window.quickEditProduct = function(id){
+    openModal();
+    if (sessionStorage.getItem("vitrina_admin_pass")){
+      showAdminTab("edit");
+      openEditForm(id);
+    }
+  };
 })();
 
 /* ---- resumen de pedido: se abre solo si el link trae ?pedido=... ---- */
