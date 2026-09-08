@@ -67,9 +67,7 @@
   }
   .announce::before{left:0;background:linear-gradient(90deg,#05070a,transparent);}
   .announce::after{right:0;background:linear-gradient(270deg,#05070a,transparent);}
-  .ticker-track{display:flex;width:max-content;will-change:transform;animation:ticker-scroll var(--ticker-duration,38s) linear infinite;}
-  @media (hover:hover){ .announce:hover .ticker-track{animation-play-state:paused;} }
-  @keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .ticker-track{display:flex;width:max-content;}
   .ticker-item{
     display:flex;align-items:center;gap:10px;flex-shrink:0;
     font-family:var(--font-mono);font-size:12.5px;letter-spacing:.02em;
@@ -77,7 +75,6 @@
   }
   .ticker-item .dot{width:5px;height:5px;border-radius:999px;background:var(--foil);box-shadow:0 0 6px 1px rgba(232,199,102,.7);flex-shrink:0;}
   .ticker-item b{color:var(--foil-bright);font-weight:600;text-shadow:0 0 10px rgba(232,199,102,.35);}
-  @media (prefers-reduced-motion:reduce){ .ticker-track{animation:none;} }
   @media (max-width:640px){ .ticker-item{font-size:11.5px;padding:0 16px;} }
   .announce b{color:var(--foil-bright);}
   .site-bar{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px;}
@@ -398,11 +395,7 @@
   .hero-visual::after{ right:0; background:linear-gradient(270deg, var(--ink-2), transparent); }
   .carousel-track{
     position:absolute; inset:0; display:flex; align-items:center; gap:0;
-    will-change:transform;
-    animation: carousel-scroll var(--carousel-duration, 32s) linear infinite;
   }
-  @media (hover:hover){ .hero-visual:hover .carousel-track{ animation-play-state: paused; } }
-  @keyframes carousel-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
   .carousel-card{
     flex:0 0 auto; display:flex; align-items:center; gap:14px;
     padding:16px 30px; cursor:pointer; height:100%; box-sizing:border-box;
@@ -415,7 +408,6 @@
   .carousel-info .price{font-family:var(--font-mono);color:var(--foil-bright);font-size:16px;}
   .carousel-info .set{font-size:10.5px;color:var(--slate);margin-top:3px;white-space:nowrap;}
   @media (max-width:900px){.hero-visual{height:170px;} .carousel-card{padding:12px 20px;} .carousel-card img{max-height:110px;max-width:80px;}}
-  @media (prefers-reduced-motion: reduce){ .carousel-track{ animation: none; } }
 
   /* métodos de pago */
   .pay-methods{margin:18px 0 4px;padding-top:16px;border-top:1px solid var(--line);}
@@ -872,7 +864,8 @@
 
   <div id="adminAddStep" style="display:none;">
     <div class="pay-options" style="margin-bottom:16px;">
-      <button type="button" class="pay-opt active" id="adminTabAdd" style="flex:1;">➕ Agregar producto</button>
+      <button type="button" class="pay-opt active" id="adminTabAdd" style="flex:1;">➕ Agregar</button>
+      <button type="button" class="pay-opt" id="adminTabEdit" style="flex:1;">✏️ Editar</button>
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
     </div>
 
@@ -899,6 +892,38 @@
       </label>
       <button type="button" class="btn btn-foil" id="adminSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Publicar ahora</button>
       <p class="promo-status" id="adminAddStatus"></p>
+    </div>
+
+    <div id="adminEditPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Editar producto</span><h3>Cambia lo que quieras, se actualiza al instante</h3></div>
+      <div id="adminEditSearchStep">
+        <input type="text" id="adminEditSearch" placeholder="Busca por nombre…" style="width:100%;">
+        <div id="adminEditResults" style="margin-top:10px;max-height:280px;overflow-y:auto;"></div>
+      </div>
+      <div id="adminEditFormStep" style="display:none;">
+        <button type="button" id="adminEditBack" style="background:none;border:none;color:var(--slate);font-size:12px;cursor:pointer;padding:0;margin-bottom:12px;">← Buscar otro</button>
+        <div class="field" style="margin-bottom:10px;">
+          <select id="editCategory" style="width:100%;">
+            <option value="pokemon">🃏 Carta Pokémon</option>
+            <option value="toy">🧸 Juguete / Coleccionable</option>
+            <option value="acrylic">🖼️ Acrílico</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:10px;"><input type="text" id="editName" placeholder="Nombre del producto" style="width:100%;"></div>
+        <div class="row" style="margin-bottom:10px;">
+          <input type="number" id="editPrice" placeholder="Precio (MXN)" style="flex:1;">
+          <input type="number" id="editStock" placeholder="Stock" style="flex:1;">
+        </div>
+        <div id="editImgPreview" style="margin-bottom:8px;"></div>
+        <button type="button" class="btn btn-ghost" id="editUploadBtn" style="width:100%;margin-bottom:8px;">📎 Cambiar foto</button>
+        <input type="file" id="editFileInput" accept="image/*" style="display:none;">
+        <input type="text" id="editPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
+          <input type="checkbox" id="editFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
+        </label>
+        <button type="button" class="btn btn-foil" id="editSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Guardar cambios</button>
+        <p class="promo-status" id="adminEditStatus"></p>
+      </div>
     </div>
 
     <div id="adminAnalyticsPanel" style="display:none;">
@@ -1283,6 +1308,36 @@ function showToast(msg){
   toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
+/* ---- movimiento continuo por JS (más confiable entre navegadores que animación CSS) ---- */
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function startMarquee(track, pxPerSecond){
+  if (!track) return () => {};
+  if (reduceMotion) return () => {}; // respeta accesibilidad, no la forzamos
+  let pos = 0, lastTs = null, paused = false, halfWidth = 0;
+  function measure(){ halfWidth = track.scrollWidth / 2; }
+  measure();
+  window.addEventListener("resize", measure);
+  function step(ts){
+    if (lastTs === null) lastTs = ts;
+    const dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+    if (!paused && halfWidth > 0){
+      pos -= pxPerSecond * dt;
+      if (Math.abs(pos) >= halfWidth) pos += halfWidth;
+      track.style.transform = `translateX(${pos}px)`;
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+  const wrap = track.parentElement;
+  if (window.matchMedia("(hover: hover)").matches && wrap){
+    wrap.addEventListener("mouseenter", () => paused = true);
+    wrap.addEventListener("mouseleave", () => paused = false);
+  }
+  return measure;
+}
+startMarquee(document.querySelector(".ticker-track"), 40);
+
 function buildCarousel(){
   const el = document.getElementById("featuredCarousel");
   if (!el) return;
@@ -1306,9 +1361,9 @@ function buildCarousel(){
   const track = document.createElement("div");
   track.className = "carousel-track";
   track.innerHTML = featured.map(cardHtml).join("") + featured.map(cardHtml).join("");
-  track.style.setProperty("--carousel-duration", `${Math.max(featured.length * 5, 14)}s`);
   el.innerHTML = "";
   el.appendChild(track);
+  setTimeout(() => startMarquee(track, 35), 50); // pequeño respiro para que el navegador calcule el ancho real
 
   el.querySelectorAll(".carousel-card[data-id]").forEach(cardEl => {
     cardEl.addEventListener("click", () => {
@@ -1901,6 +1956,19 @@ fetch(`${WORKER_URL}/stock-overrides`)
   })
   .catch(() => {});
 
+fetch(`${WORKER_URL}/edits`)
+  .then(r => r.json())
+  .then(data => {
+    const edits = data.edits || {};
+    let changed = false;
+    Object.keys(edits).forEach(id => {
+      const card = CARDS.find(c => String(c.id) === String(id));
+      if (card){ Object.assign(card, edits[id]); changed = true; }
+    });
+    if (changed) refreshAllViews();
+  })
+  .catch(() => {});
+
 /* ---- tracking silencioso de interacción (para las analíticas privadas) ---- */
 function trackEvent(type, key){
   fetch(`${WORKER_URL}/track`, {
@@ -1938,18 +2006,120 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     }
   }
 
-  document.getElementById("adminTabAdd").addEventListener("click", () => {
-    document.getElementById("adminTabAdd").classList.add("active");
-    document.getElementById("adminTabAnalytics").classList.remove("active");
-    document.getElementById("adminAddForm").style.display = "block";
-    document.getElementById("adminAnalyticsPanel").style.display = "none";
+  function showAdminTab(tab){
+    document.getElementById("adminTabAdd").classList.toggle("active", tab === "add");
+    document.getElementById("adminTabEdit").classList.toggle("active", tab === "edit");
+    document.getElementById("adminTabAnalytics").classList.toggle("active", tab === "analytics");
+    document.getElementById("adminAddForm").style.display = tab === "add" ? "block" : "none";
+    document.getElementById("adminEditPanel").style.display = tab === "edit" ? "block" : "none";
+    document.getElementById("adminAnalyticsPanel").style.display = tab === "analytics" ? "block" : "none";
+  }
+  document.getElementById("adminTabAdd").addEventListener("click", () => showAdminTab("add"));
+  document.getElementById("adminTabEdit").addEventListener("click", () => { showAdminTab("edit"); resetEditSearch(); });
+  document.getElementById("adminTabAnalytics").addEventListener("click", async () => { showAdminTab("analytics"); await loadAnalytics(); });
+
+  /* ---- editar producto existente ---- */
+  let editingId = null;
+  let editImageData = "";
+
+  function resetEditSearch(){
+    editingId = null;
+    document.getElementById("adminEditSearchStep").style.display = "block";
+    document.getElementById("adminEditFormStep").style.display = "none";
+    document.getElementById("adminEditSearch").value = "";
+    document.getElementById("adminEditResults").innerHTML = "";
+  }
+  document.getElementById("adminEditBack").addEventListener("click", resetEditSearch);
+
+  document.getElementById("adminEditSearch").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    const results = document.getElementById("adminEditResults");
+    if (q.length < 2){ results.innerHTML = ""; return; }
+    const matches = CARDS.filter(c => c.name.toLowerCase().includes(q)).slice(0, 15);
+    if (!matches.length){ results.innerHTML = `<p style="color:var(--slate);font-size:12.5px;">Sin resultados.</p>`; return; }
+    results.innerHTML = matches.map(c => `
+      <div class="edit-result-row" data-id="${c.id}" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;">
+        <div style="width:32px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center;${c.image ? `background-image:url('${c.image}')` : `background:${TYPE_COLORS[c.type]}`}"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name}</div>
+          <div style="font-size:11px;color:var(--slate);">${money(c.price)} · ${c.set || c.category}</div>
+        </div>
+      </div>
+    `).join("");
+    results.querySelectorAll(".edit-result-row").forEach(row => {
+      row.addEventListener("click", () => openEditForm(Number(row.dataset.id)));
+    });
   });
-  document.getElementById("adminTabAnalytics").addEventListener("click", async () => {
-    document.getElementById("adminTabAnalytics").classList.add("active");
-    document.getElementById("adminTabAdd").classList.remove("active");
-    document.getElementById("adminAddForm").style.display = "none";
-    document.getElementById("adminAnalyticsPanel").style.display = "block";
-    await loadAnalytics();
+
+  function openEditForm(id){
+    const card = CARDS.find(c => c.id === id);
+    if (!card) return;
+    editingId = id;
+    editImageData = "";
+    document.getElementById("adminEditSearchStep").style.display = "none";
+    document.getElementById("adminEditFormStep").style.display = "block";
+    document.getElementById("editCategory").value = card.category || "pokemon";
+    document.getElementById("editName").value = card.name;
+    document.getElementById("editPrice").value = card.price;
+    document.getElementById("editStock").value = card.stock;
+    document.getElementById("editFeatured").checked = !!card.featured;
+    document.getElementById("editImgPreview").innerHTML = card.image ? `<img src="${card.image}" style="max-height:100px;border-radius:8px;">` : "";
+    document.getElementById("editPasteInput").value = "";
+    document.getElementById("adminEditStatus").textContent = "";
+  }
+
+  document.getElementById("editUploadBtn").addEventListener("click", () => document.getElementById("editFileInput").click());
+  document.getElementById("editFileInput").addEventListener("change", () => {
+    const file = document.getElementById("editFileInput").files[0];
+    if (file) compressAdminImage(file, url => { editImageData = url; document.getElementById("editImgPreview").innerHTML = `<img src="${url}" style="max-height:100px;border-radius:8px;">`; });
+  });
+  document.getElementById("editPasteInput").addEventListener("paste", ev => {
+    const items = ev.clipboardData?.items;
+    if (!items) return;
+    for (const it of items){
+      if (it.type.startsWith("image/")){
+        ev.preventDefault();
+        compressAdminImage(it.getAsFile(), url => { editImageData = url; document.getElementById("editImgPreview").innerHTML = `<img src="${url}" style="max-height:100px;border-radius:8px;">`; });
+        return;
+      }
+    }
+  });
+  document.getElementById("editPasteInput").addEventListener("change", () => {
+    const val = document.getElementById("editPasteInput").value.trim();
+    if (val.startsWith("http")){ editImageData = val; document.getElementById("editImgPreview").innerHTML = `<img src="${val}" style="max-height:100px;border-radius:8px;">`; }
+  });
+
+  document.getElementById("editSubmitBtn").addEventListener("click", async () => {
+    if (!editingId) return;
+    const status = document.getElementById("adminEditStatus");
+    const changes = {
+      category: document.getElementById("editCategory").value,
+      name: document.getElementById("editName").value.trim(),
+      price: Number(document.getElementById("editPrice").value),
+      stock: Number(document.getElementById("editStock").value),
+      featured: document.getElementById("editFeatured").checked,
+    };
+    if (editImageData) changes.image = editImageData;
+    if (!changes.name || !changes.price){ status.textContent = "Falta nombre o precio."; return; }
+    status.textContent = "Guardando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/edit-product`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(editingId), changes })
+      });
+      const data = await res.json();
+      if (data.ok){
+        const card = CARDS.find(c => c.id === editingId);
+        if (card) Object.assign(card, changes);
+        refreshAllViews();
+        status.textContent = "✓ Guardado — ya está actualizado en el sitio.";
+      } else {
+        status.textContent = data.error || "No se pudo guardar.";
+      }
+    } catch (err) {
+      status.textContent = "No se pudo conectar con el servidor.";
+    }
   });
 
   function nameFor(id){

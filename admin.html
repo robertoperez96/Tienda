@@ -245,8 +245,8 @@
   <div class="panel">
     <h2>6b · Traer productos publicados en vivo</h2>
     <p class="hint">
-      Los productos que agregues desde el botón "Admin" en tu sitio en vivo, y los cambios de stock hechos con
-      "Marcar como vendido" desde un resumen de pedido, viven en Cloudflare, separados de este archivo.
+      Los productos que agregues desde el botón "Admin" en tu sitio en vivo, las ediciones (nombre, precio, foto, categoría...)
+      hechas con "Editar", y los cambios de stock de "Marcar como vendido", viven en Cloudflare, separados de este archivo.
       Dale clic para traerlos aquí a tu catálogo — así quedan permanentes en tu <code>cards-data.js</code>, con candados
       y reglas de precio como cualquier otra pieza. Al final te pregunta si quieres borrar los productos nuevos de
       Cloudflare (recomendado, para que no queden duplicados).
@@ -1241,7 +1241,9 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
   try {
     const res = await fetch(`${WORKER_URL}/products`);
     const data = await res.json();
-    const products = data.products || [];
+    // por si PRODUCTS y ANALYTICS comparten el mismo KV, ignoramos cualquier
+    // cosa que no sea un producto real (debe tener nombre y precio)
+    const products = (data.products || []).filter(p => p && typeof p === "object" && p.name && p.price);
     const newOnes = products.filter(p => !catalog.some(c => c.id === p.id || (typeof p.id === "string" && String(c.id) === p.id)));
 
     // productos nuevos publicados desde el sitio en vivo
@@ -1261,13 +1263,25 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
       });
     } catch(e) { /* opcional, no rompe el resto si falla */ }
 
-    if (!newOnes.length && !stockSynced){
-      status.textContent = "Ya tienes todo actualizado — sin productos ni ajustes de stock pendientes.";
+    // ediciones hechas desde el botón "Editar" en el sitio en vivo (nombre, precio, foto, etc.)
+    let editsSynced = 0;
+    try {
+      const editsRes = await fetch(`${WORKER_URL}/edits`);
+      const editsData = await editsRes.json();
+      const edits = editsData.edits || {};
+      Object.keys(edits).forEach(id => {
+        const item = catalog.find(c => String(c.id) === String(id));
+        if (item){ Object.assign(item, edits[id]); editsSynced++; }
+      });
+    } catch(e) { /* opcional, no rompe el resto si falla */ }
+
+    if (!newOnes.length && !stockSynced && !editsSynced){
+      status.textContent = "Ya tienes todo actualizado — sin productos, ediciones ni ajustes de stock pendientes.";
       return;
     }
     persist();
     renderCatalog();
-    status.textContent = `Listo: ${newOnes.length} producto(s) nuevo(s), ${stockSynced} con stock actualizado (de "Marcar vendido"). Ya puedes exportar tu cards-data.js.`;
+    status.textContent = `Listo: ${newOnes.length} producto(s) nuevo(s), ${stockSynced} con stock actualizado, ${editsSynced} con ediciones aplicadas. Ya puedes exportar tu cards-data.js.`;
 
     if (newOnes.length){
       const wipe = confirm(`¿Borrar esos ${newOnes.length} producto(s) de Cloudflare ahora que ya quedaron en tu catálogo? (recomendado, evita duplicados en el sitio en vivo). Necesitas tu ADMIN_PASSWORD del Worker.`);
@@ -1286,7 +1300,7 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
       }
     }
   } catch (err) {
-    status.textContent = "No se pudo conectar con tu Worker. Revisa que WORKER_URL esté bien puesto.";
+    status.textContent = "Error: " + err.message;
   }
 });
 
