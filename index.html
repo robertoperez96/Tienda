@@ -444,6 +444,8 @@
 
   /* ---- resumen de pedido (abre desde el link de WhatsApp) ---- */
   #orderBackdrop{z-index:105;}
+  #adminBackdrop{z-index:150;}
+  #adminModal{z-index:151;}
   .order-modal{
     display:block;position:fixed;top:50%;left:50%;
     transform:translate(-50%,-50%) scale(.94);
@@ -747,8 +749,45 @@
       <div class="footer-col"><h5>Tienda</h5><a href="#como-comprar">Cómo comprar</a><a href="#comunidad">Comunidad</a></div>
     </div>
   </div>
-  <div class="wrap footer-legal">Producto independiente hecho por fans. No afiliado a Nintendo, Game Freak, Creatures Inc. ni The Pokémon Company.</div>
+  <div class="wrap footer-legal">Producto independiente hecho por fans. No afiliado a Nintendo, Game Freak, Creatures Inc. ni The Pokémon Company. · <a href="#" id="adminOpenLink" style="color:var(--slate);">Admin</a></div>
 </footer>
+
+<div class="zoom-backdrop" id="adminBackdrop"></div>
+<div class="order-modal" id="adminModal" style="width:min(420px,92vw);">
+  <button class="zoom-close icon-btn" id="adminModalClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+
+  <div id="adminLoginStep">
+    <div class="order-head"><span class="eyebrow">Solo tú</span><h3>Contraseña de admin</h3></div>
+    <div class="field"><input type="password" id="adminPasswordInput" placeholder="Contraseña" style="width:100%;"></div>
+    <button type="button" class="btn btn-foil" id="adminLoginBtn" style="width:100%;justify-content:center;margin-top:12px;">Entrar</button>
+    <p class="promo-status" id="adminLoginStatus"></p>
+  </div>
+
+  <div id="adminAddStep" style="display:none;">
+    <div class="order-head"><span class="eyebrow">Agregar producto</span><h3>Publicar directo en el sitio</h3></div>
+    <div class="field" style="margin-bottom:10px;">
+      <select id="adminCategory" style="width:100%;">
+        <option value="pokemon">🃏 Carta Pokémon</option>
+        <option value="toy">🧸 Juguete / Coleccionable</option>
+        <option value="acrylic">🖼️ Acrílico</option>
+      </select>
+    </div>
+    <div class="field" style="margin-bottom:10px;"><input type="text" id="adminName" placeholder="Nombre del producto" style="width:100%;"></div>
+    <div class="row" style="margin-bottom:10px;">
+      <input type="number" id="adminPrice" placeholder="Precio (MXN)" style="flex:1;">
+      <input type="number" id="adminStock" placeholder="Stock" value="1" style="flex:1;">
+    </div>
+    <div id="adminImgPreview" style="margin-bottom:8px;"></div>
+    <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Subir foto</button>
+    <input type="file" id="adminFileInput" accept="image/*" style="display:none;">
+    <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
+      <input type="checkbox" id="adminFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
+    </label>
+    <button type="button" class="btn btn-foil" id="adminSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Publicar ahora</button>
+    <p class="promo-status" id="adminAddStatus"></p>
+  </div>
+</div>
 
 <div class="cart-bar" id="cartBar">
   <div class="cart-bar-info"><b id="cartBarCount">0</b> piezas · Total aprox. <b id="cartBarTotal">$0</b></div>
@@ -1523,6 +1562,159 @@ function renderAcrylics(){
 document.getElementById("acrylicSearchInput")?.addEventListener("input", e => { acrylicState.query = e.target.value; renderAcrylics(); });
 document.getElementById("acrylicSortSelect")?.addEventListener("change", e => { acrylicState.sort = e.target.value; renderAcrylics(); });
 renderAcrylics();
+
+/* ---- productos publicados en vivo desde el Worker (sin GitHub) ---- */
+function refreshAllViews(){
+  render();
+  renderToys();
+  renderAcrylics();
+  buildCarousel();
+}
+fetch(`${WORKER_URL}/products`)
+  .then(r => r.json())
+  .then(data => {
+    if (data.products && data.products.length){
+      data.products.forEach(p => {
+        if (!CARDS.some(c => c.id === p.id)) CARDS.push(p);
+      });
+      refreshAllViews();
+    }
+  })
+  .catch(() => {});
+
+/* ---- modal de admin: agregar producto directo al sitio, sin GitHub ---- */
+(function(){
+  const modal = document.getElementById("adminModal");
+  const backdrop = document.getElementById("adminBackdrop");
+  const openLink = document.getElementById("adminOpenLink");
+  const closeBtn = document.getElementById("adminModalClose");
+  const loginStep = document.getElementById("adminLoginStep");
+  const addStep = document.getElementById("adminAddStep");
+  let adminImageData = "";
+
+  function openModal(){
+    modal.classList.add("open");
+    backdrop.classList.add("open");
+    const savedPass = sessionStorage.getItem("vitrina_admin_pass");
+    if (savedPass){
+      loginStep.style.display = "none";
+      addStep.style.display = "block";
+    } else {
+      loginStep.style.display = "block";
+      addStep.style.display = "none";
+    }
+  }
+  function closeModal(){
+    modal.classList.remove("open");
+    backdrop.classList.remove("open");
+  }
+  openLink.addEventListener("click", e => { e.preventDefault(); openModal(); });
+  closeBtn.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", closeModal);
+
+  document.getElementById("adminLoginBtn").addEventListener("click", () => {
+    const pass = document.getElementById("adminPasswordInput").value;
+    const status = document.getElementById("adminLoginStatus");
+    if (!pass){ status.textContent = "Escribe la contraseña."; return; }
+    // no la verificamos aquí (eso lo hace el Worker en cada acción) —
+    // solo la guardamos para esta sesión y seguimos al formulario
+    sessionStorage.setItem("vitrina_admin_pass", pass);
+    loginStep.style.display = "none";
+    addStep.style.display = "block";
+  });
+
+  function setAdminImage(dataUrl){
+    adminImageData = dataUrl;
+    document.getElementById("adminImgPreview").innerHTML = `<img src="${dataUrl}" style="max-height:100px;border-radius:8px;">`;
+  }
+  function compressAdminImage(file, callback){
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        const maxDim = 700;
+        if (width > maxDim || height > maxDim){
+          if (width > height){ height = Math.round(height*maxDim/width); width = maxDim; }
+          else { width = Math.round(width*maxDim/height); height = maxDim; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        callback(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  document.getElementById("adminUploadBtn").addEventListener("click", () => document.getElementById("adminFileInput").click());
+  document.getElementById("adminFileInput").addEventListener("change", () => {
+    const file = document.getElementById("adminFileInput").files[0];
+    if (file) compressAdminImage(file, setAdminImage);
+  });
+  document.getElementById("adminPasteInput").addEventListener("paste", ev => {
+    const items = ev.clipboardData?.items;
+    if (!items) return;
+    for (const it of items){
+      if (it.type.startsWith("image/")){
+        ev.preventDefault();
+        compressAdminImage(it.getAsFile(), setAdminImage);
+        return;
+      }
+    }
+  });
+  document.getElementById("adminPasteInput").addEventListener("change", () => {
+    const val = document.getElementById("adminPasteInput").value.trim();
+    if (val.startsWith("http")) setAdminImage(val);
+  });
+
+  document.getElementById("adminSubmitBtn").addEventListener("click", async () => {
+    const status = document.getElementById("adminAddStatus");
+    const name = document.getElementById("adminName").value.trim();
+    const price = Number(document.getElementById("adminPrice").value);
+    if (!name || !price){ status.textContent = "Falta nombre o precio."; return; }
+    const product = {
+      category: document.getElementById("adminCategory").value,
+      kind: document.getElementById("adminCategory").value === "pokemon" ? "single" : document.getElementById("adminCategory").value,
+      name, price, stock: Number(document.getElementById("adminStock").value) || 1,
+      featured: document.getElementById("adminFeatured").checked,
+      image: adminImageData
+    };
+    status.textContent = "Publicando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/add-product`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), product })
+      });
+      const data = await res.json();
+      if (data.ok){
+        CARDS.push(data.product);
+        refreshAllViews();
+        status.textContent = "✓ Publicado — ya está en el sitio.";
+        document.getElementById("adminName").value = "";
+        document.getElementById("adminPrice").value = "";
+        document.getElementById("adminStock").value = "1";
+        document.getElementById("adminFeatured").checked = false;
+        document.getElementById("adminImgPreview").innerHTML = "";
+        document.getElementById("adminPasteInput").value = "";
+        adminImageData = "";
+      } else {
+        status.textContent = data.error || "No se pudo publicar.";
+        if (res.status === 401){
+          sessionStorage.removeItem("vitrina_admin_pass");
+          setTimeout(() => {
+            addStep.style.display = "none";
+            loginStep.style.display = "block";
+            document.getElementById("adminLoginStatus").textContent = "Esa contraseña no es correcta, intenta de nuevo.";
+          }, 1200);
+        }
+      }
+    } catch (err) {
+      status.textContent = "No se pudo conectar con el servidor.";
+    }
+  });
+})();
 
 /* ---- resumen de pedido: se abre solo si el link trae ?pedido=... ---- */
 (function(){

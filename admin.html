@@ -243,6 +243,18 @@
   </div>
 
   <div class="panel">
+    <h2>6b · Traer productos publicados en vivo</h2>
+    <p class="hint">
+      Los productos que agregues desde el botón "Admin" en tu sitio en vivo viven en Cloudflare, separados de este archivo.
+      Dale clic para traerlos aquí a tu catálogo — así quedan permanentes en tu <code>cards-data.js</code>, con candados
+      y reglas de precio como cualquier otra pieza. Al final te pregunta si quieres borrarlos de Cloudflare (recomendado,
+      para que no queden duplicados).
+    </p>
+    <div class="add-row"><button class="btn btn-foil" id="importLiveBtn" type="button">Traer productos publicados en vivo</button></div>
+    <div class="status-msg" id="importLiveStatus"></div>
+  </div>
+
+  <div class="panel">
     <h2>7 · Buscar imágenes automáticamente</h2>
     <p class="hint">
       Busca en pokemontcg.io / TCGdex la imagen real de cada <b>carta suelta</b> sin imagen, y la <b>bloquea 🔒</b> apenas la confirma
@@ -1219,6 +1231,45 @@ document.addEventListener("click", (e) => {
   } catch (err) {
     status.textContent = "Error al agregar: " + err.message;
     console.error(err);
+  }
+});
+
+document.getElementById("importLiveBtn").addEventListener("click", async () => {
+  const status = document.getElementById("importLiveStatus");
+  status.textContent = "Buscando productos publicados en vivo…";
+  try {
+    const res = await fetch(`${WORKER_URL}/products`);
+    const data = await res.json();
+    const products = data.products || [];
+    const newOnes = products.filter(p => !catalog.some(c => c.id === p.id || (typeof p.id === "string" && String(c.id) === p.id)));
+    if (!newOnes.length){
+      status.textContent = products.length ? "Ya tienes todos esos productos en tu catálogo." : "No hay productos publicados en vivo por ahora.";
+      return;
+    }
+    // el id de estos productos es tipo "kv_173..." (texto) — le damos un id numérico normal para que encaje con el resto del catálogo
+    newOnes.forEach(p => {
+      catalog.push({ ...p, id: nextId++ });
+    });
+    persist();
+    renderCatalog();
+    status.textContent = `Listo: ${newOnes.length} producto(s) agregados a tu catálogo. Ya puedes exportar tu cards-data.js.`;
+
+    const wipe = confirm(`¿Borrar esos ${newOnes.length} producto(s) de Cloudflare ahora que ya quedaron en tu catálogo? (recomendado, evita duplicados en el sitio en vivo). Necesitas tu ADMIN_PASSWORD del Worker.`);
+    if (wipe){
+      const pass = prompt("Contraseña de admin del Worker (ADMIN_PASSWORD):");
+      if (pass){
+        for (const p of newOnes){
+          await fetch(`${WORKER_URL}/admin/delete-product`, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ password: pass, id: p.id })
+          }).catch(() => {});
+        }
+        status.textContent += " Y ya se borraron de Cloudflare.";
+      }
+    }
+  } catch (err) {
+    status.textContent = "No se pudo conectar con tu Worker. Revisa que WORKER_URL esté bien puesto.";
   }
 });
 
