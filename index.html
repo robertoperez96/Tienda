@@ -2047,14 +2047,14 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       </div>
     `).join("");
     results.querySelectorAll(".edit-result-row").forEach(row => {
-      row.addEventListener("click", () => openEditForm(Number(row.dataset.id)));
+      row.addEventListener("click", () => openEditForm(row.dataset.id));
     });
   });
 
   function openEditForm(id){
-    const card = CARDS.find(c => c.id === id);
+    const card = CARDS.find(c => String(c.id) === String(id));
     if (!card) return;
-    editingId = id;
+    editingId = card.id;
     editImageData = "";
     document.getElementById("adminEditSearchStep").style.display = "none";
     document.getElementById("adminEditFormStep").style.display = "block";
@@ -2110,7 +2110,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       });
       const data = await res.json();
       if (data.ok){
-        const card = CARDS.find(c => c.id === editingId);
+        const card = CARDS.find(c => String(c.id) === String(editingId));
         if (card) Object.assign(card, changes);
         refreshAllViews();
         status.textContent = "✓ Guardado — ya está actualizado en el sitio.";

@@ -15,6 +15,7 @@
     --font-display:'Fraunces',serif;--font-body:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;
   }
   *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
   body{margin:0;background:var(--ink);color:var(--cream);font-family:var(--font-body);line-height:1.5;}
   .wrap{max-width:980px;margin:0 auto;padding:36px 24px 100px;}
   h1{font-family:var(--font-display);font-weight:680;font-size:26px;margin:0 0 4px;}
@@ -84,6 +85,11 @@
   <p class="lede">Busca la carta real por nombre, elige la impresión exacta y llena precio/condición. No necesitas fotografiar nada: la imagen se toma de la base de datos pública de Pokémon TCG.</p>
   <div class="steps-mini">
     <span>1. Busca</span><span>2. Elige la versión</span><span>3. Completa precio y estado</span><span>4. Agrega</span><span>5. Descarga cards-data.js</span>
+  </div>
+
+  <div id="liveChangesBanner" style="display:none;background:linear-gradient(135deg,rgba(201,162,39,.14),rgba(201,162,39,.05));border:1px solid var(--foil-dim);border-radius:12px;padding:16px 18px;margin-bottom:24px;">
+    <p style="margin:0 0 8px;font-weight:600;color:var(--foil-bright);" id="liveChangesTitle">Revisando si tienes cambios pendientes de tu sitio en vivo…</p>
+    <p style="margin:0;font-size:13px;color:var(--cream-dim);">Recuerda: si agregas o editas productos desde el botón "Admin" de tu sitio, o marcas algo como vendido ahí, esos cambios <b>no están en este cards-data.js todavía</b> — viven en Cloudflare hasta que le des clic a <a href="#import-live" style="color:var(--foil-bright);">"Traer productos publicados en vivo" (sección 6b)</a> y vuelvas a exportar.</p>
   </div>
 
   <div class="panel">
@@ -242,7 +248,7 @@
     <div class="status-msg" id="csvImportStatus"></div>
   </div>
 
-  <div class="panel">
+  <div class="panel" id="import-live">
     <h2>6b · Traer productos publicados en vivo</h2>
     <p class="hint">
       Los productos que agregues desde el botón "Admin" en tu sitio en vivo, las ediciones (nombre, precio, foto, categoría...)
@@ -663,6 +669,41 @@ function parseCsv(text){
   });
 }
 const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de Mi Colección (usado para el pago, no para buscar imágenes)
+
+/* ---- avisa si hay cambios del sitio en vivo (agregados/editados/vendidos) sin traer todavía ---- */
+(async function checkLiveChanges(){
+  const banner = document.getElementById("liveChangesBanner");
+  const title = document.getElementById("liveChangesTitle");
+  try {
+    const [prodRes, stockRes, editsRes] = await Promise.all([
+      fetch(`${WORKER_URL}/products`).then(r => r.json()).catch(() => ({products:[]})),
+      fetch(`${WORKER_URL}/stock-overrides`).then(r => r.json()).catch(() => ({overrides:{}})),
+      fetch(`${WORKER_URL}/edits`).then(r => r.json()).catch(() => ({edits:{}})),
+    ]);
+    const newProducts = (prodRes.products || []).filter(p => !catalog.some(c => c.id === p.id || (typeof p.id === "string" && String(c.id) === p.id)));
+    const overrides = stockRes.overrides || {};
+    const stockPending = Object.keys(overrides).filter(id => {
+      const item = catalog.find(c => String(c.id) === String(id));
+      return item && item.stock !== overrides[id];
+    });
+    const edits = editsRes.edits || {};
+    const editsPending = Object.keys(edits).filter(id => catalog.some(c => String(c.id) === String(id)));
+
+    const total = newProducts.length + stockPending.length + editsPending.length;
+    if (total > 0){
+      banner.style.display = "block";
+      const parts = [];
+      if (newProducts.length) parts.push(`${newProducts.length} producto(s) nuevo(s)`);
+      if (editsPending.length) parts.push(`${editsPending.length} edición(es)`);
+      if (stockPending.length) parts.push(`${stockPending.length} ajuste(s) de stock`);
+      title.textContent = `⚠️ Tienes cambios pendientes de tu sitio en vivo: ${parts.join(", ")}.`;
+    } else {
+      banner.style.display = "none";
+    }
+  } catch (err) {
+    banner.style.display = "none"; // si no conecta, mejor no mostrar nada que un error confuso
+  }
+})();
 
 async function tryTcgdex(item, fx){
   const searchName = cleanSearchName(item.name);
