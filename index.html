@@ -60,7 +60,7 @@
   .announce{
     background:linear-gradient(180deg,#05070a,#0b0e14);
     border-bottom:1px solid var(--line);
-    position:relative;padding:10px 0;
+    position:relative;padding:10px 0;overflow:hidden;
   }
   .announce::before, .announce::after{
     content:"";position:absolute;top:0;bottom:0;width:36px;z-index:2;pointer-events:none;
@@ -71,6 +71,7 @@
     display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;
     padding:0 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
   }
+  .ticker-track.auto-scroll{width:max-content;overflow-x:visible;scroll-snap-type:none;}
   .ticker-track::-webkit-scrollbar{display:none;}
   .ticker-item{
     display:flex;align-items:center;gap:7px;flex-shrink:0;scroll-snap-align:start;
@@ -407,6 +408,7 @@
     position:absolute; inset:0; display:flex; align-items:center; gap:0;
     overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch;
   }
+  .carousel-track.auto-scroll{position:static; width:max-content; height:100%; overflow-x:visible; scroll-snap-type:none;}
   .carousel-track::-webkit-scrollbar{display:none;}
   .carousel-card{
     flex:0 0 auto; display:flex; align-items:center; gap:14px; scroll-snap-align:start;
@@ -1368,6 +1370,7 @@ function startMarquee(track, pxPerSecond){
   const track = document.querySelector(".ticker-track");
   if (!track) return;
   if (isDesktopHover && !reduceMotion){
+    track.classList.add("auto-scroll");
     track.innerHTML += track.innerHTML; // duplica solo si sí vamos a animar
     startMarquee(track, 40);
   }
@@ -1397,7 +1400,7 @@ function buildCarousel(){
 
   const willAnimate = isDesktopHover && !reduceMotion;
   const track = document.createElement("div");
-  track.className = "carousel-track";
+  track.className = "carousel-track" + (willAnimate ? " auto-scroll" : "");
   track.innerHTML = willAnimate ? (featured.map(cardHtml).join("") + featured.map(cardHtml).join("")) : featured.map(cardHtml).join("");
   el.innerHTML = "";
   el.appendChild(track);
