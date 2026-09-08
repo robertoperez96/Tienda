@@ -67,7 +67,7 @@
   }
   .announce::before{left:0;background:linear-gradient(90deg,#05070a,transparent);}
   .announce::after{right:0;background:linear-gradient(270deg,#05070a,transparent);}
-  .ticker-track{display:flex;width:max-content;animation:ticker-scroll var(--ticker-duration,38s) linear infinite;}
+  .ticker-track{display:flex;width:max-content;will-change:transform;animation:ticker-scroll var(--ticker-duration,38s) linear infinite;}
   @media (hover:hover){ .announce:hover .ticker-track{animation-play-state:paused;} }
   @keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
   .ticker-item{
@@ -263,7 +263,7 @@
   }
 
   .back-to-top{
-    position:fixed;bottom:18px;left:18px;z-index:70;
+    position:fixed;bottom:154px;right:18px;z-index:70;
     width:44px;height:44px;border-radius:999px;background:var(--ink-4);
     border:1px solid var(--line-strong);color:var(--cream);cursor:pointer;
     display:flex;align-items:center;justify-content:center;
@@ -398,6 +398,7 @@
   .hero-visual::after{ right:0; background:linear-gradient(270deg, var(--ink-2), transparent); }
   .carousel-track{
     position:absolute; inset:0; display:flex; align-items:center; gap:0;
+    will-change:transform;
     animation: carousel-scroll var(--carousel-duration, 32s) linear infinite;
   }
   @media (hover:hover){ .hero-visual:hover .carousel-track{ animation-play-state: paused; } }
