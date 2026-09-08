@@ -81,17 +81,7 @@
   .ticker-item .dot{width:5px;height:5px;border-radius:999px;background:var(--foil);box-shadow:0 0 6px 1px rgba(232,199,102,.7);flex-shrink:0;}
   .ticker-item b{color:var(--foil-bright);font-weight:600;}
   @media (max-width:640px){
-    .ticker-item{font-size:12.5px;padding:8px 16px;}
-    /* en cel: uno a la vez con fundido, en vez de deslizar */
-    .announce.fade-mode .ticker-track{
-      display:block;overflow:visible;padding:0 16px;position:relative;height:34px;
-    }
-    .announce.fade-mode .ticker-item{
-      position:absolute;inset:0;display:flex;justify-content:center;
-      opacity:0;pointer-events:none;transition:opacity .5s ease;
-      white-space:normal;text-align:center;padding:8px 20px;
-    }
-    .announce.fade-mode .ticker-item.active{opacity:1;pointer-events:auto;}
+    .ticker-item{font-size:11.5px;padding:7px 13px;gap:5px;}
   }
   .announce b{color:var(--foil-bright);}
   .site-bar{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px;}
@@ -430,17 +420,9 @@
   .carousel-info .price{font-family:var(--font-mono);color:var(--foil-bright);font-size:16px;}
   .carousel-info .set{font-size:10.5px;color:var(--slate);margin-top:3px;white-space:nowrap;}
   @media (max-width:900px){.hero-visual{height:170px;} .carousel-card{padding:12px 20px;} .carousel-card img{max-height:110px;max-width:80px;}}
-  @media (max-width:640px){
-    /* en cel: una pieza a la vez con fundido, en vez de deslizar */
-    .hero-visual.fade-mode .carousel-track{
-      display:block;overflow:visible;position:absolute;inset:0;
-    }
-    .hero-visual.fade-mode .carousel-card{
-      position:absolute;inset:0;display:flex;justify-content:center;
-      opacity:0;pointer-events:none;transition:opacity .5s ease;border-right:none;
-    }
-    .hero-visual.fade-mode .carousel-card.active{opacity:1;pointer-events:auto;}
-  }
+  .carousel-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:4;}
+  .carousel-dots span{width:6px;height:6px;border-radius:999px;background:rgba(237,230,214,.3);transition:all .2s ease;}
+  .carousel-dots span.active{background:var(--foil-bright);width:16px;}
 
   /* métodos de pago */
   .pay-methods{margin:18px 0 4px;padding-top:16px;border-top:1px solid var(--line);}
@@ -629,9 +611,9 @@
 <div class="announce">
   <div class="ticker-track">
     <span class="ticker-item"><span class="dot"></span>Envíos a todo México</span>
-    <span class="ticker-item"><span class="dot"></span>Entregas en Monterrey: punto medio o Y Griega</span>
+    <span class="ticker-item"><span class="dot"></span>Entregas MTY: punto medio o Y Griega</span>
     <span class="ticker-item"><span class="dot"></span><b>Separa por WhatsApp</b></span>
-    <span class="ticker-item"><span class="dot"></span><b>Paga por transferencia, tarjeta o efectivo</b></span>
+    <span class="ticker-item"><span class="dot"></span><b>Paga: transferencia, tarjeta o efectivo</b></span>
   </div>
 </div>
 
@@ -1384,26 +1366,12 @@ function startMarquee(track, pxPerSecond){
 /* el ticker de arriba: en compu se duplica para el bucle y gira solo; en cel se queda sencillo y deslizable */
 (function initTicker(){
   const track = document.querySelector(".ticker-track");
-  const announce = document.querySelector(".announce");
   if (!track) return;
   if (isDesktopHover){
     track.innerHTML += track.innerHTML; // duplica una vez para el bucle continuo
     startMarquee(track, 40);
-  } else {
-    // celular: un texto a la vez con fundido, sin depender de scroll ni de gestos
-    announce.classList.add("fade-mode");
-    const items = [...track.querySelectorAll(".ticker-item")];
-    if (!items.length) return;
-    let i = 0;
-    items[0].classList.add("active");
-    if (!reduceMotion){
-      setInterval(() => {
-        items[i].classList.remove("active");
-        i = (i + 1) % items.length;
-        items[i].classList.add("active");
-      }, 3200);
-    }
   }
+  // en celular no hace falta nada extra: el scroll nativo con el dedo ya funciona solo
 })();
 
 function buildCarousel(){
@@ -1433,23 +1401,23 @@ function buildCarousel(){
   el.appendChild(track);
 
   if (isDesktopHover){
-    el.classList.remove("fade-mode");
     setTimeout(() => startMarquee(track, 35), 50);
-  } else {
-    // celular: una pieza a la vez con fundido, sin depender de deslizar
-    el.classList.add("fade-mode");
-    const cards = [...track.querySelectorAll(".carousel-card")];
-    if (cards.length){
-      let ci = 0;
-      cards[0].classList.add("active");
-      if (!reduceMotion && cards.length > 1){
-        setInterval(() => {
-          cards[ci].classList.remove("active");
-          ci = (ci + 1) % cards.length;
-          cards[ci].classList.add("active");
-        }, 4200);
-      }
-    }
+  } else if (featured.length > 1){
+    // celular: deslizable manual con el dedo, con puntos que se sincronizan solos
+    const dots = document.createElement("div");
+    dots.className = "carousel-dots";
+    dots.innerHTML = featured.map((_, i) => `<span class="${i===0?'active':''}"></span>`).join("");
+    el.appendChild(dots);
+    const dotEls = [...dots.children];
+    let scrollTimer;
+    track.addEventListener("scroll", () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        const cardWidth = track.scrollWidth / featured.length;
+        const idx = Math.round(track.scrollLeft / cardWidth);
+        dotEls.forEach((d,i) => d.classList.toggle("active", i === idx));
+      }, 80);
+    }, { passive: true });
   }
 
   el.querySelectorAll(".carousel-card[data-id]").forEach(cardEl => {
