@@ -1367,11 +1367,12 @@ function startMarquee(track, pxPerSecond){
 (function initTicker(){
   const track = document.querySelector(".ticker-track");
   if (!track) return;
-  if (isDesktopHover){
-    track.innerHTML += track.innerHTML; // duplica una vez para el bucle continuo
+  if (isDesktopHover && !reduceMotion){
+    track.innerHTML += track.innerHTML; // duplica solo si sí vamos a animar
     startMarquee(track, 40);
   }
-  // en celular no hace falta nada extra: el scroll nativo con el dedo ya funciona solo
+  // si no anima (celular, o "reducir movimiento" activado en el sistema): se queda
+  // con el contenido sencillo, deslizable con el dedo/mouse, nunca se ve cortado
 })();
 
 function buildCarousel(){
@@ -1394,16 +1395,17 @@ function buildCarousel(){
       </div>
     </div>`;
 
+  const willAnimate = isDesktopHover && !reduceMotion;
   const track = document.createElement("div");
   track.className = "carousel-track";
-  track.innerHTML = isDesktopHover ? (featured.map(cardHtml).join("") + featured.map(cardHtml).join("")) : featured.map(cardHtml).join("");
+  track.innerHTML = willAnimate ? (featured.map(cardHtml).join("") + featured.map(cardHtml).join("")) : featured.map(cardHtml).join("");
   el.innerHTML = "";
   el.appendChild(track);
 
-  if (isDesktopHover){
+  if (willAnimate){
     setTimeout(() => startMarquee(track, 35), 50);
   } else if (featured.length > 1){
-    // celular: deslizable manual con el dedo, con puntos que se sincronizan solos
+    // celular, o "reducir movimiento" activado: deslizable manual, con puntos que se sincronizan solos
     const dots = document.createElement("div");
     dots.className = "carousel-dots";
     dots.innerHTML = featured.map((_, i) => `<span class="${i===0?'active':''}"></span>`).join("");
