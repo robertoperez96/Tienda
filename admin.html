@@ -245,10 +245,11 @@
   <div class="panel">
     <h2>6b · Traer productos publicados en vivo</h2>
     <p class="hint">
-      Los productos que agregues desde el botón "Admin" en tu sitio en vivo viven en Cloudflare, separados de este archivo.
+      Los productos que agregues desde el botón "Admin" en tu sitio en vivo, y los cambios de stock hechos con
+      "Marcar como vendido" desde un resumen de pedido, viven en Cloudflare, separados de este archivo.
       Dale clic para traerlos aquí a tu catálogo — así quedan permanentes en tu <code>cards-data.js</code>, con candados
-      y reglas de precio como cualquier otra pieza. Al final te pregunta si quieres borrarlos de Cloudflare (recomendado,
-      para que no queden duplicados).
+      y reglas de precio como cualquier otra pieza. Al final te pregunta si quieres borrar los productos nuevos de
+      Cloudflare (recomendado, para que no queden duplicados).
     </p>
     <div class="add-row"><button class="btn btn-foil" id="importLiveBtn" type="button">Traer productos publicados en vivo</button></div>
     <div class="status-msg" id="importLiveStatus"></div>
@@ -1242,30 +1243,46 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
     const data = await res.json();
     const products = data.products || [];
     const newOnes = products.filter(p => !catalog.some(c => c.id === p.id || (typeof p.id === "string" && String(c.id) === p.id)));
-    if (!newOnes.length){
-      status.textContent = products.length ? "Ya tienes todos esos productos en tu catálogo." : "No hay productos publicados en vivo por ahora.";
+
+    // productos nuevos publicados desde el sitio en vivo
+    if (newOnes.length){
+      newOnes.forEach(p => { catalog.push({ ...p, id: nextId++ }); });
+    }
+
+    // ajustes de stock hechos con "Marcar como vendido" desde el resumen de pedido
+    let stockSynced = 0;
+    try {
+      const stockRes = await fetch(`${WORKER_URL}/stock-overrides`);
+      const stockData = await stockRes.json();
+      const overrides = stockData.overrides || {};
+      Object.keys(overrides).forEach(id => {
+        const item = catalog.find(c => String(c.id) === String(id));
+        if (item && item.stock !== overrides[id]){ item.stock = overrides[id]; stockSynced++; }
+      });
+    } catch(e) { /* opcional, no rompe el resto si falla */ }
+
+    if (!newOnes.length && !stockSynced){
+      status.textContent = "Ya tienes todo actualizado — sin productos ni ajustes de stock pendientes.";
       return;
     }
-    // el id de estos productos es tipo "kv_173..." (texto) — le damos un id numérico normal para que encaje con el resto del catálogo
-    newOnes.forEach(p => {
-      catalog.push({ ...p, id: nextId++ });
-    });
     persist();
     renderCatalog();
-    status.textContent = `Listo: ${newOnes.length} producto(s) agregados a tu catálogo. Ya puedes exportar tu cards-data.js.`;
+    status.textContent = `Listo: ${newOnes.length} producto(s) nuevo(s), ${stockSynced} con stock actualizado (de "Marcar vendido"). Ya puedes exportar tu cards-data.js.`;
 
-    const wipe = confirm(`¿Borrar esos ${newOnes.length} producto(s) de Cloudflare ahora que ya quedaron en tu catálogo? (recomendado, evita duplicados en el sitio en vivo). Necesitas tu ADMIN_PASSWORD del Worker.`);
-    if (wipe){
-      const pass = prompt("Contraseña de admin del Worker (ADMIN_PASSWORD):");
-      if (pass){
-        for (const p of newOnes){
-          await fetch(`${WORKER_URL}/admin/delete-product`, {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({ password: pass, id: p.id })
-          }).catch(() => {});
+    if (newOnes.length){
+      const wipe = confirm(`¿Borrar esos ${newOnes.length} producto(s) de Cloudflare ahora que ya quedaron en tu catálogo? (recomendado, evita duplicados en el sitio en vivo). Necesitas tu ADMIN_PASSWORD del Worker.`);
+      if (wipe){
+        const pass = prompt("Contraseña de admin del Worker (ADMIN_PASSWORD):");
+        if (pass){
+          for (const p of newOnes){
+            await fetch(`${WORKER_URL}/admin/delete-product`, {
+              method: "POST",
+              headers: {"Content-Type":"application/json"},
+              body: JSON.stringify({ password: pass, id: p.id })
+            }).catch(() => {});
+          }
+          status.textContent += " Y ya se borraron de Cloudflare.";
         }
-        status.textContent += " Y ya se borraron de Cloudflare.";
       }
     }
   } catch (err) {

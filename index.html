@@ -361,6 +361,10 @@
   .pay-panel b{color:var(--cream);}
   .pay-trust{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ok);margin-top:8px;}
   .pay-trust svg{width:13px;height:13px;flex-shrink:0;}
+  .process-steps{display:flex;align-items:center;gap:6px;margin:12px 0 4px;}
+  .process-step{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--cream-dim);flex:1;}
+  .process-step:not(:last-child)::after{content:"";flex:1;height:1px;background:var(--line-strong);margin-left:6px;}
+  .ps-num{flex-shrink:0;width:18px;height:18px;border-radius:999px;background:var(--foil-dim);color:var(--foil-bright);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;}
   .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--slate);}
   .load-more-wrap{display:none;justify-content:center;margin-top:24px;}
   .empty-state h3{color:var(--cream);font-family:var(--font-display);font-weight:500;font-size:20px;margin-bottom:8px;}
@@ -784,28 +788,40 @@
   </div>
 
   <div id="adminAddStep" style="display:none;">
-    <div class="order-head"><span class="eyebrow">Agregar producto</span><h3>Publicar directo en el sitio</h3></div>
-    <div class="field" style="margin-bottom:10px;">
-      <select id="adminCategory" style="width:100%;">
-        <option value="pokemon">🃏 Carta Pokémon</option>
-        <option value="toy">🧸 Juguete / Coleccionable</option>
-        <option value="acrylic">🖼️ Acrílico</option>
-      </select>
+    <div class="pay-options" style="margin-bottom:16px;">
+      <button type="button" class="pay-opt active" id="adminTabAdd" style="flex:1;">➕ Agregar producto</button>
+      <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
     </div>
-    <div class="field" style="margin-bottom:10px;"><input type="text" id="adminName" placeholder="Nombre del producto" style="width:100%;"></div>
-    <div class="row" style="margin-bottom:10px;">
-      <input type="number" id="adminPrice" placeholder="Precio (MXN)" style="flex:1;">
-      <input type="number" id="adminStock" placeholder="Stock" value="1" style="flex:1;">
+
+    <div id="adminAddForm">
+      <div class="order-head"><span class="eyebrow">Agregar producto</span><h3>Publicar directo en el sitio</h3></div>
+      <div class="field" style="margin-bottom:10px;">
+        <select id="adminCategory" style="width:100%;">
+          <option value="pokemon">🃏 Carta Pokémon</option>
+          <option value="toy">🧸 Juguete / Coleccionable</option>
+          <option value="acrylic">🖼️ Acrílico</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:10px;"><input type="text" id="adminName" placeholder="Nombre del producto" style="width:100%;"></div>
+      <div class="row" style="margin-bottom:10px;">
+        <input type="number" id="adminPrice" placeholder="Precio (MXN)" style="flex:1;">
+        <input type="number" id="adminStock" placeholder="Stock" value="1" style="flex:1;">
+      </div>
+      <div id="adminImgPreview" style="margin-bottom:8px;"></div>
+      <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Subir foto</button>
+      <input type="file" id="adminFileInput" accept="image/*" style="display:none;">
+      <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
+        <input type="checkbox" id="adminFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
+      </label>
+      <button type="button" class="btn btn-foil" id="adminSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Publicar ahora</button>
+      <p class="promo-status" id="adminAddStatus"></p>
     </div>
-    <div id="adminImgPreview" style="margin-bottom:8px;"></div>
-    <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Subir foto</button>
-    <input type="file" id="adminFileInput" accept="image/*" style="display:none;">
-    <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
-    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
-      <input type="checkbox" id="adminFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
-    </label>
-    <button type="button" class="btn btn-foil" id="adminSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Publicar ahora</button>
-    <p class="promo-status" id="adminAddStatus"></p>
+
+    <div id="adminAnalyticsPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Solo tú lo ves</span><h3>Qué le interesa a tu gente</h3></div>
+      <div id="adminAnalyticsBody" style="font-size:13px;color:var(--cream-dim);">Cargando…</div>
+    </div>
   </div>
 </div>
 
@@ -878,7 +894,20 @@
   <div class="drawer-scroll" id="drawerScroll">
     <div id="drawerList"></div>
     <div class="pay-methods">
-      <div class="pay-methods-label">¿Cómo se hace la compra?</div>
+      <div class="pay-methods-label">¿Cómo quieres recibirlo?</div>
+      <div class="pay-options" id="deliveryOptions">
+        <button type="button" class="pay-opt active" data-delivery="punto-medio">📍 Punto medio</button>
+        <button type="button" class="pay-opt" data-delivery="y-griega">📍 Y Griega</button>
+        <button type="button" class="pay-opt" data-delivery="envio">📦 Envío a domicilio</button>
+      </div>
+
+      <div class="process-steps">
+        <div class="process-step"><span class="ps-num">1</span><span>Apartas por WhatsApp</span></div>
+        <div class="process-step"><span class="ps-num">2</span><span>Confirmas pago</span></div>
+        <div class="process-step"><span class="ps-num">3</span><span>Coordinamos entrega</span></div>
+      </div>
+
+      <div class="pay-methods-label" style="margin-top:16px;">¿Cómo se hace la compra?</div>
       <div class="pay-panel" id="payMethodsStatic">
         <p style="margin:0;">Se piden por <b>WhatsApp</b> y se pagan por <b>transferencia, tarjeta o efectivo</b>, con entrega en persona.</p>
       </div>
@@ -953,8 +982,10 @@ const state = {
   query:"", kind:"all", sets:new Set(), rarities:new Set(), conditions:new Set(), languages:new Set(),
   priceMin:null, priceMax:null, sort:"price-desc",
   selected: JSON.parse(localStorage.getItem("vitrina_cart_v2") || "{}"), // {id: qty}
-  couponApplied: localStorage.getItem("vitrina_coupon") === "BIENVENIDO5"
+  couponApplied: localStorage.getItem("vitrina_coupon") === "BIENVENIDO5",
+  delivery: localStorage.getItem("vitrina_delivery") || "punto-medio"
 };
+const DELIVERY_LABELS = { "punto-medio": "Recolección en punto medio", "y-griega": "Recolección en Y Griega", "envio": "Envío a domicilio" };
 
 const money = n => "$" + n.toLocaleString("es-MX");
 function unique(key){ return [...new Set(CARDS.map(c => c[key]).filter(Boolean))]; }
@@ -1038,7 +1069,7 @@ function renderCard(card){
   const toggleSingle = (opts) => {
     if (soldOut) return;
     const cur = state.selected[card.id] || 0;
-    if (cur > 0) delete state.selected[card.id]; else { state.selected[card.id] = 1; showToast(`<b>${card.name}</b> agregada`); }
+    if (cur > 0) delete state.selected[card.id]; else { state.selected[card.id] = 1; showToast(`<b>${card.name}</b> agregada`); trackEvent("add_cart", card.id); }
     saveCart(); refreshCardInPlace(card.id); updateCartUI();
     if (opts?.closeZoom) closeZoom();
   };
@@ -1047,7 +1078,7 @@ function renderCard(card){
       ev.stopPropagation();
       if (soldOut) return;
       const cur = state.selected[card.id] || 0;
-      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); refreshCardInPlace(card.id); updateCartUI(); showToast(`<b>${card.name}</b> agregado`); }
+      if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); refreshCardInPlace(card.id); updateCartUI(); showToast(`<b>${card.name}</b> agregado`); trackEvent("add_cart", card.id); }
     });
     el.querySelector(".qty-minus").addEventListener("click", ev => {
       ev.stopPropagation();
@@ -1079,6 +1110,7 @@ function refreshCardInPlace(cardId){
 
 /* ---- zoom modal ---- */
 function openZoom(card){
+  trackEvent("view", card.id);
   const artWrap = document.getElementById("zoomArt");
   artWrap.innerHTML = card.image ? `<img src="${card.image}" alt="${card.name}" onerror="this.remove()">` : GEM_ICON;
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
@@ -1277,8 +1309,8 @@ function updateCartUI(){
   // mandamos un link corto a un resumen de pedido en el propio sitio — funciona
   // igual de bien con 2 piezas que con 50
   const itemsCode = entries.map(({card,qty}) => `${card.id}x${qty}`).join(",");
-  const orderUrl = `${location.origin}${location.pathname}?pedido=${encodeURIComponent(itemsCode)}${state.couponApplied ? "&c=1" : ""}`;
-  const msg = `Hola, quiero apartar mi pedido:%0A${encodeURIComponent(orderUrl)}%0A%0ATotal: ${money(finalTotal)}`;
+  const orderUrl = `${location.origin}${location.pathname}?pedido=${encodeURIComponent(itemsCode)}${state.couponApplied ? "&c=1" : ""}&e=${state.delivery}`;
+  const msg = `Hola, quiero apartar mi pedido:%0A${encodeURIComponent(orderUrl)}%0A%0AEntrega: ${encodeURIComponent(DELIVERY_LABELS[state.delivery])}%0ATotal: ${money(finalTotal)}`;
   document.getElementById("whatsappBtn").href = count ? `https://wa.me/${WHATSAPP_PHONE}?text=${msg}` : `https://wa.me/${WHATSAPP_PHONE}`;
 
   document.getElementById("mpPayBtn").onclick = async () => {
@@ -1360,6 +1392,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 /* ---- vistas: catálogo de cartas VS juguetes y coleccionables ---- */
 function setActiveCatTab(cat){
   document.querySelectorAll(".cat-tab").forEach(t => t.classList.toggle("active", t.dataset.cat === cat));
+  trackEvent("category_view", cat);
 }
 function showCardsView(){
   document.getElementById("cardsView").style.display = "";
@@ -1395,7 +1428,13 @@ document.querySelectorAll(".backToCardsLink").forEach(link => {
   link.addEventListener("click", e => { e.preventDefault(); showCardsView(); });
 });
 
-document.getElementById("searchInput").addEventListener("input", e => { state.query = e.target.value; resetAndRender(); });
+let searchTrackTimer;
+document.getElementById("searchInput").addEventListener("input", e => {
+  state.query = e.target.value; resetAndRender();
+  clearTimeout(searchTrackTimer);
+  const term = e.target.value.trim();
+  if (term.length >= 3) searchTrackTimer = setTimeout(() => trackEvent("search", term.toLowerCase()), 900);
+});
 document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; resetAndRender(); });
 document.getElementById("priceMin").addEventListener("input", e => { state.priceMin = e.target.value ? Number(e.target.value) : null; resetAndRender(); });
 document.getElementById("priceMax").addEventListener("input", e => { state.priceMax = e.target.value ? Number(e.target.value) : null; resetAndRender(); });
@@ -1464,12 +1503,24 @@ if (state.couponApplied){
   st.className = "coupon-status ok";
 }
 
+document.querySelectorAll("#deliveryOptions .pay-opt").forEach(btn => {
+  if (btn.dataset.delivery === state.delivery) btn.classList.add("active"); else btn.classList.remove("active");
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#deliveryOptions .pay-opt").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    state.delivery = btn.dataset.delivery;
+    localStorage.setItem("vitrina_delivery", state.delivery);
+    updateCartUI();
+  });
+});
+
 document.getElementById("couponApplyBtn").addEventListener("click", () => {
   const input = document.getElementById("couponInput");
   const status = document.getElementById("couponStatus");
   const code = input.value.trim().toUpperCase();
   if (code === "BIENVENIDO5"){
     state.couponApplied = true;
+    trackEvent("coupon_used", "BIENVENIDO5");
     localStorage.setItem("vitrina_coupon", "BIENVENIDO5");
     status.textContent = "✓ Cupón aplicado: 5% de descuento";
     status.className = "coupon-status ok";
@@ -1602,6 +1653,29 @@ fetch(`${WORKER_URL}/products`)
   })
   .catch(() => {});
 
+fetch(`${WORKER_URL}/stock-overrides`)
+  .then(r => r.json())
+  .then(data => {
+    const overrides = data.overrides || {};
+    let changed = false;
+    Object.keys(overrides).forEach(id => {
+      const card = CARDS.find(c => String(c.id) === String(id));
+      if (card && card.stock !== overrides[id]){ card.stock = overrides[id]; changed = true; }
+    });
+    if (changed) refreshAllViews();
+  })
+  .catch(() => {});
+
+/* ---- tracking silencioso de interacción (para las analíticas privadas) ---- */
+function trackEvent(type, key){
+  fetch(`${WORKER_URL}/track`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, key: String(key) })
+  }).catch(() => {});
+}
+document.getElementById("whatsappBtn").addEventListener("click", () => trackEvent("whatsapp_click", "carrito"));
+
 /* ---- modal de admin: agregar producto directo al sitio, sin GitHub ---- */
 (function(){
   const modal = document.getElementById("adminModal");
@@ -1622,6 +1696,58 @@ fetch(`${WORKER_URL}/products`)
     } else {
       loginStep.style.display = "block";
       addStep.style.display = "none";
+    }
+  }
+
+  document.getElementById("adminTabAdd").addEventListener("click", () => {
+    document.getElementById("adminTabAdd").classList.add("active");
+    document.getElementById("adminTabAnalytics").classList.remove("active");
+    document.getElementById("adminAddForm").style.display = "block";
+    document.getElementById("adminAnalyticsPanel").style.display = "none";
+  });
+  document.getElementById("adminTabAnalytics").addEventListener("click", async () => {
+    document.getElementById("adminTabAnalytics").classList.add("active");
+    document.getElementById("adminTabAdd").classList.remove("active");
+    document.getElementById("adminAddForm").style.display = "none";
+    document.getElementById("adminAnalyticsPanel").style.display = "block";
+    await loadAnalytics();
+  });
+
+  function nameFor(id){
+    const card = CARDS.find(c => String(c.id) === String(id));
+    return card ? card.name : `(id ${id})`;
+  }
+
+  async function loadAnalytics(){
+    const body = document.getElementById("adminAnalyticsBody");
+    body.innerHTML = "Cargando…";
+    const pass = sessionStorage.getItem("vitrina_admin_pass");
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/analytics?password=${encodeURIComponent(pass)}`);
+      const data = await res.json();
+      if (!res.ok){ body.innerHTML = `<p style="color:var(--ember-bright);">${data.error || "No se pudo cargar."}</p>`; return; }
+      const events = data.events || [];
+      if (!events.length){ body.innerHTML = "<p>Todavía no hay datos — vuelve en unos días con algo de tráfico en el sitio.</p>"; return; }
+
+      const byType = {};
+      events.forEach(e => { (byType[e.type] = byType[e.type] || []).push(e); });
+      Object.values(byType).forEach(list => list.sort((a,b) => b.count - a.count));
+
+      const section = (title, list, labelFn, max) => {
+        if (!list || !list.length) return "";
+        const rows = list.slice(0, max || 8).map(e => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px;">${labelFn(e.key)}</span><b style="color:var(--foil-bright);flex-shrink:0;margin-left:8px;">${e.count}</b></div>`).join("");
+        return `<div style="margin-bottom:16px;"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:6px;">${title}</div>${rows}</div>`;
+      };
+
+      body.innerHTML =
+        section("👁️ Más vistos", byType.view, nameFor) +
+        section("🛒 Más agregados al carrito", byType.add_cart, nameFor) +
+        section("💬 Clics en \"Apartar por WhatsApp\"", byType.whatsapp_click, () => "Total") +
+        section("🔍 Qué busca la gente", byType.search, k => `"${k}"`) +
+        section("📂 Secciones más visitadas", byType.category_view, k => ({cartas:"Catálogo",juguetes:"Coleccionables y Juguetes",acrilicos:"Acrílicos"}[k] || k)) +
+        section("🎁 Uso del cupón", byType.coupon_used, () => "BIENVENIDO5 usado");
+    } catch (err) {
+      body.innerHTML = `<p style="color:var(--ember-bright);">No se pudo conectar.</p>`;
     }
   }
   function closeModal(){
@@ -1750,17 +1876,24 @@ fetch(`${WORKER_URL}/products`)
   if (!items.length) return;
 
   const hasCoupon = params.get("c") === "1";
+  const deliveryKey = params.get("e") || "";
+  const deliveryLabel = DELIVERY_LABELS[deliveryKey] || "";
   const subtotal = items.reduce((s,e) => s + e.card.price*e.qty, 0);
   const discount = hasCoupon ? Math.round(subtotal * 0.05) : 0;
   const total = subtotal - discount;
 
+  if (deliveryLabel){
+    document.getElementById("orderList").insertAdjacentHTML("beforebegin", `<div style="font-size:12.5px;color:var(--foil-bright);margin-bottom:10px;">📍 ${deliveryLabel}</div>`);
+  }
+
   const list = document.getElementById("orderList");
   list.innerHTML = items.map(({card,qty}) => `
-    <div class="order-item">
+    <div class="order-item" id="orderItem-${card.id}">
       <div class="oi-thumb" data-id="${card.id}" style="${card.image ? `background-image:url('${card.image}')` : `background:${TYPE_COLORS[card.type]}`}"></div>
       <div class="oi-grow">
         <div class="oi-name">${card.name}${qty>1?` ×${qty}`:''}</div>
         <div class="oi-sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':card.category==='acrylic'?'Acrílico':'')}</div>
+        <button type="button" class="mark-sold-btn" data-id="${card.id}" data-qty="${qty}" style="background:none;border:none;color:var(--slate);text-decoration:underline;font-size:10.5px;padding:0;margin-top:4px;cursor:pointer;">Marcar como vendido</button>
       </div>
       <div class="oi-price">${money(card.price*qty)}</div>
     </div>
@@ -1769,6 +1902,33 @@ fetch(`${WORKER_URL}/products`)
     thumb.addEventListener("click", () => {
       const card = CARDS.find(c => c.id === Number(thumb.dataset.id));
       if (card) openZoom(card);
+    });
+  });
+  list.querySelectorAll(".mark-sold-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = Number(btn.dataset.id);
+      const qty = Number(btn.dataset.qty);
+      let pass = sessionStorage.getItem("vitrina_admin_pass");
+      if (!pass){ pass = prompt("Contraseña de admin para marcar vendido:"); if (!pass) return; sessionStorage.setItem("vitrina_admin_pass", pass); }
+      const card = CARDS.find(c => c.id === id);
+      const newStock = Math.max(0, (card?.stock || 0) - qty);
+      btn.textContent = "Guardando…";
+      try {
+        const res = await fetch(`${WORKER_URL}/admin/adjust-stock`, {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ password: pass, id: String(id), stock: newStock })
+        });
+        const data = await res.json();
+        if (data.ok){
+          if (card) card.stock = newStock;
+          btn.textContent = "✓ Marcado como vendido";
+          btn.style.color = "var(--ok)";
+          btn.disabled = true;
+        } else {
+          btn.textContent = data.error || "No se pudo, intenta de nuevo";
+          if (res.status === 401) sessionStorage.removeItem("vitrina_admin_pass");
+        }
+      } catch(err){ btn.textContent = "No se pudo conectar"; }
     });
   });
 
@@ -1780,7 +1940,7 @@ fetch(`${WORKER_URL}/products`)
   `;
 
   const lines = items.map(({card,qty}) => `• ${card.name}${qty>1?` x${qty}`:''} — ${money(card.price*qty)}`);
-  const waMsg = `Hola, quiero confirmar mi pedido:%0A%0A${lines.join("%0A")}%0A${hasCoupon ? `%0ACupón BIENVENIDO5 (-5%25): -${money(discount)}` : ""}%0ATotal: ${money(total)}`;
+  const waMsg = `Hola, quiero confirmar mi pedido:%0A%0A${lines.join("%0A")}%0A${hasCoupon ? `%0ACupón BIENVENIDO5 (-5%25): -${money(discount)}` : ""}${deliveryLabel ? `%0AEntrega: ${encodeURIComponent(deliveryLabel)}` : ""}%0ATotal: ${money(total)}`;
   document.getElementById("orderWhatsappBtn").href = `https://wa.me/${WHATSAPP_PHONE}?text=${waMsg}`;
 
   document.getElementById("orderModal").classList.add("open");
