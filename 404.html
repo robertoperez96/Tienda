@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Página no encontrada · Mi Colección</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0b0e14; --ink-2:#10141d; --ink-3:#161b26;
+    --line:rgba(237,230,214,0.09); --line-strong:rgba(237,230,214,0.16);
+    --foil:#c9a227; --foil-bright:#e8c766; --foil-dim: rgba(201,162,39,0.35);
+    --cream:#ede6d6; --cream-dim: rgba(237,230,214,0.62); --slate:#8b93a3;
+    --font-display:'Fraunces',serif; --font-body:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;min-height:100vh;background:radial-gradient(ellipse at 30% 15%, var(--ink-3), var(--ink) 55%);
+    color:var(--cream);font-family:var(--font-body);
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;
+  }
+  .mark{margin-bottom:22px;opacity:.9;}
+  .code{font-family:var(--font-display);font-size:clamp(64px,14vw,110px);font-weight:560;color:var(--foil-bright);line-height:1;margin:0;letter-spacing:-2px;}
+  h1{font-family:var(--font-display);font-weight:500;font-size:clamp(20px,4vw,28px);margin:10px 0 12px;}
+  p{color:var(--cream-dim);font-size:14.5px;max-width:40ch;margin:0 auto 28px;line-height:1.6;}
+  a.btn{
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+    background:linear-gradient(135deg,var(--foil-bright),var(--foil));
+    color:#1a1406;font-weight:600;font-size:14px;padding:13px 26px;border-radius:999px;
+    box-shadow:0 14px 30px -10px rgba(201,162,39,.5);transition:transform .15s ease;
+  }
+  a.btn:hover{transform:translateY(-2px);}
+</style>
+</head>
+<body>
+  <div>
+    <svg class="mark" width="52" height="52" viewBox="0 0 64 64" style="margin:0 auto;display:block;">
+      <path d="M32 8 L12 20 L32 32 L52 20 Z" fill="none" stroke="#e8c766" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M12 20 L32 32 L52 20" fill="none" stroke="#e8c766" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M32 32 L32 58" fill="none" stroke="#e8c766" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M12 20 L12 40 L32 52" fill="none" stroke="#c9a227" stroke-width="2.2" stroke-linejoin="round" opacity="0.7"/>
+      <path d="M52 20 L52 40 L32 52" fill="none" stroke="#c9a227" stroke-width="2.2" stroke-linejoin="round" opacity="0.7"/>
+    </svg>
+    <p class="code">404</p>
+    <h1>Esta pieza no está en el catálogo</h1>
+    <p>El link que seguiste no existe o ya no está disponible. Pero seguro encuentras algo igual de bueno en el catálogo.</p>
+    <a class="btn" href="index.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Volver al catálogo
+    </a>
+  </div>
+</body>
+</html>
