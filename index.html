@@ -367,9 +367,6 @@
   .card-art::before{content:"";position:absolute;inset:0;background:var(--art-grad);}
   .card:hover .card-art{transform:scale(1.015);}
   .card-art img.real{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;border-radius:8px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));}
-  .card-img-stack{position:relative;width:100%;height:100%;z-index:1;}
-  .card-img-stack .card-gimg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:8px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));opacity:0;transition:opacity .35s ease;}
-  .card-img-stack .card-gimg.active{opacity:1;}
   .card-gallery-arrow{
     position:absolute;top:50%;transform:translateY(-50%);z-index:4;
     width:24px;height:24px;border-radius:999px;background:rgba(11,14,20,.55);backdrop-filter:blur(2px);
@@ -1287,7 +1284,7 @@ function renderCard(card){
   const gallery = (Array.isArray(card.images) && card.images.length > 1) ? card.images : null;
   let artImg;
   if (gallery){
-    artImg = `<div class="card-img-stack">${gallery.map((src,i) => `<img class="real card-gimg${i===0?' active':''}" data-i="${i}" src="${src}" alt="${card.name}" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.style.display='none'">`).join("")}</div>
+    artImg = `<img class="real card-gallery-img" src="${gallery[0]}" alt="${card.name}" style="position:relative;z-index:1;width:100%;height:100%;object-fit:contain;border-radius:8px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));display:block;" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.closest('.card-art')?.classList.remove('loading');this.remove()">
       <button type="button" class="card-gallery-arrow prev" aria-label="Foto anterior"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <button type="button" class="card-gallery-arrow next" aria-label="Foto siguiente"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="card-gallery-dots">${gallery.map((_,i) => `<span class="${i===0?'active':''}"></span>`).join("")}</div>`;
@@ -1344,26 +1341,22 @@ function renderCard(card){
     el.querySelector(".add-to-cart-btn").addEventListener("click", ev => { ev.stopPropagation(); toggleSingle(); });
   }
   if (gallery){
-    const stack = el.querySelector(".card-img-stack");
-    const imgs = [...el.querySelectorAll(".card-gimg")];
+    const artEl = el.querySelector(".card-art");
+    const imgEl = el.querySelector(".card-gallery-img");
     const dots = [...el.querySelectorAll(".card-gallery-dots span")];
     let idx = 0;
     function showGalleryIdx(i){
       idx = (i + gallery.length) % gallery.length;
-      imgs.forEach((img, n) => {
-        const active = n === idx;
-        img.style.opacity = active ? "1" : "0";
-        img.style.zIndex = active ? "2" : "1";
-      });
+      imgEl.src = gallery[idx];
+      imgEl.style.cssText = "position:relative;z-index:1;width:100%;height:100%;object-fit:contain;border-radius:8px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));display:block;";
       dots.forEach((d, n) => d.classList.toggle("active", n === idx));
     }
-    showGalleryIdx(0); // fuerza el estado inicial correcto, sin depender solo de la clase del HTML
     el.querySelector(".card-gallery-arrow.prev").addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(idx - 1); });
     el.querySelector(".card-gallery-arrow.next").addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(idx + 1); });
     dots.forEach((d, n) => d.addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(n); }));
     let touchStartX = 0;
-    stack.addEventListener("touchstart", ev => { touchStartX = ev.touches[0].clientX; }, {passive:true});
-    stack.addEventListener("touchend", ev => {
+    artEl.addEventListener("touchstart", ev => { touchStartX = ev.touches[0].clientX; }, {passive:true});
+    artEl.addEventListener("touchend", ev => {
       const dx = ev.changedTouches[0].clientX - touchStartX;
       if (Math.abs(dx) > 28){
         el._justSwiped = true;
