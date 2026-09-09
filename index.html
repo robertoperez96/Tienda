@@ -963,6 +963,10 @@
     <div class="zoom-price" id="zoomPrice"></div>
     <div id="zoomStock" class="zoom-stock"></div>
     <button type="button" class="btn btn-foil" id="zoomAddBtn" style="width:100%;justify-content:center;margin-top:14px;">Agregar al carrito</button>
+    <button type="button" id="zoomShareBtn" style="width:100%;justify-content:center;margin-top:8px;display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--line-strong);color:var(--cream-dim);border-radius:10px;padding:9px;font-size:12.5px;cursor:pointer;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 13.5l6.8 3.9M15.4 6.6L8.6 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Compartir esta pieza
+    </button>
     <button type="button" id="zoomEditBtn" style="display:none;width:100%;justify-content:center;margin-top:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:10px;padding:9px;font-size:12.5px;cursor:pointer;">✏️ Editar (solo tú lo ves)</button>
   </div>
 </div>
@@ -1312,6 +1316,24 @@ function openZoom(card){
     }
     closeZoom();
   };
+
+  const shareBtn = document.getElementById("zoomShareBtn");
+  shareBtn.onclick = async () => {
+    const shareUrl = `${location.origin}${location.pathname}?producto=${card.id}`;
+    trackEvent("share_product", card.id);
+    if (navigator.share){
+      try { await navigator.share({ title: card.name, text: `${card.name} — ${money(card.price)}`, url: shareUrl }); }
+      catch(e) { /* el usuario canceló, no pasa nada */ }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast("🔗 Link copiado — pégalo donde quieras");
+      } catch(e){
+        prompt("Copia este link:", shareUrl);
+      }
+    }
+  };
+
   const zoomEditBtn = document.getElementById("zoomEditBtn");
   if (isAdminSession()){
     zoomEditBtn.style.display = "block";
@@ -2399,6 +2421,17 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       openEditForm(id);
     }
   };
+})();
+
+/* ---- abre una pieza específica si el link trae ?producto=ID (compartido por alguien) ---- */
+(function(){
+  const params = new URLSearchParams(location.search);
+  const productId = params.get("producto");
+  if (!productId) return;
+  setTimeout(() => {
+    const card = CARDS.find(c => String(c.id) === productId);
+    if (card) openZoom(card);
+  }, 600); // margen para que carguen productos agregados en vivo también
 })();
 
 /* ---- resumen de pedido: se abre solo si el link trae ?pedido=... ---- */
