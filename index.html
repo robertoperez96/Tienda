@@ -962,6 +962,12 @@
           <option value="acrylic">🖼️ Acrílico</option>
         </select>
       </div>
+      <div class="field" id="adminKindField" style="margin-bottom:10px;">
+        <select id="adminKind" style="width:100%;">
+          <option value="single">🃏 Carta suelta (single)</option>
+          <option value="sellado">📦 Producto sellado</option>
+        </select>
+      </div>
       <div class="field" style="margin-bottom:10px;"><input type="text" id="adminName" placeholder="Nombre del producto" style="width:100%;"></div>
       <div class="row" style="margin-bottom:10px;">
         <input type="number" id="adminPrice" placeholder="Precio (MXN)" style="flex:1;">
@@ -993,6 +999,12 @@
             <option value="pcjp">🇯🇵 Exclusivo Pokémon Center JP</option>
             <option value="toy">🧸 Juguete / Coleccionable</option>
             <option value="acrylic">🖼️ Acrílico</option>
+          </select>
+        </div>
+        <div class="field" id="editKindField" style="margin-bottom:10px;">
+          <select id="editKind" style="width:100%;">
+            <option value="single">🃏 Carta suelta (single)</option>
+            <option value="sellado">📦 Producto sellado</option>
           </select>
         </div>
         <div class="field" style="margin-bottom:10px;"><input type="text" id="editName" placeholder="Nombre del producto" style="width:100%;"></div>
@@ -2372,6 +2384,17 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     });
   });
 
+  function updateAdminKindVisibility(){
+    document.getElementById("adminKindField").style.display = document.getElementById("adminCategory").value === "pokemon" ? "block" : "none";
+  }
+  document.getElementById("adminCategory").addEventListener("change", updateAdminKindVisibility);
+  updateAdminKindVisibility();
+
+  function updateEditKindVisibility(){
+    document.getElementById("editKindField").style.display = document.getElementById("editCategory").value === "pokemon" ? "block" : "none";
+  }
+  document.getElementById("editCategory").addEventListener("change", updateEditKindVisibility);
+
   function openEditForm(id){
     const card = CARDS.find(c => String(c.id) === String(id));
     if (!card) return;
@@ -2380,6 +2403,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("adminEditSearchStep").style.display = "none";
     document.getElementById("adminEditFormStep").style.display = "block";
     document.getElementById("editCategory").value = card.category || "pokemon";
+    document.getElementById("editKind").value = (card.kind === "sellado") ? "sellado" : "single";
+    updateEditKindVisibility();
     document.getElementById("editName").value = card.name;
     document.getElementById("editPrice").value = card.price;
     document.getElementById("editStock").value = card.stock;
@@ -2415,6 +2440,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     const status = document.getElementById("adminEditStatus");
     const changes = {
       category: document.getElementById("editCategory").value,
+      kind: document.getElementById("editCategory").value === "pokemon" ? document.getElementById("editKind").value : document.getElementById("editCategory").value,
       name: document.getElementById("editName").value.trim(),
       price: Number(document.getElementById("editPrice").value),
       stock: Number(document.getElementById("editStock").value),
@@ -2667,7 +2693,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     if (!name || !price){ status.textContent = "Falta nombre o precio."; return; }
     const product = {
       category: document.getElementById("adminCategory").value,
-      kind: document.getElementById("adminCategory").value === "pokemon" ? "single" : document.getElementById("adminCategory").value,
+      kind: document.getElementById("adminCategory").value === "pokemon" ? document.getElementById("adminKind").value : document.getElementById("adminCategory").value,
       name, price, stock: Number(document.getElementById("adminStock").value) || 1,
       featured: document.getElementById("adminFeatured").checked,
       image: adminImages[0] || "", images: adminImages
