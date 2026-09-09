@@ -20,6 +20,7 @@
   .gallery-thumb.primary{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil);}
   .gallery-thumb .primary-tag{position:absolute;bottom:0;left:0;right:0;background:rgba(201,162,39,.9);color:#171205;font-size:8px;font-weight:700;text-align:center;padding:1px 0;}
   .gallery-thumb .remove-thumb{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:999px;background:rgba(11,14,20,.8);border:none;color:#fff;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+  .gallery-thumb .wand-thumb{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:10px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
   html{scroll-behavior:smooth;}
   body{margin:0;background:var(--ink);color:var(--cream);font-family:var(--font-body);line-height:1.5;}
   .wrap{max-width:980px;margin:0 auto;padding:36px 24px 100px;}
@@ -142,7 +143,6 @@
     <div style="margin-top:16px;">
       <label>Fotos del producto</label>
       <div id="quickDropPreview" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;"></div>
-      <button type="button" id="quickRemoveBgBtn" style="display:none;width:100%;margin-top:6px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco (de la principal)</button>
       <div class="row" style="margin-top:8px;">
         <button type="button" class="btn btn-ghost" id="quickUploadBtn" style="flex:1;">📎 Agregar foto(s) desde tu dispositivo</button>
         <input type="file" id="quickFileInput" accept="image/*" multiple style="display:none;">
@@ -1192,13 +1192,21 @@ function renderQuickGallery(){
     <div class="gallery-thumb${i===0?' primary':''}">
       <img src="${url}">
       ${i===0?'<span class="primary-tag">Principal</span>':''}
-      <button type="button" class="remove-thumb" data-i="${i}">×</button>
+      <button type="button" class="remove-thumb" data-i="${i}" title="Quitar esta foto">×</button>
+      <button type="button" class="wand-thumb" data-i="${i}" title="Quitar fondo blanco">🪄</button>
     </div>
   `).join("");
   wrap.querySelectorAll(".remove-thumb").forEach(btn => {
     btn.addEventListener("click", () => { quickImages.splice(Number(btn.dataset.i), 1); renderQuickGallery(); });
   });
-  document.getElementById("quickRemoveBgBtn").style.display = quickImages.length ? "block" : "none";
+  wrap.querySelectorAll(".wand-thumb").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const i = Number(btn.dataset.i);
+      btn.textContent = "…";
+      removeWhiteBackground(quickImages[i], (cleanUrl) => { quickImages[i] = cleanUrl; renderQuickGallery(); },
+        () => { btn.textContent = "⚠️"; setTimeout(() => renderQuickGallery(), 1800); });
+    });
+  });
 }
 function addQuickImage(dataUrl){
   quickImages.push(dataUrl);
@@ -1262,20 +1270,6 @@ function removeWhiteBackground(dataUrl, callback, onError){
   img.onerror = () => onError && onError(new Error("No se pudo cargar"));
   img.src = dataUrl;
 }
-document.getElementById("quickRemoveBgBtn").addEventListener("click", () => {
-  if (!quickImages.length) return;
-  const btn = document.getElementById("quickRemoveBgBtn");
-  btn.textContent = "Procesando…";
-  removeWhiteBackground(quickImages[0], (cleanUrl) => {
-    quickImages[0] = cleanUrl;
-    renderQuickGallery();
-    btn.textContent = "✓ Listo — fondo quitado";
-    setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2000);
-  }, () => {
-    btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
-    setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2500);
-  });
-});
 document.getElementById("quickUploadBtn").addEventListener("click", () => document.getElementById("quickFileInput").click());
 document.getElementById("quickFileInput").addEventListener("change", () => {
   const files = [...document.getElementById("quickFileInput").files];
@@ -1369,7 +1363,6 @@ document.addEventListener("click", (e) => {
     document.getElementById("quickStock").value = "1";
     document.getElementById("quickFeatured").checked = false;
     document.getElementById("quickDropPreview").innerHTML = "";
-    document.getElementById("quickRemoveBgBtn").style.display = "none";
     document.getElementById("quickPasteInput").value = "";
     quickImages = [];
     renderQuickGallery();

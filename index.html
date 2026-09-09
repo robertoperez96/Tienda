@@ -159,6 +159,7 @@
   .gallery-thumb.primary{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil);}
   .gallery-thumb .primary-tag{position:absolute;bottom:0;left:0;right:0;background:rgba(201,162,39,.9);color:#171205;font-size:8px;font-weight:700;text-align:center;padding:1px 0;}
   .gallery-thumb .remove-thumb{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:999px;background:rgba(11,14,20,.8);border:none;color:#fff;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+  .gallery-thumb .wand-thumb{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:10px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
   .cat-tab:hover{border-color:var(--foil-dim);color:var(--cream);transform:translateY(-1px);}
   .cat-tab.active{
     background:linear-gradient(135deg,var(--foil-dim),rgba(201,162,39,0.06));
@@ -366,6 +367,24 @@
   .card-art::before{content:"";position:absolute;inset:0;background:var(--art-grad);}
   .card:hover .card-art{transform:scale(1.015);}
   .card-art img.real{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;border-radius:8px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));}
+  .card-img-stack{position:relative;width:100%;height:100%;z-index:1;}
+  .card-img-stack .card-gimg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:8px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));opacity:0;transition:opacity .35s ease;}
+  .card-img-stack .card-gimg.active{opacity:1;}
+  .card-gallery-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:4;
+    width:24px;height:24px;border-radius:999px;background:rgba(11,14,20,.55);backdrop-filter:blur(2px);
+    border:1px solid rgba(237,230,214,.25);color:var(--cream);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
+    opacity:0;transition:opacity .2s ease,background .2s ease;
+  }
+  .card:hover .card-gallery-arrow{opacity:1;}
+  .card-gallery-arrow:hover{background:rgba(201,162,39,.75);border-color:var(--foil);}
+  .card-gallery-arrow.prev{left:8px;}
+  .card-gallery-arrow.next{right:8px;}
+  .card-gallery-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:4;display:flex;gap:4px;}
+  .card-gallery-dots span{width:4px;height:4px;border-radius:999px;background:rgba(237,230,214,.4);transition:all .2s;}
+  .card-gallery-dots span.active{background:var(--foil-bright);width:11px;}
+  @media (hover:none){ .card-gallery-arrow{opacity:1;width:22px;height:22px;background:rgba(11,14,20,.4);} }
   .card-art .sheen{position:absolute;inset:0;background:radial-gradient(220px 220px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 55%);mix-blend-mode:overlay;opacity:0;transition:opacity .2s;pointer-events:none;z-index:2;}
   .card:hover .card-art .sheen{opacity:1;}
   .card-art svg.gem{width:44px;height:44px;opacity:.85;position:relative;z-index:1;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));}
@@ -946,7 +965,6 @@
         <input type="number" id="adminStock" placeholder="Stock" value="1" style="flex:1;">
       </div>
       <div id="adminImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
-      <button type="button" id="adminRemoveBgBtn" style="display:none;width:100%;margin-bottom:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco (de la principal)</button>
       <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Agregar foto(s)</button>
       <input type="file" id="adminFileInput" accept="image/*" multiple style="display:none;">
       <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
@@ -980,7 +998,6 @@
           <input type="number" id="editStock" placeholder="Stock" style="flex:1;">
         </div>
         <div id="editImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
-        <button type="button" id="editRemoveBgBtn" style="display:none;width:100%;margin-bottom:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco (de la principal)</button>
         <button type="button" class="btn btn-ghost" id="editUploadBtn" style="width:100%;margin-bottom:8px;">📎 Agregar foto(s)</button>
         <input type="file" id="editFileInput" accept="image/*" multiple style="display:none;">
         <input type="text" id="editPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
@@ -1266,7 +1283,16 @@ function renderCard(card){
   el.className = "card" + (qty>0 ? " selected" : "") + (soldOut ? " sold-out" : "");
   el.dataset.id = card.id;
   el.style.setProperty("--art-grad", TYPE_COLORS[card.type] || TYPE_COLORS.incoloro);
-  const artImg = card.image ? `<img class="real" src="${card.image}" alt="${card.name}" loading="lazy" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.closest('.card-art')?.classList.remove('loading');this.remove()">` : "";
+  const gallery = (Array.isArray(card.images) && card.images.length > 1) ? card.images : null;
+  let artImg;
+  if (gallery){
+    artImg = `<div class="card-img-stack">${gallery.map((src,i) => `<img class="real card-gimg${i===0?' active':''}" data-i="${i}" src="${src}" alt="${card.name}" loading="lazy" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.style.display='none'">`).join("")}</div>
+      <button type="button" class="card-gallery-arrow prev" aria-label="Foto anterior"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button type="button" class="card-gallery-arrow next" aria-label="Foto siguiente"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="card-gallery-dots">${gallery.map((_,i) => `<span class="${i===0?'active':''}"></span>`).join("")}</div>`;
+  } else {
+    artImg = card.image ? `<img class="real" src="${card.image}" alt="${card.name}" loading="lazy" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.closest('.card-art')?.classList.remove('loading');this.remove()">` : "";
+  }
   el.innerHTML = `
     <div class="card-art${card.image ? ' loading' : ''}" data-toggle="1">
       <div class="sheen"></div>
@@ -1311,10 +1337,34 @@ function renderCard(card){
       if (cur <= 1) delete state.selected[card.id]; else state.selected[card.id] = cur-1;
       saveCart(); refreshCardInPlace(card.id); updateCartUI();
     });
-    el.querySelector(".card-art").addEventListener("click", () => openZoom(card));
+    el.querySelector(".card-art").addEventListener("click", () => { if (!el._justSwiped) openZoom(card); });
   } else {
-    el.querySelector(".card-art").addEventListener("click", () => openZoom(card));
+    el.querySelector(".card-art").addEventListener("click", () => { if (!el._justSwiped) openZoom(card); });
     el.querySelector(".add-to-cart-btn").addEventListener("click", ev => { ev.stopPropagation(); toggleSingle(); });
+  }
+  if (gallery){
+    const stack = el.querySelector(".card-img-stack");
+    const imgs = [...el.querySelectorAll(".card-gimg")];
+    const dots = [...el.querySelectorAll(".card-gallery-dots span")];
+    let idx = 0;
+    function showGalleryIdx(i){
+      idx = (i + gallery.length) % gallery.length;
+      imgs.forEach((img, n) => img.classList.toggle("active", n === idx));
+      dots.forEach((d, n) => d.classList.toggle("active", n === idx));
+    }
+    el.querySelector(".card-gallery-arrow.prev").addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(idx - 1); });
+    el.querySelector(".card-gallery-arrow.next").addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(idx + 1); });
+    dots.forEach((d, n) => d.addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(n); }));
+    let touchStartX = 0;
+    stack.addEventListener("touchstart", ev => { touchStartX = ev.touches[0].clientX; }, {passive:true});
+    stack.addEventListener("touchend", ev => {
+      const dx = ev.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 28){
+        el._justSwiped = true;
+        showGalleryIdx(idx + (dx < 0 ? 1 : -1));
+        setTimeout(() => { el._justSwiped = false; }, 300);
+      }
+    });
   }
   el.querySelector(".wish-btn").addEventListener("click", ev => {
     ev.stopPropagation();
@@ -2267,13 +2317,21 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       <div class="gallery-thumb${i===0?' primary':''}">
         <img src="${url}">
         ${i===0?'<span class="primary-tag">Principal</span>':''}
-        <button type="button" class="remove-thumb" data-i="${i}">×</button>
+        <button type="button" class="remove-thumb" data-i="${i}" title="Quitar esta foto">×</button>
+        <button type="button" class="wand-thumb" data-i="${i}" title="Quitar fondo blanco">🪄</button>
       </div>
     `).join("");
     wrap.querySelectorAll(".remove-thumb").forEach(btn => {
       btn.addEventListener("click", () => { editImages.splice(Number(btn.dataset.i), 1); renderEditGallery(); });
     });
-    document.getElementById("editRemoveBgBtn").style.display = editImages.length ? "block" : "none";
+    wrap.querySelectorAll(".wand-thumb").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.dataset.i);
+        btn.textContent = "…";
+        removeWhiteBackground(editImages[i], (cleanUrl) => { editImages[i] = cleanUrl; renderEditGallery(); },
+          () => { btn.textContent = "⚠️"; setTimeout(() => renderEditGallery(), 1800); });
+      });
+    });
   }
   function addEditImage(url){ editImages.push(url); renderEditGallery(); }
 
@@ -2342,20 +2400,6 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   document.getElementById("editPasteInput").addEventListener("change", () => {
     const val = document.getElementById("editPasteInput").value.trim();
     if (val.startsWith("http")){ addEditImage(val); document.getElementById("editPasteInput").value = ""; }
-  });
-  document.getElementById("editRemoveBgBtn").addEventListener("click", () => {
-    if (!editImages.length) return;
-    const btn = document.getElementById("editRemoveBgBtn");
-    btn.textContent = "Procesando…";
-    removeWhiteBackground(editImages[0], (cleanUrl) => {
-      editImages[0] = cleanUrl;
-      renderEditGallery();
-      btn.textContent = "✓ Listo — fondo quitado";
-      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2000);
-    }, () => {
-      btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
-      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2500);
-    });
   });
 
   document.getElementById("editSubmitBtn").addEventListener("click", async () => {
@@ -2482,13 +2526,21 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       <div class="gallery-thumb${i===0?' primary':''}">
         <img src="${url}">
         ${i===0?'<span class="primary-tag">Principal</span>':''}
-        <button type="button" class="remove-thumb" data-i="${i}">×</button>
+        <button type="button" class="remove-thumb" data-i="${i}" title="Quitar esta foto">×</button>
+        <button type="button" class="wand-thumb" data-i="${i}" title="Quitar fondo blanco">🪄</button>
       </div>
     `).join("");
     wrap.querySelectorAll(".remove-thumb").forEach(btn => {
       btn.addEventListener("click", () => { adminImages.splice(Number(btn.dataset.i), 1); renderAdminGallery(); });
     });
-    document.getElementById("adminRemoveBgBtn").style.display = adminImages.length ? "block" : "none";
+    wrap.querySelectorAll(".wand-thumb").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.dataset.i);
+        btn.textContent = "…";
+        removeWhiteBackground(adminImages[i], (cleanUrl) => { adminImages[i] = cleanUrl; renderAdminGallery(); },
+          () => { btn.textContent = "⚠️"; setTimeout(() => renderAdminGallery(), 1800); });
+      });
+    });
   }
   function addAdminImage(dataUrl){
     adminImages.push(dataUrl);
@@ -2596,20 +2648,6 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     if (val.startsWith("http")){ addAdminImage(val); document.getElementById("adminPasteInput").value = ""; }
   });
 
-  document.getElementById("adminRemoveBgBtn").addEventListener("click", () => {
-    if (!adminImages.length) return;
-    const btn = document.getElementById("adminRemoveBgBtn");
-    btn.textContent = "Procesando…";
-    removeWhiteBackground(adminImages[0], (cleanUrl) => {
-      adminImages[0] = cleanUrl;
-      renderAdminGallery();
-      btn.textContent = "✓ Listo — fondo quitado";
-      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2000);
-    }, () => {
-      btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
-      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2500);
-    });
-  });
 
   document.getElementById("adminSubmitBtn").addEventListener("click", async () => {
     const status = document.getElementById("adminAddStatus");
