@@ -897,6 +897,7 @@
         <input type="number" id="adminStock" placeholder="Stock" value="1" style="flex:1;">
       </div>
       <div id="adminImgPreview" style="margin-bottom:8px;"></div>
+      <button type="button" id="adminRemoveBgBtn" style="display:none;width:100%;margin-bottom:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco</button>
       <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Subir foto</button>
       <input type="file" id="adminFileInput" accept="image/*" style="display:none;">
       <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
@@ -928,6 +929,7 @@
           <input type="number" id="editStock" placeholder="Stock" style="flex:1;">
         </div>
         <div id="editImgPreview" style="margin-bottom:8px;"></div>
+        <button type="button" id="editRemoveBgBtn" style="display:none;width:100%;margin-bottom:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco</button>
         <button type="button" class="btn btn-ghost" id="editUploadBtn" style="width:100%;margin-bottom:8px;">📎 Cambiar foto</button>
         <input type="file" id="editFileInput" accept="image/*" style="display:none;">
         <input type="text" id="editPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
@@ -2177,14 +2179,21 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("editStock").value = card.stock;
     document.getElementById("editFeatured").checked = !!card.featured;
     document.getElementById("editImgPreview").innerHTML = card.image ? `<img src="${card.image}" style="max-height:100px;border-radius:8px;">` : "";
+    document.getElementById("editRemoveBgBtn").style.display = card.image ? "block" : "none";
     document.getElementById("editPasteInput").value = "";
     document.getElementById("adminEditStatus").textContent = "";
+  }
+
+  function setEditImage(url){
+    editImageData = url;
+    document.getElementById("editImgPreview").innerHTML = `<img src="${url}" style="max-height:100px;border-radius:8px;">`;
+    document.getElementById("editRemoveBgBtn").style.display = "block";
   }
 
   document.getElementById("editUploadBtn").addEventListener("click", () => document.getElementById("editFileInput").click());
   document.getElementById("editFileInput").addEventListener("change", () => {
     const file = document.getElementById("editFileInput").files[0];
-    if (file) compressAdminImage(file, url => { editImageData = url; document.getElementById("editImgPreview").innerHTML = `<img src="${url}" style="max-height:100px;border-radius:8px;">`; });
+    if (file) compressAdminImage(file, setEditImage);
   });
   document.getElementById("editPasteInput").addEventListener("paste", ev => {
     const items = ev.clipboardData?.items;
@@ -2192,14 +2201,29 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     for (const it of items){
       if (it.type.startsWith("image/")){
         ev.preventDefault();
-        compressAdminImage(it.getAsFile(), url => { editImageData = url; document.getElementById("editImgPreview").innerHTML = `<img src="${url}" style="max-height:100px;border-radius:8px;">`; });
+        compressAdminImage(it.getAsFile(), setEditImage);
         return;
       }
     }
   });
   document.getElementById("editPasteInput").addEventListener("change", () => {
     const val = document.getElementById("editPasteInput").value.trim();
-    if (val.startsWith("http")){ editImageData = val; document.getElementById("editImgPreview").innerHTML = `<img src="${val}" style="max-height:100px;border-radius:8px;">`; }
+    if (val.startsWith("http")) setEditImage(val);
+  });
+  document.getElementById("editRemoveBgBtn").addEventListener("click", () => {
+    const btn = document.getElementById("editRemoveBgBtn");
+    const source = editImageData || CARDS.find(c => String(c.id) === String(editingId))?.image;
+    if (!source) return;
+    btn.textContent = "Procesando…";
+    removeWhiteBackground(source, (cleanUrl) => {
+      editImageData = cleanUrl;
+      document.getElementById("editImgPreview").innerHTML = `<img src="${cleanUrl}" style="max-height:100px;border-radius:8px;background:repeating-conic-gradient(#2a2f3a 0% 25%, transparent 0% 50%) 50% / 14px 14px;">`;
+      btn.textContent = "✓ Listo — fondo quitado";
+      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2000);
+    }, () => {
+      btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
+      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2500);
+    });
   });
 
   document.getElementById("editSubmitBtn").addEventListener("click", async () => {
@@ -2323,6 +2347,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   function setAdminImage(dataUrl){
     adminImageData = dataUrl;
     document.getElementById("adminImgPreview").innerHTML = `<img src="${dataUrl}" style="max-height:100px;border-radius:8px;">`;
+    document.getElementById("adminRemoveBgBtn").style.display = "block";
   }
   function compressAdminImage(file, callback){
     const reader = new FileReader();
@@ -2344,6 +2369,39 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     };
     reader.readAsDataURL(file);
   }
+
+  // vuelve transparente el fondo blanco/casi blanco de una imagen, con borde suavizado
+  // (funciona con fotos subidas/pegadas; con imágenes de otros sitios puede fallar por seguridad del navegador)
+  function removeWhiteBackground(dataUrl, callback, onError){
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width; canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = imgData.data;
+        const threshold = 235, feather = 30;
+        for (let i = 0; i < d.length; i += 4){
+          const brightness = (d[i] + d[i+1] + d[i+2]) / 3;
+          const isWhitish = d[i] > threshold && d[i+1] > threshold && d[i+2] > threshold;
+          if (isWhitish){
+            d[i+3] = 0;
+          } else if (brightness > threshold - feather){
+            d[i+3] = Math.max(0, Math.min(255, ((threshold - brightness) / feather) * 255));
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        callback(canvas.toDataURL("image/png"));
+      } catch (err) {
+        onError && onError(err);
+      }
+    };
+    img.onerror = () => onError && onError(new Error("No se pudo cargar la imagen"));
+    img.src = dataUrl;
+  }
   document.getElementById("adminUploadBtn").addEventListener("click", () => document.getElementById("adminFileInput").click());
   document.getElementById("adminFileInput").addEventListener("change", () => {
     const file = document.getElementById("adminFileInput").files[0];
@@ -2363,6 +2421,20 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   document.getElementById("adminPasteInput").addEventListener("change", () => {
     const val = document.getElementById("adminPasteInput").value.trim();
     if (val.startsWith("http")) setAdminImage(val);
+  });
+
+  document.getElementById("adminRemoveBgBtn").addEventListener("click", () => {
+    const btn = document.getElementById("adminRemoveBgBtn");
+    btn.textContent = "Procesando…";
+    removeWhiteBackground(adminImageData, (cleanUrl) => {
+      adminImageData = cleanUrl;
+      document.getElementById("adminImgPreview").innerHTML = `<img src="${cleanUrl}" style="max-height:100px;border-radius:8px;background:repeating-conic-gradient(#2a2f3a 0% 25%, transparent 0% 50%) 50% / 14px 14px;">`;
+      btn.textContent = "✓ Listo — fondo quitado";
+      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2000);
+    }, () => {
+      btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
+      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2500);
+    });
   });
 
   document.getElementById("adminSubmitBtn").addEventListener("click", async () => {

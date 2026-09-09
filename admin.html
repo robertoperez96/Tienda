@@ -136,6 +136,7 @@
     <div style="margin-top:16px;">
       <label>Foto del producto</label>
       <div id="quickDropPreview" style="margin-top:8px;"></div>
+      <button type="button" id="quickRemoveBgBtn" style="display:none;width:100%;margin-top:6px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco</button>
       <div class="row" style="margin-top:8px;">
         <button type="button" class="btn btn-ghost" id="quickUploadBtn" style="flex:1;">📎 Subir foto desde tu dispositivo</button>
         <input type="file" id="quickFileInput" accept="image/*" style="display:none;">
@@ -1181,7 +1182,48 @@ updateQuickFieldsVisibility();
 function setQuickImage(dataUrl){
   quickImageData = dataUrl;
   document.getElementById("quickDropPreview").innerHTML = `<img src="${dataUrl}" style="max-height:120px;border-radius:8px;">`;
+  document.getElementById("quickRemoveBgBtn").style.display = "block";
 }
+
+// vuelve transparente el fondo blanco/casi blanco de una imagen, con borde suavizado
+function removeWhiteBackground(dataUrl, callback, onError){
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width; canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imgData.data;
+      const threshold = 235, feather = 30;
+      for (let i = 0; i < d.length; i += 4){
+        const brightness = (d[i] + d[i+1] + d[i+2]) / 3;
+        const isWhitish = d[i] > threshold && d[i+1] > threshold && d[i+2] > threshold;
+        if (isWhitish){ d[i+3] = 0; }
+        else if (brightness > threshold - feather){ d[i+3] = Math.max(0, Math.min(255, ((threshold - brightness) / feather) * 255)); }
+      }
+      ctx.putImageData(imgData, 0, 0);
+      callback(canvas.toDataURL("image/png"));
+    } catch (err) { onError && onError(err); }
+  };
+  img.onerror = () => onError && onError(new Error("No se pudo cargar"));
+  img.src = dataUrl;
+}
+document.getElementById("quickRemoveBgBtn").addEventListener("click", () => {
+  const btn = document.getElementById("quickRemoveBgBtn");
+  btn.textContent = "Procesando…";
+  removeWhiteBackground(quickImageData, (cleanUrl) => {
+    quickImageData = cleanUrl;
+    document.getElementById("quickDropPreview").innerHTML = `<img src="${cleanUrl}" style="max-height:120px;border-radius:8px;background:repeating-conic-gradient(#2a2f3a 0% 25%, transparent 0% 50%) 50% / 14px 14px;">`;
+    btn.textContent = "✓ Listo — fondo quitado";
+    setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2000);
+  }, () => {
+    btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
+    setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2500);
+  });
+});
 document.getElementById("quickUploadBtn").addEventListener("click", () => document.getElementById("quickFileInput").click());
 document.getElementById("quickFileInput").addEventListener("change", () => {
   const file = document.getElementById("quickFileInput").files[0];
@@ -1268,6 +1310,7 @@ document.addEventListener("click", (e) => {
     document.getElementById("quickStock").value = "1";
     document.getElementById("quickFeatured").checked = false;
     document.getElementById("quickDropPreview").innerHTML = "";
+    document.getElementById("quickRemoveBgBtn").style.display = "none";
     document.getElementById("quickPasteInput").value = "";
     quickImageData = "";
   } catch (err) {
