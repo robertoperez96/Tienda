@@ -605,7 +605,7 @@
   }
   @media (max-width:680px){ .zoom-art{ border-radius:var(--radius-l) var(--radius-l) 0 0; } }
   .zoom-art img{max-width:100%;max-height:56vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 44px rgba(0,0,0,.55);}
-  .zoom-gallery-dots{display:flex;justify-content:center;gap:6px;padding:10px 0 0;}
+  .zoom-gallery-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;justify-content:center;gap:6px;z-index:3;}
   .zoom-gallery-dots span{width:6px;height:6px;border-radius:999px;background:var(--line-strong);cursor:pointer;transition:all .2s;}
   .zoom-gallery-dots span.active{background:var(--foil-bright);width:16px;}
   .zoom-gallery-arrow{
@@ -1026,8 +1026,9 @@
 <div class="zoom-backdrop" id="zoomBackdrop"></div>
 <div class="zoom-modal" id="zoomModal">
   <button class="icon-btn zoom-close" id="zoomClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
-  <div class="zoom-art" id="zoomArt"></div>
-  <div class="zoom-gallery-dots" id="zoomGalleryDots" style="display:none;"></div>
+  <div class="zoom-art" id="zoomArt">
+    <div class="zoom-gallery-dots" id="zoomGalleryDots" style="display:none;"></div>
+  </div>
   <div class="zoom-info">
     <div class="zoom-set" id="zoomSet"></div>
     <h3 id="zoomName"></h3>
@@ -1286,7 +1287,7 @@ function renderCard(card){
   const gallery = (Array.isArray(card.images) && card.images.length > 1) ? card.images : null;
   let artImg;
   if (gallery){
-    artImg = `<div class="card-img-stack">${gallery.map((src,i) => `<img class="real card-gimg${i===0?' active':''}" data-i="${i}" src="${src}" alt="${card.name}" loading="lazy" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.style.display='none'">`).join("")}</div>
+    artImg = `<div class="card-img-stack">${gallery.map((src,i) => `<img class="real card-gimg${i===0?' active':''}" data-i="${i}" src="${src}" alt="${card.name}" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.style.display='none'">`).join("")}</div>
       <button type="button" class="card-gallery-arrow prev" aria-label="Foto anterior"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <button type="button" class="card-gallery-arrow next" aria-label="Foto siguiente"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="card-gallery-dots">${gallery.map((_,i) => `<span class="${i===0?'active':''}"></span>`).join("")}</div>`;
