@@ -154,6 +154,11 @@
   .cat-tab .cat-icon{font-size:16px;}
   .cat-tab-small{font-size:12px;padding:10px 16px;}
   .jp-flag svg{border-radius:2px;box-shadow:0 0 0 1px rgba(237,230,214,.25);display:block;}
+  .gallery-thumb{position:relative;width:60px;height:60px;border-radius:8px;overflow:hidden;border:1px solid var(--line-strong);flex-shrink:0;}
+  .gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .gallery-thumb.primary{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil);}
+  .gallery-thumb .primary-tag{position:absolute;bottom:0;left:0;right:0;background:rgba(201,162,39,.9);color:#171205;font-size:8px;font-weight:700;text-align:center;padding:1px 0;}
+  .gallery-thumb .remove-thumb{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:999px;background:rgba(11,14,20,.8);border:none;color:#fff;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
   .cat-tab:hover{border-color:var(--foil-dim);color:var(--cream);transform:translateY(-1px);}
   .cat-tab.active{
     background:linear-gradient(135deg,var(--foil-dim),rgba(201,162,39,0.06));
@@ -577,9 +582,22 @@
     background:linear-gradient(160deg,var(--ink-4),var(--ink-3));
     display:flex;align-items:center;justify-content:center;padding:34px;
     border-radius:var(--radius-l) 0 0 var(--radius-l);
+    position:relative;
   }
   @media (max-width:680px){ .zoom-art{ border-radius:var(--radius-l) var(--radius-l) 0 0; } }
   .zoom-art img{max-width:100%;max-height:56vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 44px rgba(0,0,0,.55);}
+  .zoom-gallery-dots{display:flex;justify-content:center;gap:6px;padding:10px 0 0;}
+  .zoom-gallery-dots span{width:6px;height:6px;border-radius:999px;background:var(--line-strong);cursor:pointer;transition:all .2s;}
+  .zoom-gallery-dots span.active{background:var(--foil-bright);width:16px;}
+  .zoom-gallery-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:2;
+    width:32px;height:32px;border-radius:999px;background:rgba(11,14,20,.6);
+    border:1px solid var(--line-strong);color:var(--cream);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .zoom-gallery-arrow:hover{background:rgba(11,14,20,.85);border-color:var(--foil-dim);}
+  .zoom-gallery-arrow.prev{left:10px;}
+  .zoom-gallery-arrow.next{right:10px;}
   .zoom-art svg.gem{width:80px;height:80px;opacity:.8;}
   .zoom-info{padding:30px 28px;}
   .zoom-set{font-family:var(--font-mono);font-size:12px;color:var(--slate);margin-bottom:8px;}
@@ -927,11 +945,12 @@
         <input type="number" id="adminPrice" placeholder="Precio (MXN)" style="flex:1;">
         <input type="number" id="adminStock" placeholder="Stock" value="1" style="flex:1;">
       </div>
-      <div id="adminImgPreview" style="margin-bottom:8px;"></div>
-      <button type="button" id="adminRemoveBgBtn" style="display:none;width:100%;margin-bottom:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco</button>
-      <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Subir foto</button>
-      <input type="file" id="adminFileInput" accept="image/*" style="display:none;">
+      <div id="adminImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
+      <button type="button" id="adminRemoveBgBtn" style="display:none;width:100%;margin-bottom:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco (de la principal)</button>
+      <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Agregar foto(s)</button>
+      <input type="file" id="adminFileInput" accept="image/*" multiple style="display:none;">
       <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
+      <p style="font-size:10.5px;color:var(--slate);margin-top:4px;">La primera foto es la principal (la del catálogo). Las demás forman una galería que se ve al expandir la imagen.</p>
       <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
         <input type="checkbox" id="adminFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
       </label>
@@ -960,11 +979,12 @@
           <input type="number" id="editPrice" placeholder="Precio (MXN)" style="flex:1;">
           <input type="number" id="editStock" placeholder="Stock" style="flex:1;">
         </div>
-        <div id="editImgPreview" style="margin-bottom:8px;"></div>
-        <button type="button" id="editRemoveBgBtn" style="display:none;width:100%;margin-bottom:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco</button>
-        <button type="button" class="btn btn-ghost" id="editUploadBtn" style="width:100%;margin-bottom:8px;">📎 Cambiar foto</button>
-        <input type="file" id="editFileInput" accept="image/*" style="display:none;">
+        <div id="editImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
+        <button type="button" id="editRemoveBgBtn" style="display:none;width:100%;margin-bottom:8px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco (de la principal)</button>
+        <button type="button" class="btn btn-ghost" id="editUploadBtn" style="width:100%;margin-bottom:8px;">📎 Agregar foto(s)</button>
+        <input type="file" id="editFileInput" accept="image/*" multiple style="display:none;">
         <input type="text" id="editPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
+        <p style="font-size:10.5px;color:var(--slate);margin-top:4px;">La primera foto es la principal. Las demás forman una galería.</p>
         <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
           <input type="checkbox" id="editFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
         </label>
@@ -990,6 +1010,7 @@
 <div class="zoom-modal" id="zoomModal">
   <button class="icon-btn zoom-close" id="zoomClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <div class="zoom-art" id="zoomArt"></div>
+  <div class="zoom-gallery-dots" id="zoomGalleryDots" style="display:none;"></div>
   <div class="zoom-info">
     <div class="zoom-set" id="zoomSet"></div>
     <h3 id="zoomName"></h3>
@@ -1327,7 +1348,36 @@ function openZoom(card){
   trackEvent("view", card.id);
   if (card.stock === 1) trackEvent("low_stock_view", card.id);
   const artWrap = document.getElementById("zoomArt");
-  artWrap.innerHTML = card.image ? `<img src="${card.image}" alt="${card.name}" onerror="this.remove()">` : GEM_ICON;
+  const dotsWrap = document.getElementById("zoomGalleryDots");
+  const gallery = (Array.isArray(card.images) && card.images.length) ? card.images : (card.image ? [card.image] : []);
+  let galleryIdx = 0;
+
+  function renderZoomArt(){
+    artWrap.querySelectorAll("img, .zoom-gallery-arrow").forEach(el => el.remove());
+    if (!gallery.length){
+      artWrap.insertAdjacentHTML("afterbegin", GEM_ICON);
+    } else {
+      artWrap.insertAdjacentHTML("afterbegin", `<img src="${gallery[galleryIdx]}" alt="${card.name}" onerror="this.remove()">`);
+      if (gallery.length > 1){
+        artWrap.insertAdjacentHTML("beforeend", `
+          <button type="button" class="zoom-gallery-arrow prev" aria-label="Anterior"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="zoom-gallery-arrow next" aria-label="Siguiente"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        `);
+        artWrap.querySelector(".prev").addEventListener("click", () => { galleryIdx = (galleryIdx - 1 + gallery.length) % gallery.length; renderZoomArt(); });
+        artWrap.querySelector(".next").addEventListener("click", () => { galleryIdx = (galleryIdx + 1) % gallery.length; renderZoomArt(); });
+      }
+    }
+    if (gallery.length > 1){
+      dotsWrap.style.display = "flex";
+      dotsWrap.innerHTML = gallery.map((_, i) => `<span class="${i===galleryIdx?'active':''}"></span>`).join("");
+      dotsWrap.querySelectorAll("span").forEach((dot, i) => dot.addEventListener("click", () => { galleryIdx = i; renderZoomArt(); }));
+    } else {
+      dotsWrap.style.display = "none";
+      dotsWrap.innerHTML = "";
+    }
+  }
+  renderZoomArt();
+
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
   document.getElementById("zoomName").textContent = card.name;
   document.getElementById("zoomMeta").innerHTML = `<span class="tag">${card.rarity}</span><span class="tag">${card.language}</span><span class="tag">${card.condition}</span>`;
@@ -2180,7 +2230,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   const closeBtn = document.getElementById("adminModalClose");
   const loginStep = document.getElementById("adminLoginStep");
   const addStep = document.getElementById("adminAddStep");
-  let adminImageData = "";
+  let adminImages = [];
 
   function openModal(){
     modal.classList.add("open");
@@ -2209,7 +2259,23 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
 
   /* ---- editar producto existente ---- */
   let editingId = null;
-  let editImageData = "";
+  let editImages = [];
+
+  function renderEditGallery(){
+    const wrap = document.getElementById("editImgGallery");
+    wrap.innerHTML = editImages.map((url, i) => `
+      <div class="gallery-thumb${i===0?' primary':''}">
+        <img src="${url}">
+        ${i===0?'<span class="primary-tag">Principal</span>':''}
+        <button type="button" class="remove-thumb" data-i="${i}">×</button>
+      </div>
+    `).join("");
+    wrap.querySelectorAll(".remove-thumb").forEach(btn => {
+      btn.addEventListener("click", () => { editImages.splice(Number(btn.dataset.i), 1); renderEditGallery(); });
+    });
+    document.getElementById("editRemoveBgBtn").style.display = editImages.length ? "block" : "none";
+  }
+  function addEditImage(url){ editImages.push(url); renderEditGallery(); }
 
   function resetEditSearch(){
     editingId = null;
@@ -2244,7 +2310,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     const card = CARDS.find(c => String(c.id) === String(id));
     if (!card) return;
     editingId = card.id;
-    editImageData = "";
+    editImages = Array.isArray(card.images) && card.images.length ? [...card.images] : (card.image ? [card.image] : []);
     document.getElementById("adminEditSearchStep").style.display = "none";
     document.getElementById("adminEditFormStep").style.display = "block";
     document.getElementById("editCategory").value = card.category || "pokemon";
@@ -2252,22 +2318,15 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("editPrice").value = card.price;
     document.getElementById("editStock").value = card.stock;
     document.getElementById("editFeatured").checked = !!card.featured;
-    document.getElementById("editImgPreview").innerHTML = card.image ? `<img src="${card.image}" style="max-height:100px;border-radius:8px;">` : "";
-    document.getElementById("editRemoveBgBtn").style.display = card.image ? "block" : "none";
+    renderEditGallery();
     document.getElementById("editPasteInput").value = "";
     document.getElementById("adminEditStatus").textContent = "";
   }
 
-  function setEditImage(url){
-    editImageData = url;
-    document.getElementById("editImgPreview").innerHTML = `<img src="${url}" style="max-height:100px;border-radius:8px;">`;
-    document.getElementById("editRemoveBgBtn").style.display = "block";
-  }
-
   document.getElementById("editUploadBtn").addEventListener("click", () => document.getElementById("editFileInput").click());
   document.getElementById("editFileInput").addEventListener("change", () => {
-    const file = document.getElementById("editFileInput").files[0];
-    if (file) compressAdminImage(file, setEditImage);
+    const files = [...document.getElementById("editFileInput").files];
+    files.forEach(file => compressAdminImage(file, addEditImage));
   });
   document.getElementById("editPasteInput").addEventListener("paste", ev => {
     const items = ev.clipboardData?.items;
@@ -2275,28 +2334,27 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     for (const it of items){
       if (it.type.startsWith("image/")){
         ev.preventDefault();
-        compressAdminImage(it.getAsFile(), setEditImage);
+        compressAdminImage(it.getAsFile(), addEditImage);
         return;
       }
     }
   });
   document.getElementById("editPasteInput").addEventListener("change", () => {
     const val = document.getElementById("editPasteInput").value.trim();
-    if (val.startsWith("http")) setEditImage(val);
+    if (val.startsWith("http")){ addEditImage(val); document.getElementById("editPasteInput").value = ""; }
   });
   document.getElementById("editRemoveBgBtn").addEventListener("click", () => {
+    if (!editImages.length) return;
     const btn = document.getElementById("editRemoveBgBtn");
-    const source = editImageData || CARDS.find(c => String(c.id) === String(editingId))?.image;
-    if (!source) return;
     btn.textContent = "Procesando…";
-    removeWhiteBackground(source, (cleanUrl) => {
-      editImageData = cleanUrl;
-      document.getElementById("editImgPreview").innerHTML = `<img src="${cleanUrl}" style="max-height:100px;border-radius:8px;background:repeating-conic-gradient(#2a2f3a 0% 25%, transparent 0% 50%) 50% / 14px 14px;">`;
+    removeWhiteBackground(editImages[0], (cleanUrl) => {
+      editImages[0] = cleanUrl;
+      renderEditGallery();
       btn.textContent = "✓ Listo — fondo quitado";
-      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2000);
+      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2000);
     }, () => {
       btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
-      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2500);
+      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2500);
     });
   });
 
@@ -2310,7 +2368,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       stock: Number(document.getElementById("editStock").value),
       featured: document.getElementById("editFeatured").checked,
     };
-    if (editImageData) changes.image = editImageData;
+    if (editImages.length){ changes.image = editImages[0]; changes.images = editImages; }
     if (!changes.name || !changes.price){ status.textContent = "Falta nombre o precio."; return; }
     status.textContent = "Guardando…";
     try {
@@ -2418,10 +2476,23 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     refreshAllViews();
   });
 
-  function setAdminImage(dataUrl){
-    adminImageData = dataUrl;
-    document.getElementById("adminImgPreview").innerHTML = `<img src="${dataUrl}" style="max-height:100px;border-radius:8px;">`;
-    document.getElementById("adminRemoveBgBtn").style.display = "block";
+  function renderAdminGallery(){
+    const wrap = document.getElementById("adminImgGallery");
+    wrap.innerHTML = adminImages.map((url, i) => `
+      <div class="gallery-thumb${i===0?' primary':''}">
+        <img src="${url}">
+        ${i===0?'<span class="primary-tag">Principal</span>':''}
+        <button type="button" class="remove-thumb" data-i="${i}">×</button>
+      </div>
+    `).join("");
+    wrap.querySelectorAll(".remove-thumb").forEach(btn => {
+      btn.addEventListener("click", () => { adminImages.splice(Number(btn.dataset.i), 1); renderAdminGallery(); });
+    });
+    document.getElementById("adminRemoveBgBtn").style.display = adminImages.length ? "block" : "none";
+  }
+  function addAdminImage(dataUrl){
+    adminImages.push(dataUrl);
+    renderAdminGallery();
   }
   function compressAdminImage(file, callback){
     const reader = new FileReader();
@@ -2451,22 +2522,50 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     img.crossOrigin = "anonymous";
     img.onload = () => {
       try {
+        const w = img.width, h = img.height;
         const canvas = document.createElement("canvas");
-        canvas.width = img.width; canvas.height = img.height;
+        canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0);
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const imgData = ctx.getImageData(0, 0, w, h);
         const d = imgData.data;
-        const threshold = 235, feather = 30;
-        for (let i = 0; i < d.length; i += 4){
-          const brightness = (d[i] + d[i+1] + d[i+2]) / 3;
-          const isWhitish = d[i] > threshold && d[i+1] > threshold && d[i+2] > threshold;
-          if (isWhitish){
-            d[i+3] = 0;
-          } else if (brightness > threshold - feather){
-            d[i+3] = Math.max(0, Math.min(255, ((threshold - brightness) / feather) * 255));
-          }
+        const threshold = 235;
+        const isWhitish = idx => d[idx] > threshold && d[idx+1] > threshold && d[idx+2] > threshold;
+
+        // relleno desde los bordes: solo el blanco CONECTADO al borde de la foto se
+        // considera "fondo" — el blanco que esté encerrado dentro del producto se respeta
+        const visited = new Uint8Array(w * h);
+        const queue = new Int32Array(w * h);
+        let qLen = 0;
+        function tryAdd(x, y){
+          if (x < 0 || x >= w || y < 0 || y >= h) return;
+          const p = y * w + x;
+          if (visited[p]) return;
+          if (!isWhitish(p * 4)) return;
+          visited[p] = 1;
+          queue[qLen++] = p;
         }
+        for (let x = 0; x < w; x++){ tryAdd(x, 0); tryAdd(x, h - 1); }
+        for (let y = 0; y < h; y++){ tryAdd(0, y); tryAdd(w - 1, y); }
+        let qi = 0;
+        while (qi < qLen){
+          const p = queue[qi++];
+          const x = p % w, y = (p / w) | 0;
+          tryAdd(x + 1, y); tryAdd(x - 1, y); tryAdd(x, y + 1); tryAdd(x, y - 1);
+        }
+        for (let p = 0; p < w * h; p++){ if (visited[p]) d[p * 4 + 3] = 0; }
+
+        // suaviza el borde donde el fondo quitado toca el producto, para que no quede un corte duro
+        for (let p = 0; p < w * h; p++){
+          if (visited[p]) continue;
+          const x = p % w, y = (p / w) | 0;
+          const idx = p * 4;
+          const brightness = (d[idx] + d[idx+1] + d[idx+2]) / 3;
+          if (brightness < 190) continue;
+          const near = (x+1<w && visited[p+1]) || (x>0 && visited[p-1]) || (y+1<h && visited[p+w]) || (y>0 && visited[p-w]);
+          if (near) d[idx+3] = Math.round(d[idx+3] * 0.45);
+        }
+
         ctx.putImageData(imgData, 0, 0);
         callback(canvas.toDataURL("image/png"));
       } catch (err) {
@@ -2478,8 +2577,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   }
   document.getElementById("adminUploadBtn").addEventListener("click", () => document.getElementById("adminFileInput").click());
   document.getElementById("adminFileInput").addEventListener("change", () => {
-    const file = document.getElementById("adminFileInput").files[0];
-    if (file) compressAdminImage(file, setAdminImage);
+    const files = [...document.getElementById("adminFileInput").files];
+    files.forEach(file => compressAdminImage(file, addAdminImage));
   });
   document.getElementById("adminPasteInput").addEventListener("paste", ev => {
     const items = ev.clipboardData?.items;
@@ -2487,27 +2586,28 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     for (const it of items){
       if (it.type.startsWith("image/")){
         ev.preventDefault();
-        compressAdminImage(it.getAsFile(), setAdminImage);
+        compressAdminImage(it.getAsFile(), addAdminImage);
         return;
       }
     }
   });
   document.getElementById("adminPasteInput").addEventListener("change", () => {
     const val = document.getElementById("adminPasteInput").value.trim();
-    if (val.startsWith("http")) setAdminImage(val);
+    if (val.startsWith("http")){ addAdminImage(val); document.getElementById("adminPasteInput").value = ""; }
   });
 
   document.getElementById("adminRemoveBgBtn").addEventListener("click", () => {
+    if (!adminImages.length) return;
     const btn = document.getElementById("adminRemoveBgBtn");
     btn.textContent = "Procesando…";
-    removeWhiteBackground(adminImageData, (cleanUrl) => {
-      adminImageData = cleanUrl;
-      document.getElementById("adminImgPreview").innerHTML = `<img src="${cleanUrl}" style="max-height:100px;border-radius:8px;background:repeating-conic-gradient(#2a2f3a 0% 25%, transparent 0% 50%) 50% / 14px 14px;">`;
+    removeWhiteBackground(adminImages[0], (cleanUrl) => {
+      adminImages[0] = cleanUrl;
+      renderAdminGallery();
       btn.textContent = "✓ Listo — fondo quitado";
-      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2000);
+      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2000);
     }, () => {
       btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
-      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2500);
+      setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2500);
     });
   });
 
@@ -2521,7 +2621,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       kind: document.getElementById("adminCategory").value === "pokemon" ? "single" : document.getElementById("adminCategory").value,
       name, price, stock: Number(document.getElementById("adminStock").value) || 1,
       featured: document.getElementById("adminFeatured").checked,
-      image: adminImageData
+      image: adminImages[0] || "", images: adminImages
     };
     status.textContent = "Publicando…";
     try {
@@ -2539,9 +2639,9 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         document.getElementById("adminPrice").value = "";
         document.getElementById("adminStock").value = "1";
         document.getElementById("adminFeatured").checked = false;
-        document.getElementById("adminImgPreview").innerHTML = "";
+        adminImages = [];
+        renderAdminGallery();
         document.getElementById("adminPasteInput").value = "";
-        adminImageData = "";
       } else {
         status.textContent = data.error || "No se pudo publicar.";
         if (res.status === 401){

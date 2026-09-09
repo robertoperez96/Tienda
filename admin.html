@@ -15,6 +15,11 @@
     --font-display:'Fraunces',serif;--font-body:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;
   }
   *{box-sizing:border-box;}
+  .gallery-thumb{position:relative;width:60px;height:60px;border-radius:8px;overflow:hidden;border:1px solid var(--line-strong);flex-shrink:0;}
+  .gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .gallery-thumb.primary{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil);}
+  .gallery-thumb .primary-tag{position:absolute;bottom:0;left:0;right:0;background:rgba(201,162,39,.9);color:#171205;font-size:8px;font-weight:700;text-align:center;padding:1px 0;}
+  .gallery-thumb .remove-thumb{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:999px;background:rgba(11,14,20,.8);border:none;color:#fff;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
   html{scroll-behavior:smooth;}
   body{margin:0;background:var(--ink);color:var(--cream);font-family:var(--font-body);line-height:1.5;}
   .wrap{max-width:980px;margin:0 auto;padding:36px 24px 100px;}
@@ -135,16 +140,17 @@
     </label>
 
     <div style="margin-top:16px;">
-      <label>Foto del producto</label>
-      <div id="quickDropPreview" style="margin-top:8px;"></div>
-      <button type="button" id="quickRemoveBgBtn" style="display:none;width:100%;margin-top:6px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco</button>
+      <label>Fotos del producto</label>
+      <div id="quickDropPreview" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+      <button type="button" id="quickRemoveBgBtn" style="display:none;width:100%;margin-top:6px;background:none;border:1px dashed var(--foil-dim);color:var(--foil-bright);border-radius:8px;padding:7px;font-size:11.5px;cursor:pointer;">🪄 Quitar fondo blanco (de la principal)</button>
       <div class="row" style="margin-top:8px;">
-        <button type="button" class="btn btn-ghost" id="quickUploadBtn" style="flex:1;">📎 Subir foto desde tu dispositivo</button>
-        <input type="file" id="quickFileInput" accept="image/*" style="display:none;">
+        <button type="button" class="btn btn-ghost" id="quickUploadBtn" style="flex:1;">📎 Agregar foto(s) desde tu dispositivo</button>
+        <input type="file" id="quickFileInput" accept="image/*" multiple style="display:none;">
       </div>
       <div style="margin-top:8px;">
         <input type="text" id="quickPasteInput" placeholder="O pega aquí una imagen (Ctrl+V) o un link de imagen…" style="width:100%;">
       </div>
+      <p style="font-size:10.5px;color:var(--slate);margin-top:4px;">La primera foto es la principal (la del catálogo). Las demás forman una galería en el zoom.</p>
     </div>
 
     <div class="add-row"><button class="btn btn-foil" id="quickAddBtn" type="button">Agregar al catálogo</button></div>
@@ -1164,7 +1170,7 @@ document.getElementById("unlockAllPricesBtn").addEventListener("click", () => {
 });
 
 /* ---- 1 · agregar producto individual con foto (cartas o juguetes) ---- */
-let quickImageData = "";
+let quickImages = [];
 
 function updateQuickFieldsVisibility(){
   const cat = document.getElementById("quickCategory").value;
@@ -1180,10 +1186,23 @@ function updateQuickFieldsVisibility(){
 document.getElementById("quickCategory").addEventListener("change", updateQuickFieldsVisibility);
 updateQuickFieldsVisibility();
 
-function setQuickImage(dataUrl){
-  quickImageData = dataUrl;
-  document.getElementById("quickDropPreview").innerHTML = `<img src="${dataUrl}" style="max-height:120px;border-radius:8px;">`;
-  document.getElementById("quickRemoveBgBtn").style.display = "block";
+function renderQuickGallery(){
+  const wrap = document.getElementById("quickDropPreview");
+  wrap.innerHTML = quickImages.map((url, i) => `
+    <div class="gallery-thumb${i===0?' primary':''}">
+      <img src="${url}">
+      ${i===0?'<span class="primary-tag">Principal</span>':''}
+      <button type="button" class="remove-thumb" data-i="${i}">×</button>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".remove-thumb").forEach(btn => {
+    btn.addEventListener("click", () => { quickImages.splice(Number(btn.dataset.i), 1); renderQuickGallery(); });
+  });
+  document.getElementById("quickRemoveBgBtn").style.display = quickImages.length ? "block" : "none";
+}
+function addQuickImage(dataUrl){
+  quickImages.push(dataUrl);
+  renderQuickGallery();
 }
 
 // vuelve transparente el fondo blanco/casi blanco de una imagen, con borde suavizado
@@ -1192,19 +1211,50 @@ function removeWhiteBackground(dataUrl, callback, onError){
   img.crossOrigin = "anonymous";
   img.onload = () => {
     try {
+      const w = img.width, h = img.height;
       const canvas = document.createElement("canvas");
-      canvas.width = img.width; canvas.height = img.height;
+      canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const imgData = ctx.getImageData(0, 0, w, h);
       const d = imgData.data;
-      const threshold = 235, feather = 30;
-      for (let i = 0; i < d.length; i += 4){
-        const brightness = (d[i] + d[i+1] + d[i+2]) / 3;
-        const isWhitish = d[i] > threshold && d[i+1] > threshold && d[i+2] > threshold;
-        if (isWhitish){ d[i+3] = 0; }
-        else if (brightness > threshold - feather){ d[i+3] = Math.max(0, Math.min(255, ((threshold - brightness) / feather) * 255)); }
+      const threshold = 235;
+      const isWhitish = idx => d[idx] > threshold && d[idx+1] > threshold && d[idx+2] > threshold;
+
+      // relleno desde los bordes: solo el blanco CONECTADO al borde de la foto se
+      // considera "fondo" — el blanco encerrado dentro del producto se respeta
+      const visited = new Uint8Array(w * h);
+      const queue = new Int32Array(w * h);
+      let qLen = 0;
+      function tryAdd(x, y){
+        if (x < 0 || x >= w || y < 0 || y >= h) return;
+        const p = y * w + x;
+        if (visited[p]) return;
+        if (!isWhitish(p * 4)) return;
+        visited[p] = 1;
+        queue[qLen++] = p;
       }
+      for (let x = 0; x < w; x++){ tryAdd(x, 0); tryAdd(x, h - 1); }
+      for (let y = 0; y < h; y++){ tryAdd(0, y); tryAdd(w - 1, y); }
+      let qi = 0;
+      while (qi < qLen){
+        const p = queue[qi++];
+        const x = p % w, y = (p / w) | 0;
+        tryAdd(x + 1, y); tryAdd(x - 1, y); tryAdd(x, y + 1); tryAdd(x, y - 1);
+      }
+      for (let p = 0; p < w * h; p++){ if (visited[p]) d[p * 4 + 3] = 0; }
+
+      // suaviza el borde donde el fondo quitado toca el producto
+      for (let p = 0; p < w * h; p++){
+        if (visited[p]) continue;
+        const x = p % w, y = (p / w) | 0;
+        const idx = p * 4;
+        const brightness = (d[idx] + d[idx+1] + d[idx+2]) / 3;
+        if (brightness < 190) continue;
+        const near = (x+1<w && visited[p+1]) || (x>0 && visited[p-1]) || (y+1<h && visited[p+w]) || (y>0 && visited[p-w]);
+        if (near) d[idx+3] = Math.round(d[idx+3] * 0.45);
+      }
+
       ctx.putImageData(imgData, 0, 0);
       callback(canvas.toDataURL("image/png"));
     } catch (err) { onError && onError(err); }
@@ -1213,23 +1263,23 @@ function removeWhiteBackground(dataUrl, callback, onError){
   img.src = dataUrl;
 }
 document.getElementById("quickRemoveBgBtn").addEventListener("click", () => {
+  if (!quickImages.length) return;
   const btn = document.getElementById("quickRemoveBgBtn");
   btn.textContent = "Procesando…";
-  removeWhiteBackground(quickImageData, (cleanUrl) => {
-    quickImageData = cleanUrl;
-    document.getElementById("quickDropPreview").innerHTML = `<img src="${cleanUrl}" style="max-height:120px;border-radius:8px;background:repeating-conic-gradient(#2a2f3a 0% 25%, transparent 0% 50%) 50% / 14px 14px;">`;
+  removeWhiteBackground(quickImages[0], (cleanUrl) => {
+    quickImages[0] = cleanUrl;
+    renderQuickGallery();
     btn.textContent = "✓ Listo — fondo quitado";
-    setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2000);
+    setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2000);
   }, () => {
     btn.textContent = "No se pudo (imagen externa) — sube la foto tú mismo";
-    setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco"; }, 2500);
+    setTimeout(() => { btn.textContent = "🪄 Quitar fondo blanco (de la principal)"; }, 2500);
   });
 });
 document.getElementById("quickUploadBtn").addEventListener("click", () => document.getElementById("quickFileInput").click());
 document.getElementById("quickFileInput").addEventListener("change", () => {
-  const file = document.getElementById("quickFileInput").files[0];
-  if (!file) return;
-  compressImage(file, 700, setQuickImage);
+  const files = [...document.getElementById("quickFileInput").files];
+  files.forEach(file => compressImage(file, 700, addQuickImage));
 });
 document.getElementById("quickPasteInput").addEventListener("paste", ev => {
   const items = ev.clipboardData?.items;
@@ -1238,7 +1288,7 @@ document.getElementById("quickPasteInput").addEventListener("paste", ev => {
     if (it.type.startsWith("image/")){
       ev.preventDefault();
       const file = it.getAsFile();
-      compressImage(file, 700, dataUrl => { setQuickImage(dataUrl); document.getElementById("quickPasteInput").value = "(imagen pegada)"; });
+      compressImage(file, 700, dataUrl => { addQuickImage(dataUrl); document.getElementById("quickPasteInput").value = "(imagen pegada)"; });
       return;
     }
   }
@@ -1246,7 +1296,7 @@ document.getElementById("quickPasteInput").addEventListener("paste", ev => {
 });
 document.getElementById("quickPasteInput").addEventListener("change", () => {
   const val = document.getElementById("quickPasteInput").value.trim();
-  if (val && val.startsWith("http")) setQuickImage(val);
+  if (val && val.startsWith("http")){ addQuickImage(val); document.getElementById("quickPasteInput").value = ""; }
 });
 
 document.addEventListener("click", (e) => {
@@ -1270,8 +1320,8 @@ document.addEventListener("click", (e) => {
         rarity: document.getElementById("quickToyType").value.trim() || "Coleccionable",
         condition: "Nuevo", language: "", type: "incoloro",
         category: "toy", kind: "toy", price, stock,
-        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
-        priceSource: "manual", image: quickImageData
+        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImages.length,
+        priceSource: "manual", image: quickImages[0] || "", images: quickImages
       };
     } else if (category === "acrylic"){
       entry = {
@@ -1279,16 +1329,16 @@ document.addEventListener("click", (e) => {
         rarity: document.getElementById("quickAcrylicType").value.trim() || "Acrílico",
         condition: "Nuevo", language: "", type: "incoloro",
         category: "acrylic", kind: "acrylic", price, stock,
-        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
-        priceSource: "manual", image: quickImageData
+        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImages.length,
+        priceSource: "manual", image: quickImages[0] || "", images: quickImages
       };
     } else if (category === "pcjp"){
       entry = {
         id: nextId++, name, set: "Pokémon Center Japón", code: "", num: 0, total: 0,
         rarity: "Exclusivo", condition: "Nuevo", language: "Japonés", type: "incoloro",
         category: "pcjp", kind: "pcjp", price, stock,
-        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
-        priceSource: "manual", image: quickImageData
+        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImages.length,
+        priceSource: "manual", image: quickImages[0] || "", images: quickImages
       };
     } else {
       entry = {
@@ -1300,8 +1350,8 @@ document.addEventListener("click", (e) => {
         language: document.getElementById("quickLang").value,
         type: "incoloro", category: "pokemon",
         kind: document.getElementById("quickKind").value, price, stock,
-        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImageData,
-        priceSource: "manual", image: quickImageData
+        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImages.length,
+        priceSource: "manual", image: quickImages[0] || "", images: quickImages
       };
     }
     catalog.push(entry);
@@ -1321,7 +1371,8 @@ document.addEventListener("click", (e) => {
     document.getElementById("quickDropPreview").innerHTML = "";
     document.getElementById("quickRemoveBgBtn").style.display = "none";
     document.getElementById("quickPasteInput").value = "";
-    quickImageData = "";
+    quickImages = [];
+    renderQuickGallery();
   } catch (err) {
     status.textContent = "Error al agregar: " + err.message;
     console.error(err);
