@@ -1350,9 +1350,14 @@ function renderCard(card){
     let idx = 0;
     function showGalleryIdx(i){
       idx = (i + gallery.length) % gallery.length;
-      imgs.forEach((img, n) => img.classList.toggle("active", n === idx));
+      imgs.forEach((img, n) => {
+        const active = n === idx;
+        img.style.opacity = active ? "1" : "0";
+        img.style.zIndex = active ? "2" : "1";
+      });
       dots.forEach((d, n) => d.classList.toggle("active", n === idx));
     }
+    showGalleryIdx(0); // fuerza el estado inicial correcto, sin depender solo de la clase del HTML
     el.querySelector(".card-gallery-arrow.prev").addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(idx - 1); });
     el.querySelector(".card-gallery-arrow.next").addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(idx + 1); });
     dots.forEach((d, n) => d.addEventListener("click", ev => { ev.stopPropagation(); showGalleryIdx(n); }));
