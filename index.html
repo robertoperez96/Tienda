@@ -152,13 +152,15 @@
     transition:all .2s ease;
   }
   .cat-tab .cat-icon{font-size:16px;}
+  .cat-tab-small{font-size:12px;padding:10px 16px;}
+  .jp-flag svg{border-radius:2px;box-shadow:0 0 0 1px rgba(237,230,214,.25);display:block;}
   .cat-tab:hover{border-color:var(--foil-dim);color:var(--cream);transform:translateY(-1px);}
   .cat-tab.active{
     background:linear-gradient(135deg,var(--foil-dim),rgba(201,162,39,0.06));
     border-color:var(--foil);color:var(--foil-bright);
     box-shadow:0 6px 16px -6px rgba(201,162,39,.35);
   }
-  @media (max-width:640px){ .category-nav-inner{padding:10px 16px;gap:8px;} .cat-tab{padding:9px 16px;font-size:12.5px;} }
+  @media (max-width:640px){ .category-nav-inner{padding:10px 16px;gap:8px;} .cat-tab{padding:9px 16px;font-size:12.5px;} .cat-tab-small{font-size:10.5px;padding:9px 13px;} }
 
   section.hero{padding:28px 0 22px;position:relative;overflow:hidden;}
   .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;}
@@ -671,6 +673,9 @@
     <a href="#catalogo" class="cat-tab active" data-cat="cartas">
       <span class="cat-icon">🃏</span><span>Catálogo</span>
     </a>
+    <a href="#pcjp" class="cat-tab cat-tab-small" data-cat="pcjp">
+      <span class="cat-icon jp-flag"><svg viewBox="0 0 30 20" width="18" height="12"><rect width="30" height="20" rx="2" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg></span><span>Exclusivos Pokémon Center JP</span>
+    </a>
     <a href="#acrilicos" class="cat-tab" data-cat="acrilicos">
       <span class="cat-icon">🖼️</span><span>Acrílicos</span>
     </a>
@@ -740,6 +745,31 @@
           <span id="loadMoreText" style="color:var(--slate);font-size:13px;">Cargando más piezas…</span>
         </div>
       </div>
+    </div>
+  </section>
+  </div>
+
+  <div id="pcjpView" style="display:none;">
+  <section class="toys" id="pcjp">
+    <div class="wrap">
+      <a href="#" class="backToCardsLink" style="display:inline-flex;align-items:center;gap:6px;color:var(--slate);text-decoration:none;font-size:13px;margin-bottom:16px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Volver al catálogo de cartas
+      </a>
+      <div class="toys-head"><span class="eyebrow">Colección especial</span><h2><span class="jp-flag" style="display:inline-flex;vertical-align:middle;margin-right:8px;"><svg viewBox="0 0 30 20" width="26" height="17"><rect width="30" height="20" rx="2" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg></span>Exclusivos Pokémon Center JP</h2></div>
+      <div class="toolbar" style="margin-bottom:18px;">
+        <div class="search-field">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <input type="text" id="pcjpSearchInput" placeholder="Buscar exclusivo Pokémon Center JP…">
+        </div>
+        <select class="sort-select" id="pcjpSortSelect">
+          <option value="relevance">Ordenar: relevancia</option>
+          <option value="price-asc">Precio: menor a mayor</option>
+          <option value="price-desc">Precio: mayor a menor</option>
+        </select>
+        <span class="results-count" id="pcjpResultsCount"></span>
+      </div>
+      <div class="grid" id="pcjpGrid"></div>
     </div>
   </section>
   </div>
@@ -887,6 +917,7 @@
       <div class="field" style="margin-bottom:10px;">
         <select id="adminCategory" style="width:100%;">
           <option value="pokemon">🃏 Carta Pokémon</option>
+          <option value="pcjp">🇯🇵 Exclusivo Pokémon Center JP</option>
           <option value="toy">🧸 Juguete / Coleccionable</option>
           <option value="acrylic">🖼️ Acrílico</option>
         </select>
@@ -919,6 +950,7 @@
         <div class="field" style="margin-bottom:10px;">
           <select id="editCategory" style="width:100%;">
             <option value="pokemon">🃏 Carta Pokémon</option>
+            <option value="pcjp">🇯🇵 Exclusivo Pokémon Center JP</option>
             <option value="toy">🧸 Juguete / Coleccionable</option>
             <option value="acrylic">🖼️ Acrílico</option>
           </select>
@@ -1183,7 +1215,7 @@ function buildFilterUI(){
 }
 
 function matches(card){
-  if (card.category === "toy" || card.category === "acrylic") return false;
+  if (card.category === "toy" || card.category === "acrylic" || card.category === "pcjp") return false;
   const q = state.query.trim().toLowerCase();
   if (state.kind !== "all" && card.kind !== state.kind) return false;
   if (q && !(`${card.name} ${card.set} ${card.code}${card.num}`.toLowerCase().includes(q))) return false;
@@ -1665,6 +1697,7 @@ function showCardsView(){
   document.getElementById("cardsView").style.display = "";
   document.getElementById("toysView").style.display = "none";
   document.getElementById("acrylicsView").style.display = "none";
+  document.getElementById("pcjpView").style.display = "none";
   setActiveCatTab("cartas");
   window.scrollTo({top:0, behavior:"auto"});
 }
@@ -1672,6 +1705,7 @@ function showToysView(){
   document.getElementById("cardsView").style.display = "none";
   document.getElementById("toysView").style.display = "";
   document.getElementById("acrylicsView").style.display = "none";
+  document.getElementById("pcjpView").style.display = "none";
   setActiveCatTab("juguetes");
   window.scrollTo({top:0, behavior:"auto"});
 }
@@ -1679,7 +1713,16 @@ function showAcrylicsView(){
   document.getElementById("cardsView").style.display = "none";
   document.getElementById("toysView").style.display = "none";
   document.getElementById("acrylicsView").style.display = "";
+  document.getElementById("pcjpView").style.display = "none";
   setActiveCatTab("acrilicos");
+  window.scrollTo({top:0, behavior:"auto"});
+}
+function showPcjpView(){
+  document.getElementById("cardsView").style.display = "none";
+  document.getElementById("toysView").style.display = "none";
+  document.getElementById("acrylicsView").style.display = "none";
+  document.getElementById("pcjpView").style.display = "";
+  setActiveCatTab("pcjp");
   window.scrollTo({top:0, behavior:"auto"});
 }
 document.querySelectorAll('a[href="#catalogo"]').forEach(link => {
@@ -1690,6 +1733,9 @@ document.querySelectorAll('a[href="#juguetes"]').forEach(link => {
 });
 document.querySelectorAll('a[href="#acrilicos"]').forEach(link => {
   link.addEventListener("click", e => { e.preventDefault(); showAcrylicsView(); });
+});
+document.querySelectorAll('a[href="#pcjp"]').forEach(link => {
+  link.addEventListener("click", e => { e.preventDefault(); showPcjpView(); });
 });
 document.querySelectorAll(".backToCardsLink").forEach(link => {
   link.addEventListener("click", e => { e.preventDefault(); showCardsView(); });
@@ -1818,7 +1864,7 @@ function renderWishlist(){
       <div class="art" data-id="${card.id}" style="${card.image ? `background-image:url('${card.image}')` : `background:${TYPE_COLORS[card.type]}`}"></div>
       <div class="grow">
         <div class="name">${card.name}</div>
-        <div class="sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':card.category==='acrylic'?'Acrílico':'')}</div>
+        <div class="sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':card.category==='acrylic'?'Acrílico':card.category==='pcjp'?'Exclusivo Pokémon Center JP':'')}</div>
         <div class="price">${money(card.price)}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
@@ -1842,7 +1888,7 @@ function renderWishlist(){
       const card = CARDS.find(c => c.id === id);
       if (!card || card.stock <= 0) return;
       const cur = state.selected[id] || 0;
-      if (card.kind === "sellado" || card.kind === "toy" || card.kind === "acrylic"){
+      if (card.kind === "sellado" || card.kind === "toy" || card.kind === "acrylic" || card.kind === "pcjp"){
         if (cur < card.stock) state.selected[id] = cur + 1;
       } else if (cur === 0){
         state.selected[id] = 1;
@@ -2017,11 +2063,39 @@ document.getElementById("acrylicSearchInput")?.addEventListener("input", e => { 
 document.getElementById("acrylicSortSelect")?.addEventListener("change", e => { acrylicState.sort = e.target.value; renderAcrylics(); });
 renderAcrylics();
 
+/* ---- Exclusivos Pokémon Center JP (sección separada, misma lógica que Acrílicos/Juguetes) ---- */
+const pcjpState = { query: "", sort: "relevance" };
+function renderPcjp(){
+  const grid = document.getElementById("pcjpGrid");
+  if (!grid) return;
+  let list = CARDS.filter(c => c.category === "pcjp");
+  const q = pcjpState.query.trim().toLowerCase();
+  if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
+  if (pcjpState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
+  else if (pcjpState.sort === "price-desc") list = [...list].sort((a,b)=>b.price-a.price);
+
+  document.getElementById("pcjpResultsCount").textContent = `${list.length} producto${list.length===1?'':'s'}`;
+  grid.innerHTML = "";
+  if (!list.length){
+    grid.innerHTML = `<div class="empty-state"><h3>${CARDS.some(c=>c.category==="pcjp") ? "No hay productos con esa búsqueda" : "Aún no hay exclusivos Pokémon Center JP en el catálogo"}</h3><p>${CARDS.some(c=>c.category==="pcjp") ? "Prueba con otra palabra." : "Agrégalos desde admin.html, sección 1."}</p></div>`;
+    return;
+  }
+  list.forEach(c => {
+    const el = renderCard(c);
+    el.classList.add("in-view");
+    grid.appendChild(el);
+  });
+}
+document.getElementById("pcjpSearchInput")?.addEventListener("input", e => { pcjpState.query = e.target.value; renderPcjp(); });
+document.getElementById("pcjpSortSelect")?.addEventListener("change", e => { pcjpState.sort = e.target.value; renderPcjp(); });
+renderPcjp();
+
 /* ---- productos publicados en vivo desde el Worker (sin GitHub) ---- */
 function refreshAllViews(){
   render();
   renderToys();
   renderAcrylics();
+  renderPcjp();
   buildCarousel();
 }
 fetch(`${WORKER_URL}/products`)
@@ -2316,7 +2390,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         section("🏷️ Rareza más filtrada", byType.filter_rarity, k => k) +
         section("🩺 Condición más filtrada", byType.filter_condition, k => k) +
         section("🌐 Idioma más filtrado", byType.filter_language, k => k) +
-        section("📂 Secciones más visitadas", byType.category_view, k => ({cartas:"Catálogo",juguetes:"Coleccionables y Juguetes",acrilicos:"Acrílicos"}[k] || k)) +
+        section("📂 Secciones más visitadas", byType.category_view, k => ({cartas:"Catálogo",juguetes:"Coleccionables y Juguetes",acrilicos:"Acrílicos",pcjp:"Exclusivos Pokémon Center JP"}[k] || k)) +
         section("📱 Dispositivo", byType.device_type, k => k === "movil" ? "Celular" : "Escritorio") +
         section("🔗 De dónde llega la gente", byType.traffic_source, k => k) +
         section("🎁 Uso del cupón", byType.coupon_used, () => "BIENVENIDO5 usado");
@@ -2536,7 +2610,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       <div class="oi-thumb" data-id="${card.id}" style="${card.image ? `background-image:url('${card.image}')` : `background:${TYPE_COLORS[card.type]}`}"></div>
       <div class="oi-grow">
         <div class="oi-name">${card.name}${qty>1?` ×${qty}`:''}</div>
-        <div class="oi-sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':card.category==='acrylic'?'Acrílico':'')}</div>
+        <div class="oi-sub">${card.set || (card.category==='toy'?'Juguete/Coleccionable':card.category==='acrylic'?'Acrílico':card.category==='pcjp'?'Exclusivo Pokémon Center JP':'')}</div>
         <button type="button" class="mark-sold-btn" data-id="${card.id}" data-qty="${qty}" style="background:none;border:none;color:var(--slate);text-decoration:underline;font-size:10.5px;padding:0;margin-top:4px;cursor:pointer;">Marcar como vendido</button>
       </div>
       <div class="oi-price">${money(card.price*qty)}</div>
