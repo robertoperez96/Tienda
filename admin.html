@@ -501,7 +501,7 @@ function renderCatalog(){
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${c.image ? `<img src="${c.image}" alt="">` : "📦"}</td>
-      <td><input type="text" class="editName" data-id="${c.id}" value="${c.name.replace(/"/g,'&quot;')}" style="width:150px;"><div style="color:var(--slate);font-size:11px;">${c.set}</div></td>
+      <td><input type="text" class="editName" data-id="${c.id}" value="${(c.name || "").replace(/"/g,'&quot;')}" style="width:150px;"><div style="color:var(--slate);font-size:11px;">${c.set || ""}</div></td>
       <td>${c.kind === "sellado" ? "Sellado" : c.kind === "toy" ? "🧸 Juguete" : c.kind === "acrylic" ? "🖼️ Acrílico" : c.kind === "pcjp" ? "🇯🇵 PC JP" : "Single"}</td>
       <td>
         <div style="display:flex;gap:4px;align-items:center;">
