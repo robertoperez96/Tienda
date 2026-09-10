@@ -591,6 +591,11 @@ function renderCatalog(){
 
 document.getElementById("exportBtn").addEventListener("click", () => {
   if (!catalog.length){ alert("Agrega al menos una pieza antes de exportar."); return; }
+  const lastCount = Number(localStorage.getItem("vitrina_admin_last_export_count") || 0);
+  if (lastCount > 0 && catalog.length < lastCount * 0.8){
+    const proceed = confirm(`⚠️ ATENCIÓN: la última vez que exportaste tenías ${lastCount} piezas. Ahora solo tienes ${catalog.length}.\n\nSi subes este archivo a GitHub, vas a REEMPLAZAR tu catálogo en línea por uno más chico — podrías perder piezas.\n\n¿Seguro que quieres exportar de todos modos?`);
+    if (!proceed) return;
+  }
   const csvUpdatedIso = localStorage.getItem("vitrina_admin_csv_updated") || new Date().toISOString();
   const content = `/* cards-data.js — generado desde admin.html el ${new Date().toLocaleString("es-MX")} */\nwindow.CARDS = ${JSON.stringify(catalog, null, 2)};\nwindow.CATALOG_UPDATED = "${csvUpdatedIso}";\n`;
   const blob = new Blob([content], {type:"text/javascript"});
@@ -598,6 +603,7 @@ document.getElementById("exportBtn").addEventListener("click", () => {
   a.href = URL.createObjectURL(blob);
   a.download = "cards-data.js";
   a.click();
+  localStorage.setItem("vitrina_admin_last_export_count", String(catalog.length));
 });
 
 document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
@@ -613,6 +619,7 @@ document.getElementById("importFile").addEventListener("change", e => {
       if (!Array.isArray(imported)) throw new Error("Formato inesperado");
       catalog = imported;
       nextId = catalog.length ? Math.max(...catalog.map(c=>c.id))+1 : 1;
+      localStorage.setItem("vitrina_admin_last_export_count", String(catalog.length));
       persist(); renderCatalog();
       alert(`Se importaron ${imported.length} piezas.`);
     } catch(err){
@@ -695,14 +702,16 @@ const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // W
       return item && item.stock !== overrides[id];
     });
     const edits = editsRes.edits || {};
-    const editsPending = Object.keys(edits).filter(id => catalog.some(c => String(c.id) === String(id)));
+    const editsPending = Object.keys(edits).filter(id => !edits[id].deleted && catalog.some(c => String(c.id) === String(id)));
+    const deletionsPending = Object.keys(edits).filter(id => edits[id].deleted && catalog.some(c => String(c.id) === String(id)));
 
-    const total = newProducts.length + stockPending.length + editsPending.length;
+    const total = newProducts.length + stockPending.length + editsPending.length + deletionsPending.length;
     if (total > 0){
       banner.style.display = "block";
       const parts = [];
       if (newProducts.length) parts.push(`${newProducts.length} producto(s) nuevo(s)`);
       if (editsPending.length) parts.push(`${editsPending.length} edición(es)`);
+      if (deletionsPending.length) parts.push(`${deletionsPending.length} eliminación(es) pendiente(s)`);
       if (stockPending.length) parts.push(`${stockPending.length} ajuste(s) de stock`);
       title.textContent = `⚠️ Tienes cambios pendientes de tu sitio en vivo: ${parts.join(", ")}.`;
     } else {
@@ -1374,6 +1383,10 @@ document.addEventListener("click", (e) => {
 
 document.getElementById("importLiveBtn").addEventListener("click", async () => {
   const status = document.getElementById("importLiveStatus");
+  if (catalog.length < 10){
+    const proceed = confirm(`⚠️ Tu catálogo cargado en este navegador tiene solo ${catalog.length} pieza(s).\n\n¿Ya importaste tu cards-data.js completo antes de esto? Si no, cancela y primero impórtalo (sección "Importar cards-data.js existente"), o vas a exportar un catálogo incompleto.\n\n¿Continuar de todos modos?`);
+    if (!proceed) return;
+  }
   status.textContent = "Buscando productos publicados en vivo…";
   try {
     const res = await fetch(`${WORKER_URL}/products`);
@@ -1402,23 +1415,29 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
 
     // ediciones hechas desde el botón "Editar" en el sitio en vivo (nombre, precio, foto, etc.)
     let editsSynced = 0;
+    let deletedSynced = 0;
     try {
       const editsRes = await fetch(`${WORKER_URL}/edits`);
       const editsData = await editsRes.json();
       const edits = editsData.edits || {};
       Object.keys(edits).forEach(id => {
+        if (edits[id].deleted){
+          const idx = catalog.findIndex(c => String(c.id) === String(id));
+          if (idx > -1){ catalog.splice(idx, 1); deletedSynced++; }
+          return;
+        }
         const item = catalog.find(c => String(c.id) === String(id));
         if (item){ Object.assign(item, edits[id]); editsSynced++; }
       });
     } catch(e) { /* opcional, no rompe el resto si falla */ }
 
-    if (!newOnes.length && !stockSynced && !editsSynced){
+    if (!newOnes.length && !stockSynced && !editsSynced && !deletedSynced){
       status.textContent = "Ya tienes todo actualizado — sin productos, ediciones ni ajustes de stock pendientes.";
       return;
     }
     persist();
     renderCatalog();
-    status.textContent = `Listo: ${newOnes.length} producto(s) nuevo(s), ${stockSynced} con stock actualizado, ${editsSynced} con ediciones aplicadas. Ya puedes exportar tu cards-data.js.`;
+    status.textContent = `Listo: ${newOnes.length} producto(s) nuevo(s), ${stockSynced} con stock actualizado, ${editsSynced} con ediciones aplicadas, ${deletedSynced} eliminada(s). Ya puedes exportar tu cards-data.js.`;
 
     if (newOnes.length){
       const wipe = confirm(`¿Borrar esos ${newOnes.length} producto(s) de Cloudflare ahora que ya quedaron en tu catálogo? (recomendado, evita duplicados en el sitio en vivo). Necesitas tu ADMIN_PASSWORD del Worker.`);

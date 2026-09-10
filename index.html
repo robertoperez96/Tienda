@@ -1021,6 +1021,7 @@
           <input type="checkbox" id="editFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
         </label>
         <button type="button" class="btn btn-foil" id="editSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Guardar cambios</button>
+        <button type="button" id="editDeleteBtn" style="width:100%;justify-content:center;margin-top:8px;background:none;border:1px dashed rgba(181,72,42,.5);color:var(--ember-bright);border-radius:10px;padding:9px;font-size:12.5px;cursor:pointer;">🗑️ Eliminar este producto (permanente)</button>
         <p class="promo-status" id="adminEditStatus"></p>
       </div>
     </div>
@@ -2252,7 +2253,11 @@ fetch(`${WORKER_URL}/edits`)
       const card = CARDS.find(c => String(c.id) === String(id));
       if (card){ Object.assign(card, edits[id]); changed = true; }
     });
-    if (changed) refreshAllViews();
+    if (changed){
+      // las marcadas como eliminadas se quitan del todo, aunque sigan en cards-data.js
+      for (let i = CARDS.length - 1; i >= 0; i--){ if (CARDS[i].deleted) CARDS.splice(i, 1); }
+      refreshAllViews();
+    }
   })
   .catch(() => {});
 
@@ -2374,8 +2379,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       <div class="edit-result-row" data-id="${c.id}" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;">
         <div style="width:32px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center;${c.image ? `background-image:url('${c.image}')` : `background:${TYPE_COLORS[c.type]}`}"></div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name}</div>
-          <div style="font-size:11px;color:var(--slate);">${money(c.price)} · ${c.set || c.category}</div>
+          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name} ${String(c.id).startsWith("kv_") ? '<span style="color:var(--foil-bright);font-size:10px;">🌐 en vivo</span>' : ''}</div>
+          <div style="font-size:11px;color:var(--slate);">${money(c.price)} · ${c.set || c.category} · id: ${c.id}</div>
         </div>
       </div>
     `).join("");
@@ -2464,6 +2469,45 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       } else {
         status.textContent = data.error || "No se pudo guardar.";
       }
+    } catch (err) {
+      status.textContent = "No se pudo conectar con el servidor.";
+    }
+  });
+
+  document.getElementById("editDeleteBtn").addEventListener("click", async () => {
+    if (!editingId) return;
+    const status = document.getElementById("adminEditStatus");
+    const card = CARDS.find(c => String(c.id) === String(editingId));
+    const name = card ? card.name : editingId;
+    const isLive = String(editingId).startsWith("kv_");
+    if (!confirm(`¿Eliminar "${name}" por completo del sitio? Esto no se puede deshacer.`)) return;
+    status.textContent = "Eliminando…";
+    try {
+      if (isLive){
+        // productos "en vivo" (agregados desde el botón Admin): se borran de verdad de Cloudflare
+        const res = await fetch(`${WORKER_URL}/admin/delete-product`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(editingId) })
+        });
+        const data = await res.json();
+        if (!data.ok){ status.textContent = data.error || "No se pudo eliminar."; return; }
+      } else {
+        // piezas de cards-data.js: se marcan como eliminadas en Cloudflare — el sitio las
+        // esconde para siempre en cada visita, aunque sigan físicamente en el archivo
+        const res = await fetch(`${WORKER_URL}/admin/edit-product`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(editingId), changes: { deleted: true } })
+        });
+        const data = await res.json();
+        if (!data.ok){ status.textContent = data.error || "No se pudo eliminar."; return; }
+      }
+      const i = CARDS.findIndex(c => String(c.id) === String(editingId));
+      if (i > -1) CARDS.splice(i, 1);
+      refreshAllViews();
+      status.textContent = "✓ Eliminado permanentemente — nunca más va a salir en el sitio.";
+      setTimeout(resetEditSearch, 1400);
     } catch (err) {
       status.textContent = "No se pudo conectar con el servidor.";
     }
