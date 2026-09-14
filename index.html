@@ -158,7 +158,10 @@
     display:flex;flex-direction:column;align-items:center;gap:8px;
     padding:14px 10px;border-radius:12px;border:1px solid var(--line-strong);
     background:var(--ink-3);cursor:pointer;transition:all .15s ease;text-align:center;
+    position:relative;
   }
+  .se-lang-badge{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:9px;color:var(--cream-dim);background:rgba(11,14,20,.6);border-radius:999px;padding:2px 6px;}
+  .se-upload-logo{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
   .set-explorer-item:hover{border-color:var(--foil-dim);transform:translateY(-2px);background:var(--ink-4);}
   .set-explorer-item img{max-width:100%;max-height:38px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
   .set-explorer-item .se-fallback{font-family:var(--font-display);font-weight:560;font-size:14px;color:var(--foil-bright);}
@@ -1286,39 +1289,137 @@ fetch("https://api.pokemontcg.io/v2/sets?select=name,images,releaseDate")
   })
   .catch(() => { buildSetExplorer(); }); // aunque falle la API, igual mostramos la lista sin logos
 
-// fechas a mano para sets que NO están en esa base de datos pública (chinos, exclusivos, promocionales)
+// fechas e idiomas a mano para sets que NO están en esa base de datos pública (chinos, japoneses, exclusivos, promocionales)
 // agrega aquí más conforme los necesites — la key debe ser el nombre EXACTO como está en tu catálogo, en minúsculas
+// verificado contra fuentes reales (Cardmarket, Bulbapedia, Bill's Archive, etc.)
 const MANUAL_SET_DATES = {
-  "collect 151 hope": "2025-04-15", // 2do de la serie china Collect 151 (entre Journey 17-ene-25 y Surprise 18-jul-25)
+  "collect 151 hope": "2025-04-15",   // chino — 2do de la serie Collect 151 (entre Journey 17-ene-25 y Surprise 18-jul-25)
+  "abyss eye": "2026-05-22",          // japonés
+  "mega dream ex": "2025-11-28",      // japonés — versión JP de "Ascended Heroes"
+  "inferno x": "2025-09-26",          // japonés — versión JP de "Phantasmal Flames"
+  "mcdonald's promo (2025)": "2025-08-09", // japonés — promo Happy Meal Japón
+  "gem pack 2": "2025-05-16",         // chino
+  "gem pack vol. 3": "2025-09-26",    // chino
+  "gem pack vol. 4": "2026-02-06",    // chino
 };
+const MANUAL_SET_LANG = {
+  "collect 151 hope": "cn",
+  "abyss eye": "jp",
+  "mega dream ex": "jp",
+  "inferno x": "jp",
+  "mcdonald's promo (2025)": "jp",
+  "gem pack 2": "cn",
+  "gem pack vol. 3": "cn",
+  "gem pack vol. 4": "cn",
+};
+const LANG_INFO = {
+  en: { label: "Inglés", flag: `<svg viewBox="0 0 60 30" width="14" height="7"><clipPath id="lf-s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><g clip-path="url(#lf-s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>` },
+  jp: { label: "Japonés", flag: `<svg viewBox="0 0 30 20" width="14" height="9"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>` },
+  cn: { label: "Chino", flag: `<svg viewBox="0 0 30 20" width="14" height="9"><rect width="30" height="20" fill="#de2910"/><path d="M5 4l1.2 3.6H10l-3 2.2 1.1 3.6L5 11.2l-3.1 2.2 1.1-3.6L0 7.6h3.8z" fill="#ffde00"/></svg>` },
+};
+function getLangInfo(card){
+  const setKey = (card.set || "").toLowerCase();
+  const override = MANUAL_SET_LANG[setKey];
+  if (override) return LANG_INFO[override];
+  const stored = (card.language || "").toLowerCase();
+  if (stored.includes("jap")) return LANG_INFO.jp;
+  if (stored.includes("chin") || stored.includes("mandar")) return LANG_INFO.cn;
+  return LANG_INFO.en;
+}
+
+// vuelve transparente el fondo blanco/casi blanco de una imagen, con borde suavizado — función
+// global, la usan tanto el panel de admin como "Explorar por expansión" para subir logos
+function removeWhiteBackground(dataUrl, callback, onError){
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    try {
+      const w = img.width, h = img.height;
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const d = imgData.data;
+      const threshold = 235;
+      const isWhitish = idx => d[idx] > threshold && d[idx+1] > threshold && d[idx+2] > threshold;
+
+      // relleno desde los bordes: solo el blanco CONECTADO al borde de la foto se
+      // considera "fondo" — el blanco que esté encerrado dentro del producto se respeta
+      const visited = new Uint8Array(w * h);
+      const queue = new Int32Array(w * h);
+      let qLen = 0;
+      function tryAdd(x, y){
+        if (x < 0 || x >= w || y < 0 || y >= h) return;
+        const p = y * w + x;
+        if (visited[p]) return;
+        if (!isWhitish(p * 4)) return;
+        visited[p] = 1;
+        queue[qLen++] = p;
+      }
+      for (let x = 0; x < w; x++){ tryAdd(x, 0); tryAdd(x, h - 1); }
+      for (let y = 0; y < h; y++){ tryAdd(0, y); tryAdd(w - 1, y); }
+      let qi = 0;
+      while (qi < qLen){
+        const p = queue[qi++];
+        const x = p % w, y = (p / w) | 0;
+        tryAdd(x + 1, y); tryAdd(x - 1, y); tryAdd(x, y + 1); tryAdd(x, y - 1);
+      }
+      for (let p = 0; p < w * h; p++){ if (visited[p]) d[p * 4 + 3] = 0; }
+
+      // suaviza el borde donde el fondo quitado toca el producto, para que no quede un corte duro
+      for (let p = 0; p < w * h; p++){
+        if (visited[p]) continue;
+        const x = p % w, y = (p / w) | 0;
+        const idx = p * 4;
+        const brightness = (d[idx] + d[idx+1] + d[idx+2]) / 3;
+        if (brightness < 190) continue;
+        const near = (x+1<w && visited[p+1]) || (x>0 && visited[p-1]) || (y+1<h && visited[p+w]) || (y>0 && visited[p-w]);
+        if (near) d[idx+3] = Math.round(d[idx+3] * 0.45);
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      callback(canvas.toDataURL("image/png"));
+    } catch (err) {
+      onError && onError(err);
+    }
+  };
+  img.onerror = () => onError && onError(new Error("No se pudo cargar la imagen"));
+  img.src = dataUrl;
+}
 
 function findSetMeta(setName){
   const key = setName.toLowerCase();
   const manualDate = MANUAL_SET_DATES[key];
   const apiMeta = SET_META[key] || SET_META[Object.keys(SET_META).find(k => key.includes(k) || k.includes(key))];
-  if (manualDate) return { ...apiMeta, releaseDate: manualDate };
+  if (manualDate) return { ...apiMeta, releaseDate: manualDate, lang: MANUAL_SET_LANG[key] };
   return apiMeta;
 }
 
 function buildSetExplorer(){
   const grid = document.getElementById("setExplorerGrid");
   if (!grid) return;
+  const customLogos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
   const sets = unique("set").map(name => {
     const meta = findSetMeta(name);
     const count = CARDS.filter(c => c.set === name && (c.category === "pokemon" || !c.category)).length;
-    return { name, count, logo: meta?.logo, releaseDate: meta?.releaseDate || "" };
+    const langCode = meta?.lang || (MANUAL_SET_LANG[name.toLowerCase()] || null);
+    return { name, count, logo: customLogos[name] || meta?.logo, releaseDate: meta?.releaseDate || "", langCode };
   });
   // más nuevo primero; los que no tienen fecha (sets propios/no catalogados) van al final
   sets.sort((a,b) => (b.releaseDate || "0000-00-00").localeCompare(a.releaseDate || "0000-00-00"));
   grid.innerHTML = sets.map(s => `
     <div class="set-explorer-item" data-set="${s.name}">
+      ${s.langCode ? `<span class="se-lang-badge">${LANG_INFO[s.langCode].flag} ${s.langCode.toUpperCase()}</span>` : ''}
+      ${!s.logo && isAdminSession() ? `<button type="button" class="se-upload-logo" data-set="${s.name}" title="Subir logo de esta expansión">📎</button>` : ''}
       ${s.logo ? `<img src="${s.logo}" alt="${s.name}">` : `<span class="se-fallback">${s.name}</span>`}
       <span class="se-name">${s.name}</span>
       <span class="se-meta">${s.count} pieza${s.count===1?'':'s'}${s.releaseDate ? ` · ${s.releaseDate.slice(0,4)}` : ''}</span>
     </div>
   `).join("");
   grid.querySelectorAll(".set-explorer-item").forEach(item => {
-    item.addEventListener("click", () => {
+    item.addEventListener("click", (ev) => {
+      if (ev.target.closest(".se-upload-logo")) return; // no abrir el filtro si le dieron al botón de subir logo
       const setName = item.dataset.set;
       state.sets.clear();
       state.sets.add(setName);
@@ -1327,6 +1428,48 @@ function buildSetExplorer(){
       closeSetExplorer();
       showCardsView();
       document.getElementById("catalogo").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+  grid.querySelectorAll(".se-upload-logo").forEach(btn => {
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const setName = btn.dataset.set;
+      const input = document.createElement("input");
+      input.type = "file"; input.accept = "image/*";
+      input.onchange = () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const maxDim = 300;
+            let { width, height } = img;
+            if (width > maxDim || height > maxDim){
+              if (width > height){ height = Math.round(height*maxDim/width); width = maxDim; }
+              else { width = Math.round(width*maxDim/height); height = maxDim; }
+            }
+            canvas.width = width; canvas.height = height;
+            canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+            const rawUrl = canvas.toDataURL("image/png");
+            removeWhiteBackground(rawUrl, cleanUrl => {
+              const logos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
+              logos[setName] = cleanUrl;
+              localStorage.setItem("vitrina_custom_set_logos", JSON.stringify(logos));
+              buildSetExplorer();
+            }, () => {
+              const logos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
+              logos[setName] = rawUrl; // si falla quitar el fondo, igual guardamos la original
+              localStorage.setItem("vitrina_custom_set_logos", JSON.stringify(logos));
+              buildSetExplorer();
+            });
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
     });
   });
 }
@@ -1425,7 +1568,7 @@ function renderCard(card){
     <div class="card-info">
       <div class="card-set"><span>${card.set}</span>${card.num ? `<span>${card.code}${String(card.num).padStart(3,"0")}/${card.total}</span>` : ""}</div>
       <p class="card-name">${card.name}</p>
-      <div class="card-meta"><span class="tag">${card.rarity}</span><span class="tag">${card.language}</span></div>
+      <div class="card-meta"><span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span></div>
       <div class="card-price-row"><span class="card-price">${money(card.price)}</span><span class="card-cond">${card.condition}</span></div>
       ${card.kind==="sellado" ? `
       <div class="qty-stepper">
@@ -1551,7 +1694,8 @@ function openZoom(card){
 
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
   document.getElementById("zoomName").textContent = card.name;
-  document.getElementById("zoomMeta").innerHTML = `<span class="tag">${card.rarity}</span><span class="tag">${card.language}</span><span class="tag">${card.condition}</span>`;
+  const langInfo = getLangInfo(card);
+  document.getElementById("zoomMeta").innerHTML = `<span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:5px;">${langInfo.flag} ${langInfo.label}</span><span class="tag">${card.condition}</span>`;
   document.getElementById("zoomPrice").textContent = money(card.price);
   const soldOut = card.stock <= 0;
   const stockEl = document.getElementById("zoomStock");
@@ -2754,66 +2898,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     reader.readAsDataURL(file);
   }
 
-  // vuelve transparente el fondo blanco/casi blanco de una imagen, con borde suavizado
-  // (funciona con fotos subidas/pegadas; con imágenes de otros sitios puede fallar por seguridad del navegador)
-  function removeWhiteBackground(dataUrl, callback, onError){
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      try {
-        const w = img.width, h = img.height;
-        const canvas = document.createElement("canvas");
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        const imgData = ctx.getImageData(0, 0, w, h);
-        const d = imgData.data;
-        const threshold = 235;
-        const isWhitish = idx => d[idx] > threshold && d[idx+1] > threshold && d[idx+2] > threshold;
-
-        // relleno desde los bordes: solo el blanco CONECTADO al borde de la foto se
-        // considera "fondo" — el blanco que esté encerrado dentro del producto se respeta
-        const visited = new Uint8Array(w * h);
-        const queue = new Int32Array(w * h);
-        let qLen = 0;
-        function tryAdd(x, y){
-          if (x < 0 || x >= w || y < 0 || y >= h) return;
-          const p = y * w + x;
-          if (visited[p]) return;
-          if (!isWhitish(p * 4)) return;
-          visited[p] = 1;
-          queue[qLen++] = p;
-        }
-        for (let x = 0; x < w; x++){ tryAdd(x, 0); tryAdd(x, h - 1); }
-        for (let y = 0; y < h; y++){ tryAdd(0, y); tryAdd(w - 1, y); }
-        let qi = 0;
-        while (qi < qLen){
-          const p = queue[qi++];
-          const x = p % w, y = (p / w) | 0;
-          tryAdd(x + 1, y); tryAdd(x - 1, y); tryAdd(x, y + 1); tryAdd(x, y - 1);
-        }
-        for (let p = 0; p < w * h; p++){ if (visited[p]) d[p * 4 + 3] = 0; }
-
-        // suaviza el borde donde el fondo quitado toca el producto, para que no quede un corte duro
-        for (let p = 0; p < w * h; p++){
-          if (visited[p]) continue;
-          const x = p % w, y = (p / w) | 0;
-          const idx = p * 4;
-          const brightness = (d[idx] + d[idx+1] + d[idx+2]) / 3;
-          if (brightness < 190) continue;
-          const near = (x+1<w && visited[p+1]) || (x>0 && visited[p-1]) || (y+1<h && visited[p+w]) || (y>0 && visited[p-w]);
-          if (near) d[idx+3] = Math.round(d[idx+3] * 0.45);
-        }
-
-        ctx.putImageData(imgData, 0, 0);
-        callback(canvas.toDataURL("image/png"));
-      } catch (err) {
-        onError && onError(err);
-      }
-    };
-    img.onerror = () => onError && onError(new Error("No se pudo cargar la imagen"));
-    img.src = dataUrl;
-  }
+  // vuelve transparente el fondo blanco/casi blanco de una imagen — ahora es una función
+  // global (ver arriba, cerca de MANUAL_SET_DATES) para que también la use "Explorar por expansión"
   document.getElementById("adminUploadBtn").addEventListener("click", () => document.getElementById("adminFileInput").click());
   document.getElementById("adminFileInput").addEventListener("change", () => {
     const files = [...document.getElementById("adminFileInput").files];
