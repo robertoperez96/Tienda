@@ -161,7 +161,10 @@
     position:relative;
   }
   .se-lang-badge{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:9px;color:var(--cream-dim);background:rgba(11,14,20,.6);border-radius:999px;padding:2px 6px;}
-  .se-upload-logo{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+  .se-upload-logo{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:2;}
+  .se-upload-logo:hover{background:var(--foil-bright);}
+  @media (max-width:600px){ .se-upload-logo{width:32px;height:32px;font-size:15px;top:4px;right:4px;} }
+  .se-admin-hint{grid-column:1/-1;font-size:12px;color:var(--foil-bright);background:rgba(201,162,39,.10);border:1px dashed var(--foil-dim);border-radius:8px;padding:8px 12px;margin-bottom:4px;}
   .set-explorer-item:hover{border-color:var(--foil-dim);transform:translateY(-2px);background:var(--ink-4);}
   .set-explorer-item img{max-width:100%;max-height:38px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
   .set-explorer-item .se-fallback{font-family:var(--font-display);font-weight:560;font-size:14px;color:var(--foil-bright);}
@@ -264,15 +267,23 @@
   .filter-group:first-child{padding-top:0;}
   .filter-group:last-child{border-bottom:none;padding-bottom:0;}
   .filter-group h4{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--slate);margin:0 0 10px;font-weight:600;}
+  .filter-collapse{width:100%;}
+  .filter-collapse summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--slate);margin:0 0 10px;font-weight:600;}
+  .filter-collapse summary::-webkit-details-marker{display:none;}
+  .filter-collapse summary::after{content:"+";font-family:var(--font-mono);color:var(--foil-bright);font-size:17px;line-height:1;flex-shrink:0;margin-left:8px;}
+  .filter-collapse[open] summary::after{content:"–";}
+  .filter-collapse:not([open]) summary{margin-bottom:0;}
+  .filter-collapse summary:hover{color:var(--cream);}
   .chip-row{display:flex;flex-wrap:wrap;gap:6px;}
   .chip{font-size:12.5px;padding:6px 10px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;color:var(--cream-dim);cursor:pointer;transition:all .12s ease;font-family:var(--font-body);display:inline-flex;align-items:center;gap:6px;}
   .chip-icon{width:14px;height:14px;object-fit:contain;flex-shrink:0;filter:brightness(0) invert(1);opacity:.75;}
   .chip.active .chip-icon{opacity:1;}
   .chip:hover{border-color:var(--foil-dim);color:var(--cream);}
   .chip.active{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);font-weight:600;}
-  .check-row{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:4px 0;cursor:pointer;color:var(--cream-dim);}
-  .check-row input{accent-color:var(--foil);width:14px;height:14px;}
-  .check-row:hover{color:var(--cream);}
+  .check-row{display:flex;align-items:center;gap:9px;font-size:13.5px;padding:7px 9px;margin:0 -9px;border-radius:8px;cursor:pointer;color:var(--cream-dim);transition:background .12s ease,color .12s ease;}
+  .check-row input{accent-color:var(--foil);width:14px;height:14px;flex-shrink:0;}
+  .check-row:hover{color:var(--cream);background:rgba(255,255,255,.04);}
+  .check-row.row-checked{color:var(--foil-bright);background:rgba(201,162,39,.10);}
   .price-row{display:flex;gap:8px;align-items:center;}
   .price-row input{width:100%;background:var(--ink);border:1px solid var(--line-strong);border-radius:7px;color:var(--cream);padding:7px 8px;font-size:13px;font-family:var(--font-mono);}
   .clear-filters{margin-top:14px;width:100%;background:transparent;border:1px dashed var(--line-strong);color:var(--slate);padding:9px;border-radius:8px;cursor:pointer;font-size:12.5px;}
@@ -838,8 +849,8 @@
         <div class="filter-backdrop" id="filterBackdrop"></div>
         <aside class="filters" id="filtersPanel">
           <div class="filter-close"><button class="icon-btn" id="filterClose" aria-label="Cerrar filtros"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
-          <div class="filter-group"><h4>Set / Era</h4><div class="chip-row" id="setChips"></div></div>
-          <div class="filter-group"><h4>Rareza</h4><div id="rarityChecks"></div></div>
+          <div class="filter-group"><details class="filter-collapse"><summary>Set / Era</summary><div class="chip-row" id="setChips"></div></details></div>
+          <div class="filter-group"><details class="filter-collapse" open><summary>Rareza</summary><div id="rarityChecks"></div></details></div>
           <div class="filter-group"><h4>Condición</h4><div id="condChecks"></div></div>
           <div class="filter-group"><h4>Idioma</h4><div id="langChecks"></div></div>
           <div class="filter-group"><h4>Precio (MXN)</h4><div class="price-row"><input type="number" id="priceMin" placeholder="Mín"><span style="color:var(--slate)">–</span><input type="number" id="priceMax" placeholder="Máx"></div></div>
@@ -1329,15 +1340,11 @@ function applySetData(sets){
     SET_ICONS[key] = s.images?.symbol;
     SET_META[key] = { logo: s.images?.logo, releaseDate: s.releaseDate, name: s.name };
   });
-  document.querySelectorAll(".chip[data-set]").forEach(chip => {
-    const setName = chip.dataset.set.toLowerCase();
-    const icon = SET_ICONS[setName] || SET_ICONS[Object.keys(SET_ICONS).find(k => setName.includes(k) || k.includes(setName))];
-    if (icon && !chip.querySelector("img")){
-      const img = document.createElement("img");
-      img.src = icon; img.alt = ""; img.className = "chip-icon";
-      chip.prepend(img);
-    }
-  });
+  // vuelve a construir los chips de Set/Era con el orden e íconos ya correctos — antes esto
+  // solo "parchaba" los chips existentes buscándolos en el DOM, pero si esta función corría
+  // antes de que buildFilterUI() hubiera creado los chips (típico con el caché de 7 días),
+  // los íconos nunca se aplicaban. Reconstruir siempre es lo único 100% confiable.
+  renderSetChips();
   buildSetExplorer();
 }
 
@@ -1412,6 +1419,13 @@ function getLangInfo(card){
   if (stored.includes("chin") || stored.includes("mandar")) return LANG_INFO.cn;
   return LANG_INFO.en;
 }
+// misma heurística que getLangInfo, pero para textos sueltos (ej. las etiquetas del filtro de Idioma)
+function flagForLangText(text){
+  const t = (text || "").toLowerCase();
+  if (t.includes("jap")) return LANG_INFO.jp.flag;
+  if (t.includes("chin") || t.includes("mandar")) return LANG_INFO.cn.flag;
+  return LANG_INFO.en.flag; // por defecto inglés, igual que getLangInfo()
+}
 
 // vuelve transparente el fondo blanco/casi blanco de una imagen, con borde suavizado — función
 // global, la usan tanto el panel de admin como "Explorar por expansión" para subir logos
@@ -1482,11 +1496,43 @@ function findSetMeta(setName){
   return apiMeta;
 }
 
+// misma fuente de verdad que usa "Explorar por expansión": todos los sets del catálogo,
+// del más nuevo al más viejo (los que no tienen fecha confirmada van al final), con su
+// ícono pequeño ya resuelto cuando esté disponible — la usan tanto los chips del filtro
+// de Set/Era como el propio "Explorar por expansión", para que el orden sea siempre el mismo.
+function getSetsOrdered(){
+  return unique("set").map(name => {
+    const key = name.toLowerCase();
+    const meta = findSetMeta(name);
+    const icon = SET_ICONS[key] || SET_ICONS[Object.keys(SET_ICONS).find(k => key.includes(k) || k.includes(key))];
+    return { name, icon, releaseDate: meta?.releaseDate || "" };
+  }).sort((a,b) => (b.releaseDate || "0000-00-00").localeCompare(a.releaseDate || "0000-00-00"));
+}
+
+function renderSetChips(){
+  const setChips = document.getElementById("setChips");
+  if (!setChips) return; // buildFilterUI todavía no corre — la reconstruirá con el orden correcto cuando le toque
+  setChips.innerHTML = "";
+  getSetsOrdered().forEach(({ name: set, icon }) => {
+    const chip = document.createElement("button");
+    chip.className = "chip" + (state.sets.has(set) ? " active" : "");
+    chip.dataset.set = set;
+    chip.innerHTML = (icon ? `<img src="${icon}" alt="" class="chip-icon">` : "") + `<span>${set}</span>`;
+    chip.addEventListener("click", () => { state.sets.has(set) ? state.sets.delete(set) : state.sets.add(set); chip.classList.toggle("active"); resetAndRender(); });
+    setChips.appendChild(chip);
+  });
+}
+
 let setExplorerLangFilter = "all";
+// logos subidos a mano para sets sin logo oficial. serverSetLogos viene del Worker (KV
+// "SET_LOGOS") y es la fuente compartida — se ve igual en cualquier dispositivo, incluidos
+// los de tus clientes. El localStorage local queda solo como respaldo/caché mientras carga.
+let serverSetLogos = {};
 function buildSetExplorer(){
   const grid = document.getElementById("setExplorerGrid");
   if (!grid) return;
-  const customLogos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
+  const localLogos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
+  const customLogos = { ...localLogos, ...serverSetLogos };
   let sets = unique("set").map(name => {
     const meta = findSetMeta(name);
     const count = CARDS.filter(c => c.set === name && (c.category === "pokemon" || !c.category)).length;
@@ -1497,7 +1543,9 @@ function buildSetExplorer(){
   // más nuevo primero; los que no tienen fecha (sets propios/no catalogados) van al final
   sets.sort((a,b) => (b.releaseDate || "0000-00-00").localeCompare(a.releaseDate || "0000-00-00"));
   if (!sets.length){ grid.innerHTML = `<p style="grid-column:1/-1;color:var(--slate);font-size:13px;">No hay expansiones en este idioma.</p>`; return; }
-  grid.innerHTML = sets.map(s => `
+  const missing = sets.filter(s => !s.logo).length;
+  const hint = (isAdminSession() && missing) ? `<div class="se-admin-hint">📎 Toca el broche dorado en la esquina de un set sin logo (${missing}) para subirle uno — se guarda para todos, no solo en este dispositivo.</div>` : '';
+  grid.innerHTML = hint + sets.map(s => `
     <div class="set-explorer-item" data-set="${s.name}">
       ${s.langCode !== "en" ? `<span class="se-lang-badge">${LANG_INFO[s.langCode].flag} ${s.langCode.toUpperCase()}</span>` : ''}
       ${!s.logo && isAdminSession() ? `<button type="button" class="se-upload-logo" data-set="${s.name}" title="Subir logo de esta expansión">📎</button>` : ''}
@@ -1542,17 +1590,26 @@ function buildSetExplorer(){
             canvas.width = width; canvas.height = height;
             canvas.getContext("2d").drawImage(img, 0, 0, width, height);
             const rawUrl = canvas.toDataURL("image/png");
-            removeWhiteBackground(rawUrl, cleanUrl => {
+            const saveLogo = (url) => {
+              // guarda de inmediato en este navegador (respaldo/offline) y se ve al instante
               const logos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
-              logos[setName] = cleanUrl;
+              logos[setName] = url;
               localStorage.setItem("vitrina_custom_set_logos", JSON.stringify(logos));
               buildSetExplorer();
-            }, () => {
-              const logos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
-              logos[setName] = rawUrl; // si falla quitar el fondo, igual guardamos la original
-              localStorage.setItem("vitrina_custom_set_logos", JSON.stringify(logos));
-              buildSetExplorer();
-            });
+              // y lo manda al Worker para que quede igual en todos los dispositivos y para tus visitantes
+              fetch(`${WORKER_URL}/admin/save-set-logo`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), set: setName, logo: url })
+              })
+                .then(r => r.json())
+                .then(data => {
+                  if (data.ok){ serverSetLogos[setName] = url; buildSetExplorer(); }
+                  else alert(`El logo se ve en este navegador, pero no se pudo guardar en el servidor: ${data.error || "error desconocido"}. Verifica el KV "SET_LOGOS" en el Worker.`);
+                })
+                .catch(() => alert("El logo se ve en este navegador, pero no se pudo guardar en el servidor (sin conexión al Worker). Vuelve a intentar cuando tengas internet."));
+            };
+            removeWhiteBackground(rawUrl, saveLogo, () => saveLogo(rawUrl)); // si falla quitar el fondo, igual guarda la original
           };
           img.src = reader.result;
         };
@@ -1584,21 +1641,17 @@ document.getElementById("setExplorerClose").addEventListener("click", closeSetEx
 document.getElementById("setExplorerBackdrop").addEventListener("click", closeSetExplorer);
 
 function buildFilterUI(){
-  const setChips = document.getElementById("setChips");
-  unique("set").forEach(set => {
-    const chip = document.createElement("button");
-    chip.className = "chip"; chip.dataset.set = set;
-    chip.innerHTML = `<span>${set}</span>`;
-    chip.addEventListener("click", () => { state.sets.has(set) ? state.sets.delete(set) : state.sets.add(set); chip.classList.toggle("active"); resetAndRender(); });
-    setChips.appendChild(chip);
-  });
+  renderSetChips();
   const buildChecks = (container, key, targetSet) => {
     unique(key).forEach(val => {
       const id = `chk-${key}-${val}`.replace(/\s+/g,"-");
       const row = document.createElement("label");
-      row.className = "check-row"; row.innerHTML = `<input type="checkbox" id="${id}"> ${val}`;
+      const flag = key === "language" ? flagForLangText(val) : "";
+      row.className = "check-row";
+      row.innerHTML = `<input type="checkbox" id="${id}">${flag}<span>${val}</span>`;
       row.querySelector("input").addEventListener("change", e => {
         e.target.checked ? targetSet.add(val) : targetSet.delete(val);
+        row.classList.toggle("row-checked", e.target.checked);
         if (e.target.checked) trackEvent(`filter_${key}`, val);
         resetAndRender();
       });
@@ -2248,6 +2301,7 @@ document.getElementById("clearFilters").addEventListener("click", () => {
   document.getElementById("searchInput").value=""; document.getElementById("priceMin").value=""; document.getElementById("priceMax").value="";
   document.querySelectorAll(".chip.active").forEach(c=>c.classList.remove("active"));
   document.querySelectorAll("aside.filters input[type=checkbox]").forEach(c=>c.checked=false);
+  document.querySelectorAll("aside.filters .check-row.row-checked").forEach(r=>r.classList.remove("row-checked"));
   resetAndRender();
 });
 document.getElementById("searchToggle").addEventListener("click", () => document.getElementById("searchInput").focus());
@@ -2626,6 +2680,16 @@ fetch(`${WORKER_URL}/edits`)
       for (let i = CARDS.length - 1; i >= 0; i--){ if (CARDS[i].deleted) CARDS.splice(i, 1); }
       refreshAllViews();
     }
+  })
+  .catch(() => {});
+
+// logos de sets subidos a mano desde "Explorar por expansión" (KV "SET_LOGOS" del Worker) —
+// así se ven igual en cualquier dispositivo, no solo en el navegador donde se subieron
+fetch(`${WORKER_URL}/set-logos`)
+  .then(r => r.json())
+  .then(data => {
+    serverSetLogos = data.logos || {};
+    buildSetExplorer();
   })
   .catch(() => {});
 
