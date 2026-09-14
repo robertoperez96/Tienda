@@ -139,6 +139,9 @@
     <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--cream-dim);">
       <input type="checkbox" id="quickFeatured" style="width:16px;height:16px;"> Destacado (aparece en el carrusel del inicio)
     </label>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13.5px;color:var(--cream-dim);">
+      <input type="checkbox" id="quickHot" style="width:16px;height:16px;"> 🔥 Marcar como "Muy buscada" (genera urgencia)
+    </label>
 
     <div style="margin-top:16px;">
       <label>Fotos del producto</label>
@@ -763,11 +766,12 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
   if (!file) return;
   const status = document.getElementById("csvImportStatus");
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try{
       const rows = parseCsv(reader.result);
       const existingKeys = new Set(catalog.map(c => catalogKey(c.name, c.set, c.num)));
       let added = 0, updatedStock = 0, skipped = 0, priceRestored = 0, rarityFixed = 0;
+      const priceChanges = []; // {id, price} — para el historial de tendencias "📈 En alza"
       rows.forEach(r => {
         const name = (r["Product Name"] || "").trim();
         if (!name) return;
@@ -795,10 +799,10 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
             const forcePrice = document.getElementById("forceCsvPrice").checked;
             if (!existing.priceLocked){
               if (forcePrice){
-                if (existing.price !== price){ existing.price = price; existing.priceSource = "csv"; priceRestored++; }
+                if (existing.price !== price){ existing.price = price; existing.priceSource = "csv"; priceRestored++; priceChanges.push({id: existing.id, price}); }
               } else if (price > existing.price){
                 // el precio nunca baja solo: se actualiza únicamente si el CSV resulta MAYOR que el que ya tienes
-                existing.price = price; existing.priceSource = "csv"; priceRestored++;
+                existing.price = price; existing.priceSource = "csv"; priceRestored++; priceChanges.push({id: existing.id, price});
               }
             }
             if (existing.stock === stockVal && (forcePrice ? existing.price === price : price <= existing.price)) skipped++;
@@ -822,6 +826,28 @@ document.getElementById("csvFileInput").addEventListener("change", e => {
       renderCatalog();
       const forceMode = document.getElementById("forceCsvPrice").checked;
       status.textContent = `Listo: ${added} piezas nuevas agregadas, ${updatedStock} con stock actualizado, ${rarityFixed} con rareza corregida (ej. Common → Holo), ${priceRestored} con precio ${forceMode ? "forzado al valor EXACTO del CSV" : "ajustado (solo si el CSV resultó mayor)"}, ${skipped} ya estaban igual (no se tocaron). Corre "Buscar imágenes" para las nuevas.`;
+
+      if (priceChanges.length){
+        const wantLog = confirm(`¿Registrar estos ${priceChanges.length} cambio(s) de precio para calcular la tendencia "📈 En alza" en tu sitio? Necesitas tu ADMIN_PASSWORD del Worker.`);
+        if (wantLog){
+          const pass = prompt("Contraseña de admin del Worker (ADMIN_PASSWORD):");
+          if (pass){
+            status.textContent += " Registrando historial de precios…";
+            let ok = 0;
+            for (const chg of priceChanges){
+              try {
+                const r = await fetch(`${WORKER_URL}/admin/log-price`, {
+                  method: "POST", headers: {"Content-Type":"application/json"},
+                  body: JSON.stringify({ password: pass, id: String(chg.id), price: chg.price })
+                });
+                const d = await r.json();
+                if (d.ok) ok++;
+              } catch(e) { /* seguimos con los demás aunque uno falle */ }
+            }
+            status.textContent += ` (${ok}/${priceChanges.length} registrados en el historial)`;
+          }
+        }
+      }
     } catch(err){
       status.textContent = "No se pudo leer ese archivo. Asegúrate de que sea el export.csv de Collectr sin modificar.";
     }
@@ -1315,6 +1341,7 @@ document.addEventListener("click", (e) => {
 
     const stock = Number(document.getElementById("quickStock").value) || 1;
     const isFeatured = document.getElementById("quickFeatured").checked;
+    const isHot = document.getElementById("quickHot").checked;
 
     let entry;
     if (category === "toy"){
@@ -1323,7 +1350,7 @@ document.addEventListener("click", (e) => {
         rarity: document.getElementById("quickToyType").value.trim() || "Coleccionable",
         condition: "Nuevo", language: "", type: "incoloro",
         category: "toy", kind: "toy", price, stock,
-        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImages.length,
+        isNew: true, featured: isFeatured, hot: isHot, priceLocked: true, imageLocked: !!quickImages.length,
         priceSource: "manual", image: quickImages[0] || "", images: quickImages
       };
     } else if (category === "acrylic"){
@@ -1332,7 +1359,7 @@ document.addEventListener("click", (e) => {
         rarity: document.getElementById("quickAcrylicType").value.trim() || "Acrílico",
         condition: "Nuevo", language: "", type: "incoloro",
         category: "acrylic", kind: "acrylic", price, stock,
-        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImages.length,
+        isNew: true, featured: isFeatured, hot: isHot, priceLocked: true, imageLocked: !!quickImages.length,
         priceSource: "manual", image: quickImages[0] || "", images: quickImages
       };
     } else if (category === "pcjp"){
@@ -1340,7 +1367,7 @@ document.addEventListener("click", (e) => {
         id: nextId++, name, set: "Pokémon Center Japón", code: "", num: 0, total: 0,
         rarity: "Exclusivo", condition: "Nuevo", language: "Japonés", type: "incoloro",
         category: "pcjp", kind: "pcjp", price, stock,
-        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImages.length,
+        isNew: true, featured: isFeatured, hot: isHot, priceLocked: true, imageLocked: !!quickImages.length,
         priceSource: "manual", image: quickImages[0] || "", images: quickImages
       };
     } else {
@@ -1353,7 +1380,7 @@ document.addEventListener("click", (e) => {
         language: document.getElementById("quickLang").value,
         type: "incoloro", category: "pokemon",
         kind: document.getElementById("quickKind").value, price, stock,
-        isNew: true, featured: isFeatured, priceLocked: true, imageLocked: !!quickImages.length,
+        isNew: true, featured: isFeatured, hot: isHot, priceLocked: true, imageLocked: !!quickImages.length,
         priceSource: "manual", image: quickImages[0] || "", images: quickImages
       };
     }
@@ -1371,6 +1398,7 @@ document.addEventListener("click", (e) => {
     document.getElementById("quickRarity").value = "";
     document.getElementById("quickStock").value = "1";
     document.getElementById("quickFeatured").checked = false;
+    document.getElementById("quickHot").checked = false;
     document.getElementById("quickDropPreview").innerHTML = "";
     document.getElementById("quickPasteInput").value = "";
     quickImages = [];

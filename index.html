@@ -227,6 +227,20 @@
   .catalog-head{margin-bottom:18px;}
   section.toys{padding:20px 0 8px;border-top:1px solid var(--line);margin-top:20px;}
   .toys-head{margin-bottom:16px;}
+  .acrylic-promo-banner{
+    display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:18px 22px;
+    border-radius:16px;position:relative;overflow:hidden;
+    background:linear-gradient(120deg,rgba(201,162,39,.12),rgba(201,162,39,.03) 60%),var(--ink-2);
+    border:1px solid var(--foil-dim);
+  }
+  .acrylic-promo-banner::before{
+    content:"";position:absolute;top:-40%;right:-10%;width:220px;height:220px;border-radius:999px;
+    background:radial-gradient(circle,rgba(232,199,102,.18),transparent 70%);pointer-events:none;
+  }
+  .apb-icon{font-size:34px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(201,162,39,.4));}
+  .apb-title{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--foil-bright);margin-bottom:3px;}
+  .apb-sub{font-size:12.5px;color:var(--cream-dim);line-height:1.5;}
+  @media (max-width:640px){ .acrylic-promo-banner{padding:14px 16px;gap:12px;} .apb-icon{font-size:26px;} .apb-title{font-size:14.5px;} .apb-sub{font-size:11.5px;} }
   .toys-head h2{font-size:22px;}
   .kind-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
   .kind-tab{background:var(--ink-2);border:1px solid var(--line-strong);color:var(--cream-dim);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:500;}
@@ -424,6 +438,20 @@
   .badge.left{left:41px;background:rgba(11,14,20,.72);color:var(--foil-bright);border:1px solid var(--foil-dim);}
   .badge.stock{right:9px;top:auto;bottom:9px;background:rgba(11,14,20,.72);color:var(--ok);border:1px solid rgba(76,139,107,.4);}
   .badge.sold{right:9px;top:auto;bottom:9px;background:rgba(181,72,42,0.85);color:var(--cream);border:1px solid var(--ember);}
+  .badge-hot{
+    position:absolute;top:9px;left:50%;transform:translateX(-50%);z-index:3;
+    font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.02em;
+    padding:4px 10px;border-radius:999px;white-space:nowrap;
+    background:linear-gradient(135deg,#3a1608,#5c2410);
+    border:1px solid rgba(255,140,60,.5);color:#ffb37a;
+    box-shadow:0 0 14px -2px rgba(255,120,40,.45);
+    animation:hot-glow 2.4s ease-in-out infinite;
+  }
+  @keyframes hot-glow{
+    0%,100%{box-shadow:0 0 10px -3px rgba(255,120,40,.4);}
+    50%{box-shadow:0 0 18px 0px rgba(255,140,60,.65);}
+  }
+  @media (prefers-reduced-motion:reduce){ .badge-hot{animation:none;} }
   .card.sold-out{opacity:.55;}
   .card.sold-out .card-art{cursor:not-allowed;}
   .add-to-cart-btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -445,6 +473,7 @@
   .card-name{font-size:14.5px;font-weight:600;margin:0 0 6px;line-height:1.25;}
   .card-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   .tag{font-size:10.5px;padding:2px 7px;border-radius:5px;background:var(--ink-4);color:var(--cream-dim);border:1px solid var(--line);}
+  .trend-tag{background:rgba(76,139,107,.15);color:var(--ok);border-color:rgba(76,139,107,.4);font-weight:600;}
   .card-price-row{display:flex;align-items:baseline;justify-content:space-between;}
   .card-price{font-family:var(--font-mono);font-weight:600;font-size:16px;color:var(--foil-bright);}
   .card-cond{font-size:11px;color:var(--slate);}
@@ -632,6 +661,10 @@
   .order-totals .row.total b{font-family:var(--font-mono);font-size:19px;color:var(--foil-bright);}
   .order-totals .row.discount{color:var(--ok);}
   .zoom-close{position:absolute;top:14px;right:14px;z-index:2;background:rgba(11,14,20,.6);}
+  .zoom-wish{position:absolute;top:14px;right:64px;z-index:2;background:rgba(11,14,20,.6);}
+  .zoom-wish svg{color:rgba(237,230,214,.7);transition:all .15s;}
+  .zoom-wish:hover svg{color:#e8607a;}
+  .zoom-wish.active svg{color:#e8607a;fill:#e8607a;}
   .zoom-art{
     background:linear-gradient(160deg,var(--ink-4),var(--ink-3));
     display:flex;align-items:center;justify-content:center;padding:34px;
@@ -855,6 +888,13 @@
         Volver al catálogo de cartas
       </a>
       <div class="toys-head"><span class="eyebrow">Colección especial</span><h2>Acrílicos</h2></div>
+      <div class="acrylic-promo-banner">
+        <div class="apb-icon">🎁</div>
+        <div class="apb-text">
+          <div class="apb-title">10% de descuento extra en acrílicos</div>
+          <div class="apb-sub">Al comprar <b>$500 o más</b> en otros productos de la tienda, cualquier acrílico que agregues lleva 10% menos — se aplica solo con armar tu carrito, sin código.</div>
+        </div>
+      </div>
       <div class="toolbar" style="margin-bottom:18px;">
         <div class="search-field">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -1014,6 +1054,9 @@
       <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
         <input type="checkbox" id="adminFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
       </label>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--cream-dim);">
+        <input type="checkbox" id="adminHot" style="width:16px;height:16px;"> 🔥 Marcar como "Muy buscada" (genera urgencia)
+      </label>
       <button type="button" class="btn btn-foil" id="adminSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Publicar ahora</button>
       <p class="promo-status" id="adminAddStatus"></p>
     </div>
@@ -1053,6 +1096,9 @@
         <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
           <input type="checkbox" id="editFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
         </label>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--cream-dim);">
+          <input type="checkbox" id="editHot" style="width:16px;height:16px;"> 🔥 Marcar como "Muy buscada" (genera urgencia)
+        </label>
         <button type="button" class="btn btn-foil" id="editSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Guardar cambios</button>
         <button type="button" id="editDeleteBtn" style="width:100%;justify-content:center;margin-top:8px;background:none;border:1px dashed rgba(181,72,42,.5);color:var(--ember-bright);border-radius:10px;padding:9px;font-size:12.5px;cursor:pointer;">🗑️ Eliminar este producto (permanente)</button>
         <p class="promo-status" id="adminEditStatus"></p>
@@ -1076,12 +1122,19 @@
 <div class="order-modal" id="setExplorerModal" style="width:min(640px,92vw);max-height:80vh;">
   <button class="zoom-close icon-btn" id="setExplorerClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <div class="order-head"><span class="eyebrow">Del más nuevo al más viejo</span><h3>Explorar por expansión</h3></div>
+  <div class="pay-options" id="setLangFilter" style="margin-bottom:14px;">
+    <button type="button" class="pay-opt active" data-lang="all">Todas</button>
+    <button type="button" class="pay-opt" data-lang="en">Inglés</button>
+    <button type="button" class="pay-opt" data-lang="jp">Japonés</button>
+    <button type="button" class="pay-opt" data-lang="cn">Chino</button>
+  </div>
   <div id="setExplorerGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">Cargando expansiones…</div>
 </div>
 
 <div class="zoom-backdrop" id="zoomBackdrop"></div>
 <div class="zoom-modal" id="zoomModal">
   <button class="icon-btn zoom-close" id="zoomClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  <button class="icon-btn zoom-wish" id="zoomWishBtn" aria-label="Guardar para después"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-7.5-4.6-10-9.3C.5 8 2 4.5 5.5 4c2-.3 3.8.7 4.9 2.3l1.6 2.2 1.6-2.2C14.7 4.7 16.5 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.5 4.7-10 9.3-10 9.3z" stroke="currentColor" stroke-width="1.6"/></svg></button>
   <div class="zoom-art" id="zoomArt">
     <div class="zoom-gallery-dots" id="zoomGalleryDots" style="display:none;"></div>
   </div>
@@ -1206,6 +1259,7 @@
     <p class="coupon-status" id="couponStatus"></p>
     <div class="drawer-total" id="drawerSubtotalRow" style="display:none;"><span>Subtotal</span><span id="drawerSubtotal">$0</span></div>
     <div class="drawer-total" id="drawerDiscountRow" style="display:none;color:var(--ok);"><span>Descuento</span><span id="drawerDiscountAmount">-$0</span></div>
+    <div class="drawer-total" id="acrylicPromoRow" style="display:none;color:var(--foil-bright);"><span>🎁 Promo acrílicos (-10%)</span><span id="acrylicPromoAmount">-$0</span></div>
     <div class="drawer-total"><span>Total aproximado</span><b id="drawerTotal">$0</b></div>
     <a href="#" class="btn btn-foil" id="whatsappBtn" target="_blank" rel="noopener">Apartar por WhatsApp</a>
     <button type="button" class="btn btn-ghost" id="mpPayBtn" style="margin-top:8px;opacity:.6;display:none;">Pagar con MercadoPago (próximamente)</button>
@@ -1268,26 +1322,50 @@ function saveCart(){ localStorage.setItem("vitrina_cart_v2", JSON.stringify(stat
 
 const SET_ICONS = {};
 const SET_META = {}; // {logo, releaseDate} por nombre de set, para "Explorar por expansión"
-fetch("https://api.pokemontcg.io/v2/sets?select=name,images,releaseDate")
-  .then(r => r.json())
-  .then(data => {
-    (data.data || []).forEach(s => {
-      const key = s.name.toLowerCase();
-      SET_ICONS[key] = s.images?.symbol;
-      SET_META[key] = { logo: s.images?.logo, releaseDate: s.releaseDate, name: s.name };
-    });
-    document.querySelectorAll(".chip[data-set]").forEach(chip => {
-      const setName = chip.dataset.set.toLowerCase();
-      const icon = SET_ICONS[setName] || SET_ICONS[Object.keys(SET_ICONS).find(k => setName.includes(k) || k.includes(setName))];
-      if (icon){
-        const img = document.createElement("img");
-        img.src = icon; img.alt = ""; img.className = "chip-icon";
-        chip.prepend(img);
+
+function applySetData(sets){
+  sets.forEach(s => {
+    const key = s.name.toLowerCase();
+    SET_ICONS[key] = s.images?.symbol;
+    SET_META[key] = { logo: s.images?.logo, releaseDate: s.releaseDate, name: s.name };
+  });
+  document.querySelectorAll(".chip[data-set]").forEach(chip => {
+    const setName = chip.dataset.set.toLowerCase();
+    const icon = SET_ICONS[setName] || SET_ICONS[Object.keys(SET_ICONS).find(k => setName.includes(k) || k.includes(setName))];
+    if (icon && !chip.querySelector("img")){
+      const img = document.createElement("img");
+      img.src = icon; img.alt = ""; img.className = "chip-icon";
+      chip.prepend(img);
+    }
+  });
+  buildSetExplorer();
+}
+
+// guardamos en caché 7 días — así no gastamos la consulta gratis de la API cada vez
+// que alguien visita el sitio, y los logos siguen apareciendo aunque la API esté saturada
+const SET_CACHE_KEY = "vitrina_set_data_cache_v1";
+const cached = JSON.parse(localStorage.getItem(SET_CACHE_KEY) || "null");
+if (cached && cached.ts && (Date.now() - cached.ts) < 7 * 24 * 60 * 60 * 1000 && cached.sets?.length){
+  applySetData(cached.sets);
+} else {
+  fetch("https://api.pokemontcg.io/v2/sets?select=name,images,releaseDate")
+    .then(r => r.json())
+    .then(data => {
+      const sets = data.data || [];
+      if (sets.length){
+        localStorage.setItem(SET_CACHE_KEY, JSON.stringify({ ts: Date.now(), sets }));
+        applySetData(sets);
+      } else if (cached?.sets?.length){
+        applySetData(cached.sets); // si la consulta viene vacía, usa lo que ya había en caché aunque esté vencido
+      } else {
+        buildSetExplorer();
       }
+    })
+    .catch(() => {
+      if (cached?.sets?.length) applySetData(cached.sets); // si falla, usa lo que ya había en caché aunque esté vencido
+      else buildSetExplorer();
     });
-    buildSetExplorer();
-  })
-  .catch(() => { buildSetExplorer(); }); // aunque falle la API, igual mostramos la lista sin logos
+}
 
 // fechas e idiomas a mano para sets que NO están en esa base de datos pública (chinos, japoneses, exclusivos, promocionales)
 // agrega aquí más conforme los necesites — la key debe ser el nombre EXACTO como está en tu catálogo, en minúsculas
@@ -1301,6 +1379,14 @@ const MANUAL_SET_DATES = {
   "gem pack 2": "2025-05-16",         // chino
   "gem pack vol. 3": "2025-09-26",    // chino
   "gem pack vol. 4": "2026-02-06",    // chino
+  // respaldo para sets en inglés bien conocidos, por si la API pública falla o se satura
+  "ascended heroes": "2026-01-30",
+  "perfect order": "2026-03-27",
+  "chaos rising": "2026-05-22",
+  "pitch black": "2026-07-17",
+  "brilliant stars": "2022-02-25",
+  "crown zenith": "2023-01-20",
+  "crown zenith: galarian gallery": "2023-01-20",
 };
 const MANUAL_SET_LANG = {
   "collect 151 hope": "cn",
@@ -1396,21 +1482,24 @@ function findSetMeta(setName){
   return apiMeta;
 }
 
+let setExplorerLangFilter = "all";
 function buildSetExplorer(){
   const grid = document.getElementById("setExplorerGrid");
   if (!grid) return;
   const customLogos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
-  const sets = unique("set").map(name => {
+  let sets = unique("set").map(name => {
     const meta = findSetMeta(name);
     const count = CARDS.filter(c => c.set === name && (c.category === "pokemon" || !c.category)).length;
-    const langCode = meta?.lang || (MANUAL_SET_LANG[name.toLowerCase()] || null);
+    const langCode = meta?.lang || (MANUAL_SET_LANG[name.toLowerCase()] || "en");
     return { name, count, logo: customLogos[name] || meta?.logo, releaseDate: meta?.releaseDate || "", langCode };
   });
+  if (setExplorerLangFilter !== "all") sets = sets.filter(s => s.langCode === setExplorerLangFilter);
   // más nuevo primero; los que no tienen fecha (sets propios/no catalogados) van al final
   sets.sort((a,b) => (b.releaseDate || "0000-00-00").localeCompare(a.releaseDate || "0000-00-00"));
+  if (!sets.length){ grid.innerHTML = `<p style="grid-column:1/-1;color:var(--slate);font-size:13px;">No hay expansiones en este idioma.</p>`; return; }
   grid.innerHTML = sets.map(s => `
     <div class="set-explorer-item" data-set="${s.name}">
-      ${s.langCode ? `<span class="se-lang-badge">${LANG_INFO[s.langCode].flag} ${s.langCode.toUpperCase()}</span>` : ''}
+      ${s.langCode !== "en" ? `<span class="se-lang-badge">${LANG_INFO[s.langCode].flag} ${s.langCode.toUpperCase()}</span>` : ''}
       ${!s.logo && isAdminSession() ? `<button type="button" class="se-upload-logo" data-set="${s.name}" title="Subir logo de esta expansión">📎</button>` : ''}
       ${s.logo ? `<img src="${s.logo}" alt="${s.name}">` : `<span class="se-fallback">${s.name}</span>`}
       <span class="se-name">${s.name}</span>
@@ -1483,6 +1572,14 @@ function closeSetExplorer(){
   document.getElementById("setExplorerBackdrop").classList.remove("open");
 }
 document.getElementById("setExplorerToggle").addEventListener("click", openSetExplorer);
+document.querySelectorAll('#setLangFilter .pay-opt').forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll('#setLangFilter .pay-opt').forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    setExplorerLangFilter = btn.dataset.lang;
+    buildSetExplorer();
+  });
+});
 document.getElementById("setExplorerClose").addEventListener("click", closeSetExplorer);
 document.getElementById("setExplorerBackdrop").addEventListener("click", closeSetExplorer);
 
@@ -1560,6 +1657,7 @@ function renderCard(card){
       <div class="sheen"></div>
       ${artImg || GEM_ICON}
       ${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}
+      ${card.hot && !soldOut ? '<span class="badge-hot">🔥 Muy buscada</span>' : ''}
       ${soldOut ? '<span class="badge sold">Agotado</span>' : (card.stock === 1 ? '<span class="badge stock">Última pieza</span>' : (card.kind==="sellado" ? `<span class="badge stock">Disponible: ${card.stock}</span>` : ''))}
       <button type="button" class="wish-btn${wished ? ' active' : ''}" data-id="${card.id}" aria-label="Guardar para después">${HEART_ICON}</button>
       ${isAdminSession() ? `<button type="button" class="admin-edit-btn" data-id="${card.id}" aria-label="Editar (admin)" title="Editar (solo tú lo ves)">${EDIT_ICON}</button>` : ''}
@@ -1568,7 +1666,7 @@ function renderCard(card){
     <div class="card-info">
       <div class="card-set"><span>${card.set}</span>${card.num ? `<span>${card.code}${String(card.num).padStart(3,"0")}/${card.total}</span>` : ""}</div>
       <p class="card-name">${card.name}</p>
-      <div class="card-meta"><span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span></div>
+      <div class="card-meta"><span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}</div>
       <div class="card-price-row"><span class="card-price">${money(card.price)}</span><span class="card-cond">${card.condition}</span></div>
       ${card.kind==="sellado" ? `
       <div class="qty-stepper">
@@ -1661,6 +1759,19 @@ function refreshCardInPlace(cardId){
 function openZoom(card){
   trackEvent("view", card.id);
   if (card.stock === 1) trackEvent("low_stock_view", card.id);
+
+  const zoomWishBtn = document.getElementById("zoomWishBtn");
+  function syncZoomWish(){ zoomWishBtn.classList.toggle("active", state.wishlist.has(card.id)); }
+  syncZoomWish();
+  zoomWishBtn.onclick = () => {
+    if (state.wishlist.has(card.id)){ state.wishlist.delete(card.id); }
+    else { state.wishlist.add(card.id); showToast(`<b>${card.name}</b> guardada`); trackEvent("wishlist_add", card.id); }
+    saveWishlist();
+    syncZoomWish();
+    refreshCardInPlace(card.id);
+    updateWishlistUI();
+  };
+
   const artWrap = document.getElementById("zoomArt");
   const dotsWrap = document.getElementById("zoomGalleryDots");
   const gallery = (Array.isArray(card.images) && card.images.length) ? card.images : (card.image ? [card.image] : []);
@@ -1695,7 +1806,7 @@ function openZoom(card){
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
   document.getElementById("zoomName").textContent = card.name;
   const langInfo = getLangInfo(card);
-  document.getElementById("zoomMeta").innerHTML = `<span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:5px;">${langInfo.flag} ${langInfo.label}</span><span class="tag">${card.condition}</span>`;
+  document.getElementById("zoomMeta").innerHTML = `<span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:5px;">${langInfo.flag} ${langInfo.label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}<span class="tag">${card.condition}</span>`;
   document.getElementById("zoomPrice").textContent = money(card.price);
   const soldOut = card.stock <= 0;
   const stockEl = document.getElementById("zoomStock");
@@ -1960,12 +2071,19 @@ function updateCartUI(){
   }
   document.getElementById("drawerTotal").textContent = money(total);
 
+  // promo: 10% extra en acrílicos cuando el carrito completo llega a $500+, sin necesidad de código
+  const acrylicSubtotal = entries.filter(({card}) => card.category === "acrylic").reduce((s,{card,qty}) => s + card.price*qty, 0);
+  const nonAcrylicSubtotal = total - acrylicSubtotal;
+  const acrylicPromo = (nonAcrylicSubtotal >= 500 && acrylicSubtotal > 0) ? Math.round(acrylicSubtotal * 0.10) : 0;
+
   const discount = state.couponApplied ? Math.round(total * 0.05) : 0;
-  const finalTotal = total - discount;
-  document.getElementById("drawerSubtotalRow").style.display = discount ? "flex" : "none";
+  const finalTotal = total - discount - acrylicPromo;
+  document.getElementById("drawerSubtotalRow").style.display = (discount || acrylicPromo) ? "flex" : "none";
   document.getElementById("drawerDiscountRow").style.display = discount ? "flex" : "none";
+  document.getElementById("acrylicPromoRow").style.display = acrylicPromo ? "flex" : "none";
   document.getElementById("drawerSubtotal").textContent = money(total);
   document.getElementById("drawerDiscountAmount").textContent = `-${money(discount)}`;
+  document.getElementById("acrylicPromoAmount").textContent = `-${money(acrylicPromo)}`;
   document.getElementById("drawerTotal").textContent = money(finalTotal);
   document.getElementById("cartBarTotal").textContent = money(finalTotal);
 
@@ -1973,7 +2091,7 @@ function updateCartUI(){
   // mandamos un link corto a un resumen de pedido en el propio sitio — funciona
   // igual de bien con 2 piezas que con 50
   const itemsCode = entries.map(({card,qty}) => `${card.id}x${qty}`).join(",");
-  const orderUrl = `${location.origin}${location.pathname}?pedido=${encodeURIComponent(itemsCode)}${state.couponApplied ? "&c=1" : ""}&e=${state.delivery}`;
+  const orderUrl = `${location.origin}${location.pathname}?pedido=${encodeURIComponent(itemsCode)}${state.couponApplied ? "&c=1" : ""}${acrylicPromo ? "&ap=1" : ""}&e=${state.delivery}`;
   const msg = `Hola, quiero apartar mi pedido:%0A${encodeURIComponent(orderUrl)}%0A%0AEntrega: ${encodeURIComponent(DELIVERY_LABELS[state.delivery])}%0ATotal: ${money(finalTotal)}`;
   document.getElementById("whatsappBtn").href = count ? `https://wa.me/${WHATSAPP_PHONE}?text=${msg}` : `https://wa.me/${WHATSAPP_PHONE}`;
 
@@ -2511,6 +2629,34 @@ fetch(`${WORKER_URL}/edits`)
   })
   .catch(() => {});
 
+// historial de precios: si el precio de hoy es mayor al de hace ~3+ días (o al más viejo
+// disponible si aún no hay tanto historial), marcamos la pieza como "📈 En alza"
+fetch(`${WORKER_URL}/price-history`)
+  .then(r => r.json())
+  .then(data => {
+    const history = data.history || {};
+    let changed = false;
+    Object.keys(history).forEach(id => {
+      const card = CARDS.find(c => String(c.id) === String(id));
+      const points = history[id];
+      if (!card || !points || points.length < 2) return;
+      const sorted = [...points].sort((a,b) => a.date.localeCompare(b.date));
+      const latest = sorted[sorted.length - 1];
+      const latestDate = new Date(latest.date);
+      let reference = sorted[0];
+      for (const p of sorted){
+        const daysAgo = (latestDate - new Date(p.date)) / 86400000;
+        if (daysAgo >= 3){ reference = p; } // se queda con el más reciente que tenga al menos 3 días de diferencia
+      }
+      if (reference !== latest && latest.price > reference.price * 1.03){ // al menos 3% de alza real
+        card.trending = true;
+        changed = true;
+      }
+    });
+    if (changed) refreshAllViews();
+  })
+  .catch(() => {});
+
 /* ---- tracking silencioso de interacción (para las analíticas privadas) ---- */
 function trackEvent(type, key){
   if (isAdminSession()) return; // no contamos tus propios clics de prueba, para no ensuciar los datos reales
@@ -2664,6 +2810,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("editPrice").value = card.price;
     document.getElementById("editStock").value = card.stock;
     document.getElementById("editFeatured").checked = !!card.featured;
+    document.getElementById("editHot").checked = !!card.hot;
     renderEditGallery();
     document.getElementById("editPasteInput").value = "";
     document.getElementById("adminEditStatus").textContent = "";
@@ -2693,6 +2840,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   document.getElementById("editSubmitBtn").addEventListener("click", async () => {
     if (!editingId) return;
     const status = document.getElementById("adminEditStatus");
+    const priceBefore = CARDS.find(c => String(c.id) === String(editingId))?.price;
     const changes = {
       category: document.getElementById("editCategory").value,
       kind: document.getElementById("editCategory").value === "pokemon" ? document.getElementById("editKind").value : document.getElementById("editCategory").value,
@@ -2700,6 +2848,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       price: Number(document.getElementById("editPrice").value),
       stock: Number(document.getElementById("editStock").value),
       featured: document.getElementById("editFeatured").checked,
+      hot: document.getElementById("editHot").checked,
     };
     if (editImages.length){ changes.image = editImages[0]; changes.images = editImages; }
     if (!changes.name || !changes.price){ status.textContent = "Falta nombre o precio."; return; }
@@ -2716,6 +2865,14 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         if (card) Object.assign(card, changes);
         refreshAllViews();
         status.textContent = "✓ Guardado — ya está actualizado en el sitio.";
+        // registra el cambio de precio en el historial, para ir armando la tendencia "📈 En alza"
+        if (priceBefore !== undefined && changes.price !== priceBefore){
+          fetch(`${WORKER_URL}/admin/log-price`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(editingId), price: changes.price })
+          }).catch(() => {});
+        }
       } else {
         status.textContent = data.error || "No se pudo guardar.";
       }
@@ -2807,7 +2964,33 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       const deliveryLabelFn = k => DELIVERY_LABELS[k] || k;
       const bucketLabelFn = k => `$${k}`;
 
-      body.innerHTML =
+      // puntaje combinado para sugerir qué marcar como "🔥 Muy buscada": vistas + el doble por agregar al carrito + 1.5x por guardar
+      const scoreMap = {};
+      const addScore = (list, weight) => (list || []).forEach(e => { scoreMap[e.key] = (scoreMap[e.key] || 0) + e.count * weight; });
+      addScore(byType.view, 1);
+      addScore(byType.add_cart, 2);
+      addScore(byType.wishlist_add, 1.5);
+      const topTrending = Object.entries(scoreMap)
+        .filter(([id]) => CARDS.some(c => String(c.id) === String(id)))
+        .sort((a,b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([id]) => CARDS.find(c => String(c.id) === String(id)));
+
+      const trendingHtml = topTrending.length ? `
+        <div style="margin-bottom:18px;padding:12px;border-radius:10px;border:1px dashed var(--foil-dim);">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:8px;">🔥 Sugerencia automática, según lo más buscado/agregado/guardado</div>
+          ${topTrending.map(c => `
+            <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.5px;">
+              <input type="checkbox" class="trend-suggest-check" data-id="${c.id}" ${c.hot ? "checked" : ""} style="width:14px;height:14px;">
+              <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name}</span>
+            </label>
+          `).join("")}
+          <button type="button" class="btn btn-foil" id="applyTrendingBtn" style="width:100%;margin-top:10px;padding:8px;font-size:12.5px;">Aplicar marcados como "🔥 Muy buscada"</button>
+          <p class="promo-status" id="trendingApplyStatus"></p>
+        </div>
+      ` : "";
+
+      body.innerHTML = trendingHtml +
         section("👁️ Más vistos", byType.view, nameFor) +
         section("🛒 Más agregados al carrito", byType.add_cart, nameFor) +
         section("♡ Más guardados para después", byType.wishlist_add, nameFor) +
@@ -2824,6 +3007,38 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         section("📱 Dispositivo", byType.device_type, k => k === "movil" ? "Celular" : "Escritorio") +
         section("🔗 De dónde llega la gente", byType.traffic_source, k => k) +
         section("🎁 Uso del cupón", byType.coupon_used, () => "BIENVENIDO5 usado");
+
+      const applyBtn = document.getElementById("applyTrendingBtn");
+      if (applyBtn){
+        applyBtn.addEventListener("click", async () => {
+          const trendStatus = document.getElementById("trendingApplyStatus");
+          const checks = [...document.querySelectorAll(".trend-suggest-check")];
+          applyBtn.disabled = true;
+          applyBtn.textContent = "Guardando…";
+          let ok = 0, fail = 0;
+          for (const chk of checks){
+            const id = chk.dataset.id;
+            const card = CARDS.find(c => String(c.id) === String(id));
+            const wantHot = chk.checked;
+            if (!card || !!card.hot === wantHot) continue; // sin cambios, no gastamos llamada
+            try {
+              const res = await fetch(`${WORKER_URL}/admin/edit-product`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(id), changes: { hot: wantHot } })
+              });
+              const data = await res.json();
+              if (data.ok){ card.hot = wantHot; ok++; } else { fail++; }
+            } catch (e) { fail++; }
+          }
+          refreshAllViews();
+          applyBtn.disabled = false;
+          applyBtn.textContent = 'Aplicar marcados como "🔥 Muy buscada"';
+          trendStatus.textContent = fail
+            ? `✓ ${ok} actualizada(s), ${fail} con error — intenta de nuevo con esas.`
+            : (ok ? `✓ ${ok} actualizada(s) — ya se ven en el sitio.` : "Sin cambios que guardar.");
+        });
+      }
     } catch (err) {
       body.innerHTML = `<p style="color:var(--ember-bright);">No se pudo conectar.</p>`;
     }
@@ -2932,6 +3147,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       kind: document.getElementById("adminCategory").value === "pokemon" ? document.getElementById("adminKind").value : document.getElementById("adminCategory").value,
       name, price, stock: Number(document.getElementById("adminStock").value) || 1,
       featured: document.getElementById("adminFeatured").checked,
+      hot: document.getElementById("adminHot").checked,
       image: adminImages[0] || "", images: adminImages
     };
     status.textContent = "Publicando…";
@@ -2946,10 +3162,16 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         CARDS.push(data.product);
         refreshAllViews();
         status.textContent = "✓ Publicado — ya está en el sitio.";
+        fetch(`${WORKER_URL}/admin/log-price`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(data.product.id), price: data.product.price })
+        }).catch(() => {});
         document.getElementById("adminName").value = "";
         document.getElementById("adminPrice").value = "";
         document.getElementById("adminStock").value = "1";
         document.getElementById("adminFeatured").checked = false;
+        document.getElementById("adminHot").checked = false;
         adminImages = [];
         renderAdminGallery();
         document.getElementById("adminPasteInput").value = "";
@@ -3005,11 +3227,14 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   if (!items.length) return;
 
   const hasCoupon = params.get("c") === "1";
+  const hasAcrylicPromo = params.get("ap") === "1";
   const deliveryKey = params.get("e") || "";
   const deliveryLabel = DELIVERY_LABELS[deliveryKey] || "";
   const subtotal = items.reduce((s,e) => s + e.card.price*e.qty, 0);
+  const acrylicSubtotal = items.filter(e => e.card.category === "acrylic").reduce((s,e) => s + e.card.price*e.qty, 0);
+  const acrylicPromo = (hasAcrylicPromo && (subtotal - acrylicSubtotal) >= 500 && acrylicSubtotal > 0) ? Math.round(acrylicSubtotal * 0.10) : 0;
   const discount = hasCoupon ? Math.round(subtotal * 0.05) : 0;
-  const total = subtotal - discount;
+  const total = subtotal - discount - acrylicPromo;
 
   if (deliveryLabel){
     document.getElementById("orderList").insertAdjacentHTML("beforebegin", `<div style="font-size:12.5px;color:var(--foil-bright);margin-bottom:10px;">📍 ${deliveryLabel}</div>`);
@@ -3063,13 +3288,14 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
 
   const totals = document.getElementById("orderTotals");
   totals.innerHTML = `
-    ${hasCoupon ? `<div class="row"><span>Subtotal</span><span>${money(subtotal)}</span></div>
-    <div class="row discount"><span>Cupón BIENVENIDO5 (-5%)</span><span>-${money(discount)}</span></div>` : ""}
+    ${(hasCoupon || acrylicPromo) ? `<div class="row"><span>Subtotal</span><span>${money(subtotal)}</span></div>` : ""}
+    ${hasCoupon ? `<div class="row discount"><span>Cupón BIENVENIDO5 (-5%)</span><span>-${money(discount)}</span></div>` : ""}
+    ${acrylicPromo ? `<div class="row discount"><span>🎁 Promo acrílicos (-10%)</span><span>-${money(acrylicPromo)}</span></div>` : ""}
     <div class="row total"><span>Total</span><b>${money(total)}</b></div>
   `;
 
   const lines = items.map(({card,qty}) => `• ${card.name}${qty>1?` x${qty}`:''} — ${money(card.price*qty)}`);
-  const waMsg = `Hola, quiero confirmar mi pedido:%0A%0A${lines.join("%0A")}%0A${hasCoupon ? `%0ACupón BIENVENIDO5 (-5%25): -${money(discount)}` : ""}${deliveryLabel ? `%0AEntrega: ${encodeURIComponent(deliveryLabel)}` : ""}%0ATotal: ${money(total)}`;
+  const waMsg = `Hola, quiero confirmar mi pedido:%0A%0A${lines.join("%0A")}%0A${hasCoupon ? `%0ACupón BIENVENIDO5 (-5%25): -${money(discount)}` : ""}${acrylicPromo ? `%0APromo acrílicos (-10%25): -${money(acrylicPromo)}` : ""}${deliveryLabel ? `%0AEntrega: ${encodeURIComponent(deliveryLabel)}` : ""}%0ATotal: ${money(total)}`;
   document.getElementById("orderWhatsappBtn").href = `https://wa.me/${WHATSAPP_PHONE}?text=${waMsg}`;
 
   document.getElementById("orderModal").classList.add("open");
