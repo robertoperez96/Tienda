@@ -136,24 +136,34 @@
   /* ---- barra de categorías: visual, solo arriba, se oculta al hacer scroll ---- */
   .category-nav{
     position:sticky;top:72px;z-index:45;
-    background:linear-gradient(180deg,rgba(11,14,20,0.98),rgba(11,14,20,0.9));
-    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
-    max-height:80px;overflow:hidden;
-    transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .3s ease, border-color .3s ease;
+    background:linear-gradient(180deg,rgba(11,14,20,0.98),rgba(11,14,20,0.92));
+    backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,162,39,.18);
+    box-shadow:0 10px 24px -14px rgba(0,0,0,.5);
   }
-  .category-nav.hide{max-height:0;opacity:0;border-color:transparent;}
-  .category-nav-inner{display:flex;gap:10px;padding:12px 24px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .category-nav-inner{display:flex;gap:12px;padding:14px 24px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
   .category-nav-inner::-webkit-scrollbar{display:none;}
   .cat-tab{
-    display:flex;align-items:center;gap:8px;flex-shrink:0;
-    padding:10px 20px;border-radius:999px;text-decoration:none;
+    display:flex;align-items:center;gap:9px;flex-shrink:0;
+    padding:11px 20px;border-radius:999px;text-decoration:none;
     background:var(--ink-2);border:1px solid var(--line-strong);
-    color:var(--cream-dim);font-size:13.5px;font-weight:560;
+    color:var(--cream-dim);font-size:13.5px;font-weight:600;
     transition:all .2s ease;
   }
-  .cat-tab .cat-icon{font-size:16px;}
+  .cat-tab .cat-count{font-family:var(--font-mono);font-size:10.5px;color:var(--slate);background:rgba(237,230,214,.06);border-radius:999px;padding:1px 7px;}
+  .cat-tab.active .cat-count{color:var(--foil-bright);background:rgba(201,162,39,.18);}
+  .cat-tab .cat-icon{font-size:17px;}
   .cat-tab-small{font-size:12px;padding:10px 16px;}
   .jp-flag svg{border-radius:2px;box-shadow:0 0 0 1px rgba(237,230,214,.25);display:block;}
+  .set-explorer-item{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    padding:14px 10px;border-radius:12px;border:1px solid var(--line-strong);
+    background:var(--ink-3);cursor:pointer;transition:all .15s ease;text-align:center;
+  }
+  .set-explorer-item:hover{border-color:var(--foil-dim);transform:translateY(-2px);background:var(--ink-4);}
+  .set-explorer-item img{max-width:100%;max-height:38px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
+  .set-explorer-item .se-fallback{font-family:var(--font-display);font-weight:560;font-size:14px;color:var(--foil-bright);}
+  .set-explorer-item .se-name{font-size:11.5px;color:var(--cream-dim);line-height:1.3;}
+  .set-explorer-item .se-meta{font-size:10px;color:var(--slate);font-family:var(--font-mono);}
   .gallery-thumb{position:relative;width:60px;height:60px;border-radius:8px;overflow:hidden;border:1px solid var(--line-strong);flex-shrink:0;}
   .gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
   .gallery-thumb.primary{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil);}
@@ -259,7 +269,22 @@
 
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
   @media (max-width:1080px){.grid{grid-template-columns:repeat(3,1fr);}}
-  @media (max-width:720px){.grid{grid-template-columns:repeat(2,1fr);gap:12px;}}
+  @media (max-width:720px){
+    .grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .card-art{padding:8px;}
+    .card-info{padding:9px 9px 10px;}
+    .card-set{font-size:9.5px;margin-bottom:2px;}
+    .card-name{font-size:12.5px;margin:0 0 4px;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;}
+    .card-price{font-size:14px;}
+    .add-to-cart-btn{padding:7px;font-size:11px;margin-top:7px;}
+    .card-select-dot{width:18px;height:18px;top:7px;right:7px;}
+    .card-select-dot svg{width:9px;height:9px;}
+    .wish-btn{width:22px;height:22px;top:7px;left:7px;}
+    .wish-btn svg{width:11px;height:11px;}
+    .badge{font-size:9px;padding:2px 5px;top:7px;}
+    .badge.left{left:33px;}
+    .badge.stock{right:7px;bottom:7px;}
+  }
   @media (max-width:420px){.grid{grid-template-columns:1fr 1fr;}}
   .card{background:var(--ink-3);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;position:relative;box-shadow:var(--shadow-card);opacity:0;transform:translateY(14px);transition:border-color .15s,transform .15s ease;}
   .card.in-view{animation:card-in .5s ease forwards;}
@@ -410,7 +435,7 @@
   .card.selected .card-select-dot{background:var(--foil);border-color:var(--foil);}
   .card-select-dot svg{width:12px;height:12px;opacity:0;transition:opacity .1s;}
   .card.selected .card-select-dot svg{opacity:1;}
-  .card-info{padding:12px 12px 14px;}
+  .card-info{padding:10px 10px 12px;}
   .card-set{font-family:var(--font-mono);font-size:10.5px;color:var(--slate);display:flex;justify-content:space-between;margin-bottom:4px;}
   .card-name{font-size:14.5px;font-weight:600;margin:0 0 6px;line-height:1.25;}
   .card-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
@@ -422,7 +447,7 @@
   .qty-stepper button{background:var(--ink-4);border:none;color:var(--cream);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;}
   .qty-stepper button:hover{background:var(--foil-dim);color:var(--foil-bright);}
   .qty-stepper span{font-family:var(--font-mono);font-size:13px;}
-  .add-to-cart-btn{margin-top:10px;width:100%;padding:9px;border-radius:8px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .add-to-cart-btn{margin-top:10px;width:100%;padding:8px;border-radius:8px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
   .add-to-cart-btn:hover{border-color:var(--foil-dim);}
   .add-to-cart-btn.in-cart{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);}
 
@@ -573,6 +598,8 @@
 
   /* ---- resumen de pedido (abre desde el link de WhatsApp) ---- */
   #orderBackdrop{z-index:105;}
+  #setExplorerBackdrop{z-index:107;}
+  #setExplorerModal{z-index:108;}
   #adminBackdrop{z-index:150;}
   #adminModal{z-index:151;}
   .order-modal{
@@ -711,16 +738,16 @@
 <div class="category-nav" id="categoryNav">
   <div class="wrap category-nav-inner">
     <a href="#catalogo" class="cat-tab active" data-cat="cartas">
-      <span class="cat-icon">🃏</span><span>Catálogo</span>
+      <span class="cat-icon">🃏</span><span>Catálogo</span><span class="cat-count" id="countCartas"></span>
     </a>
     <a href="#pcjp" class="cat-tab cat-tab-small" data-cat="pcjp">
-      <span class="cat-icon jp-flag"><svg viewBox="0 0 30 20" width="18" height="12"><rect width="30" height="20" rx="2" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg></span><span>Exclusivos Pokémon Center JP</span>
+      <span class="cat-icon jp-flag"><svg viewBox="0 0 30 20" width="18" height="12"><rect width="30" height="20" rx="2" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg></span><span>Exclusivos Pokémon Center JP</span><span class="cat-count" id="countPcjp"></span>
     </a>
     <a href="#acrilicos" class="cat-tab" data-cat="acrilicos">
-      <span class="cat-icon">🖼️</span><span>Acrílicos</span>
+      <span class="cat-icon">🖼️</span><span>Acrílicos</span><span class="cat-count" id="countAcrilicos"></span>
     </a>
     <a href="#juguetes" class="cat-tab" data-cat="juguetes">
-      <span class="cat-icon">🧸</span><span>Coleccionables y Juguetes</span>
+      <span class="cat-icon">🧸</span><span>Coleccionables y Juguetes</span><span class="cat-count" id="countJuguetes"></span>
     </a>
   </div>
 </div>
@@ -754,6 +781,7 @@
 
       <div class="toolbar">
         <button class="filter-toggle" id="filterToggle"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Filtrar</button>
+        <button class="filter-toggle" id="setExplorerToggle"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9h18M8 3v3M16 3v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Explorar por expansión</button>
         <div class="search-field">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <input type="text" id="searchInput" placeholder="Buscar por nombre, set o número…">
@@ -1039,6 +1067,13 @@
 </div>
 
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="zoom-backdrop" id="setExplorerBackdrop"></div>
+<div class="order-modal" id="setExplorerModal" style="width:min(640px,92vw);max-height:80vh;">
+  <button class="zoom-close icon-btn" id="setExplorerClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  <div class="order-head"><span class="eyebrow">Del más nuevo al más viejo</span><h3>Explorar por expansión</h3></div>
+  <div id="setExplorerGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">Cargando expansiones…</div>
+</div>
+
 <div class="zoom-backdrop" id="zoomBackdrop"></div>
 <div class="zoom-modal" id="zoomModal">
   <button class="icon-btn zoom-close" id="zoomClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
@@ -1227,10 +1262,15 @@ function unique(key){ return [...new Set(CARDS.map(c => c[key]).filter(Boolean))
 function saveCart(){ localStorage.setItem("vitrina_cart_v2", JSON.stringify(state.selected)); }
 
 const SET_ICONS = {};
-fetch("https://api.pokemontcg.io/v2/sets?select=name,images")
+const SET_META = {}; // {logo, releaseDate} por nombre de set, para "Explorar por expansión"
+fetch("https://api.pokemontcg.io/v2/sets?select=name,images,releaseDate")
   .then(r => r.json())
   .then(data => {
-    (data.data || []).forEach(s => { SET_ICONS[s.name.toLowerCase()] = s.images?.symbol; });
+    (data.data || []).forEach(s => {
+      const key = s.name.toLowerCase();
+      SET_ICONS[key] = s.images?.symbol;
+      SET_META[key] = { logo: s.images?.logo, releaseDate: s.releaseDate, name: s.name };
+    });
     document.querySelectorAll(".chip[data-set]").forEach(chip => {
       const setName = chip.dataset.set.toLowerCase();
       const icon = SET_ICONS[setName] || SET_ICONS[Object.keys(SET_ICONS).find(k => setName.includes(k) || k.includes(setName))];
@@ -1240,8 +1280,57 @@ fetch("https://api.pokemontcg.io/v2/sets?select=name,images")
         chip.prepend(img);
       }
     });
+    buildSetExplorer();
   })
-  .catch(() => {});
+  .catch(() => { buildSetExplorer(); }); // aunque falle la API, igual mostramos la lista sin logos
+
+function findSetMeta(setName){
+  const key = setName.toLowerCase();
+  return SET_META[key] || SET_META[Object.keys(SET_META).find(k => key.includes(k) || k.includes(key))];
+}
+
+function buildSetExplorer(){
+  const grid = document.getElementById("setExplorerGrid");
+  if (!grid) return;
+  const sets = unique("set").map(name => {
+    const meta = findSetMeta(name);
+    const count = CARDS.filter(c => c.set === name && (c.category === "pokemon" || !c.category)).length;
+    return { name, count, logo: meta?.logo, releaseDate: meta?.releaseDate || "" };
+  });
+  // más nuevo primero; los que no tienen fecha (sets propios/no catalogados) van al final
+  sets.sort((a,b) => (b.releaseDate || "0000-00-00").localeCompare(a.releaseDate || "0000-00-00"));
+  grid.innerHTML = sets.map(s => `
+    <div class="set-explorer-item" data-set="${s.name}">
+      ${s.logo ? `<img src="${s.logo}" alt="${s.name}">` : `<span class="se-fallback">${s.name}</span>`}
+      <span class="se-name">${s.name}</span>
+      <span class="se-meta">${s.count} pieza${s.count===1?'':'s'}${s.releaseDate ? ` · ${s.releaseDate.slice(0,4)}` : ''}</span>
+    </div>
+  `).join("");
+  grid.querySelectorAll(".set-explorer-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const setName = item.dataset.set;
+      state.sets.clear();
+      state.sets.add(setName);
+      document.querySelectorAll(".chip[data-set]").forEach(chip => chip.classList.toggle("active", chip.dataset.set === setName));
+      resetAndRender();
+      closeSetExplorer();
+      showCardsView();
+      document.getElementById("catalogo").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+function openSetExplorer(){
+  document.getElementById("setExplorerModal").classList.add("open");
+  document.getElementById("setExplorerBackdrop").classList.add("open");
+}
+function closeSetExplorer(){
+  document.getElementById("setExplorerModal").classList.remove("open");
+  document.getElementById("setExplorerBackdrop").classList.remove("open");
+}
+document.getElementById("setExplorerToggle").addEventListener("click", openSetExplorer);
+document.getElementById("setExplorerClose").addEventListener("click", closeSetExplorer);
+document.getElementById("setExplorerBackdrop").addEventListener("click", closeSetExplorer);
 
 function buildFilterUI(){
   const setChips = document.getElementById("setChips");
@@ -1333,7 +1422,7 @@ function renderCard(card){
         <span>${qty} en tu selección</span>
         <button class="qty-plus" aria-label="Agregar uno" ${soldOut?'disabled':''}>+</button>
       </div>` : `
-      <button type="button" class="add-to-cart-btn ${qty>0 ? 'in-cart' : ''}" ${soldOut?'disabled':''}>${soldOut ? 'Agotado' : (qty>0 ? '✓ En tu carrito' : 'Agregar al carrito')}</button>`}
+      <button type="button" class="add-to-cart-btn ${qty>0 ? 'in-cart' : ''}" ${soldOut?'disabled':''}>${soldOut ? 'Agotado' : (qty>0 ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> En tu carrito' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 6h2l1.6 9.6a2 2 0 002 1.7h7.4a2 2 0 002-1.6L20 9H7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.3" fill="currentColor"/><circle cx="17" cy="20" r="1.3" fill="currentColor"/></svg> Agregar')}</button>`}
     </div>
   `;
   const toggleSingle = (opts) => {
@@ -2035,12 +2124,10 @@ document.querySelectorAll(".pay-opt").forEach(btn => {
 
 const siteHeader = document.querySelector("header.site");
 const backToTopBtn = document.getElementById("backToTop");
-const categoryNav = document.getElementById("categoryNav");
 window.addEventListener("scroll", () => {
   const y = window.scrollY;
   siteHeader.classList.toggle("scrolled", y > 12);
   backToTopBtn.classList.toggle("show", y > 700);
-  categoryNav.classList.toggle("hide", y > 90);
 }, { passive: true });
 backToTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
@@ -2212,13 +2299,21 @@ document.getElementById("pcjpSortSelect")?.addEventListener("change", e => { pcj
 renderPcjp();
 
 /* ---- productos publicados en vivo desde el Worker (sin GitHub) ---- */
+function updateCategoryCounts(){
+  document.getElementById("countCartas").textContent = CARDS.filter(c => c.category === "pokemon" || !c.category).length;
+  document.getElementById("countPcjp").textContent = CARDS.filter(c => c.category === "pcjp").length;
+  document.getElementById("countAcrilicos").textContent = CARDS.filter(c => c.category === "acrylic").length;
+  document.getElementById("countJuguetes").textContent = CARDS.filter(c => c.category === "toy").length;
+}
 function refreshAllViews(){
   render();
   renderToys();
   renderAcrylics();
   renderPcjp();
   buildCarousel();
+  updateCategoryCounts();
 }
+updateCategoryCounts();
 fetch(`${WORKER_URL}/products`)
   .then(r => r.json())
   .then(data => {
