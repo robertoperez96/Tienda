@@ -236,6 +236,8 @@
   select.sort-select{background:var(--ink);border:1px solid var(--line-strong);color:var(--cream);border-radius:9px;padding:9px 12px;font-size:13.5px;cursor:pointer;}
   .filter-toggle{display:none;}
   @media (max-width:900px){.filter-toggle{display:flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--line-strong);color:var(--cream);border-radius:9px;padding:9px 14px;cursor:pointer;font-size:13.5px;font-weight:500;}}
+  .explorer-toggle{display:flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--line-strong);color:var(--cream);border-radius:9px;padding:9px 14px;cursor:pointer;font-size:13.5px;font-weight:500;transition:border-color .15s;}
+  .explorer-toggle:hover{border-color:var(--foil-dim);}
   .results-count{font-size:13px;color:var(--slate);font-family:var(--font-mono);white-space:nowrap;}
   .catalog-layout{display:grid;grid-template-columns:240px 1fr;gap:26px;align-items:flex-start;}
   @media (max-width:900px){.catalog-layout{grid-template-columns:1fr;}}
@@ -388,7 +390,7 @@
   .card.selected{border-color:var(--foil);box-shadow:0 0 0 1px var(--foil),var(--shadow-card);}
   @keyframes card-pulse{0%{box-shadow:0 0 0 0 rgba(201,162,39,.55), var(--shadow-card);}100%{box-shadow:0 0 0 8px rgba(201,162,39,0), var(--shadow-card);}}
   .card.just-updated{animation:card-pulse .5s ease-out;}
-  .card-art{aspect-ratio:3/4;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:16px;transition:transform .2s ease;}
+  .card-art{aspect-ratio:3/4;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:9px;transition:transform .2s ease;}
   .product-card .card-art{aspect-ratio:1/1;}
   .product-card .card-art::after{
     content:"";position:absolute;inset:0;pointer-events:none;
@@ -781,7 +783,7 @@
 
       <div class="toolbar">
         <button class="filter-toggle" id="filterToggle"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Filtrar</button>
-        <button class="filter-toggle" id="setExplorerToggle"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9h18M8 3v3M16 3v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Explorar por expansión</button>
+        <button class="explorer-toggle" id="setExplorerToggle"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9h18M8 3v3M16 3v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Explorar por expansión</button>
         <div class="search-field">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <input type="text" id="searchInput" placeholder="Buscar por nombre, set o número…">
@@ -1284,9 +1286,18 @@ fetch("https://api.pokemontcg.io/v2/sets?select=name,images,releaseDate")
   })
   .catch(() => { buildSetExplorer(); }); // aunque falle la API, igual mostramos la lista sin logos
 
+// fechas a mano para sets que NO están en esa base de datos pública (chinos, exclusivos, promocionales)
+// agrega aquí más conforme los necesites — la key debe ser el nombre EXACTO como está en tu catálogo, en minúsculas
+const MANUAL_SET_DATES = {
+  "collect 151 hope": "2025-04-15", // 2do de la serie china Collect 151 (entre Journey 17-ene-25 y Surprise 18-jul-25)
+};
+
 function findSetMeta(setName){
   const key = setName.toLowerCase();
-  return SET_META[key] || SET_META[Object.keys(SET_META).find(k => key.includes(k) || k.includes(key))];
+  const manualDate = MANUAL_SET_DATES[key];
+  const apiMeta = SET_META[key] || SET_META[Object.keys(SET_META).find(k => key.includes(k) || k.includes(key))];
+  if (manualDate) return { ...apiMeta, releaseDate: manualDate };
+  return apiMeta;
 }
 
 function buildSetExplorer(){
