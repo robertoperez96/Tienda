@@ -161,14 +161,17 @@
     position:relative;
   }
   .se-lang-badge{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:9px;color:var(--cream-dim);background:rgba(11,14,20,.6);border-radius:999px;padding:2px 6px;}
-  .se-upload-logo,.se-upload-link{position:absolute;top:6px;width:26px;height:26px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:2;}
+  .se-upload-logo,.se-upload-link,.se-remove-bg{position:absolute;top:6px;width:26px;height:26px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:2;}
   .se-upload-logo{right:6px;}
   .se-upload-link{right:36px;}
+  .se-remove-bg{right:66px;background:rgba(90,110,140,.85);}
   .se-upload-logo:hover,.se-upload-link:hover{background:var(--foil-bright);}
+  .se-remove-bg:hover{background:var(--foil-bright);}
   @media (max-width:600px){
-    .se-upload-logo,.se-upload-link{width:32px;height:32px;font-size:15px;top:4px;}
+    .se-upload-logo,.se-upload-link,.se-remove-bg{width:32px;height:32px;font-size:15px;top:4px;}
     .se-upload-logo{right:4px;}
     .se-upload-link{right:40px;}
+    .se-remove-bg{right:76px;}
   }
   .se-admin-hint{grid-column:1/-1;font-size:12px;color:var(--foil-bright);background:rgba(201,162,39,.10);border:1px dashed var(--foil-dim);border-radius:8px;padding:8px 12px;margin-bottom:4px;}
   .set-explorer-item:hover{border-color:var(--foil-dim);transform:translateY(-2px);background:var(--ink-4);}
@@ -1150,9 +1153,9 @@
   <div class="order-head"><span class="eyebrow">Del más nuevo al más viejo</span><h3>Explorar por expansión</h3></div>
   <div class="pay-options" id="setLangFilter" style="margin-bottom:14px;">
     <button type="button" class="pay-opt active" data-lang="all">Todas</button>
-    <button type="button" class="pay-opt" data-lang="en">Inglés</button>
-    <button type="button" class="pay-opt" data-lang="jp">Japonés</button>
-    <button type="button" class="pay-opt" data-lang="cn">Chino</button>
+    <button type="button" class="pay-opt" data-lang="en" style="display:inline-flex;align-items:center;gap:5px;">Inglés</button>
+    <button type="button" class="pay-opt" data-lang="jp" style="display:inline-flex;align-items:center;gap:5px;">Japonés</button>
+    <button type="button" class="pay-opt" data-lang="cn" style="display:inline-flex;align-items:center;gap:5px;">Chino</button>
   </div>
   <div id="setExplorerGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">Cargando expansiones…</div>
 </div>
@@ -1295,7 +1298,28 @@
   </div>
 </div>
 
-<script src="cards-data.js"></script>
+<script>
+/* cards-data.js pesa varios MB (trae fotos propias incrustadas) y GitHub Pages/los
+   navegadores lo cachean de forma agresiva. Si esa descarga se interrumpe una sola vez
+   (señal débil, cambio de wifi a datos, etc.), el navegador puede quedar con una copia
+   incompleta guardada en caché y repetirla en cada recarga normal — eso es lo que causaba
+   el catálogo vacío "hasta que borrabas caché o entrabas en incógnito". Agregar "?v=" con
+   la hora actual obliga a pedir SIEMPRE una copia nueva por la red, así nunca puede quedarse
+   pegado sirviendo una copia rota. */
+document.write('<script src="cards-data.js?v=' + Date.now() + '"><' + '/script>');
+</script>
+<script>
+// red de seguridad: si aun así window.CARDS llegó vacío (ej. sin conexión un instante),
+// reintentamos una vez más antes de rendirnos y mostrar el catálogo vacío.
+if (!window.CARDS || !window.CARDS.length) {
+  try {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "cards-data.js?retry=" + Date.now(), false);
+    xhr.send(null);
+    if (xhr.status === 200 && xhr.responseText) { (0, eval)(xhr.responseText); }
+  } catch (e) { console.warn("No se pudo recargar cards-data.js:", e); }
+}
+</script>
 <script>
 /* =====================================================================
    Storefront — lee el inventario de window.CARDS (cards-data.js).
@@ -1375,7 +1399,7 @@ const cached = JSON.parse(localStorage.getItem(SET_CACHE_KEY) || "null");
 if (cached && cached.ts && (Date.now() - cached.ts) < 7 * 24 * 60 * 60 * 1000 && cached.sets?.length){
   applySetData(cached.sets);
 } else {
-  fetch(`${WORKER_URL}/set-data`)
+  fetch(`${WORKER_URL}/set-data`, { cache: "no-store" })
     .then(r => r.json())
     .then(data => {
       const sets = data.data || [];
@@ -1564,12 +1588,13 @@ function buildSetExplorer(){
   sets.sort((a,b) => (b.releaseDate || "0000-00-00").localeCompare(a.releaseDate || "0000-00-00"));
   if (!sets.length){ grid.innerHTML = `<p style="grid-column:1/-1;color:var(--slate);font-size:13px;">No hay expansiones en este idioma.</p>`; return; }
   const missing = sets.filter(s => !s.logo).length;
-  const hint = (isAdminSession() && missing) ? `<div class="se-admin-hint">📎 Sube una foto del logo, o 🔗 pega el link de una imagen de internet, en cualquier set sin logo (${missing}) — se guarda para todos, no solo en este dispositivo.</div>` : '';
+  const hint = isAdminSession() ? `<div class="se-admin-hint">📎 Sube una foto del logo o 🔗 pega el link de una imagen de internet — funciona en cualquier set, tenga o no logo ya puesto (${missing} sin logo todavía), para agregarlo o reemplazarlo. Con 🧹 le quitas el fondo a un logo que ya subiste. Todo se guarda para todos, no solo en este dispositivo.</div>` : '';
   grid.innerHTML = hint + sets.map(s => `
     <div class="set-explorer-item" data-set="${s.name}">
       ${s.langCode !== "en" ? `<span class="se-lang-badge">${LANG_INFO[s.langCode].flag} ${s.langCode.toUpperCase()}</span>` : ''}
-      ${!s.logo && isAdminSession() ? `<button type="button" class="se-upload-logo" data-set="${s.name}" title="Subir foto del logo desde tu dispositivo">📎</button>` : ''}
-      ${!s.logo && isAdminSession() ? `<button type="button" class="se-upload-link" data-set="${s.name}" title="Pegar link de una imagen de internet">🔗</button>` : ''}
+      ${isAdminSession() ? `<button type="button" class="se-upload-logo" data-set="${s.name}" title="${s.logo ? 'Reemplazar el logo (subir otra foto)' : 'Subir foto del logo desde tu dispositivo'}">📎</button>` : ''}
+      ${isAdminSession() ? `<button type="button" class="se-upload-link" data-set="${s.name}" title="${s.logo ? 'Reemplazar el logo (pegar link)' : 'Pegar link de una imagen de internet'}">🔗</button>` : ''}
+      ${s.logo && isAdminSession() ? `<button type="button" class="se-remove-bg" data-set="${s.name}" title="Quitar el fondo de este logo">🧹</button>` : ''}
       ${s.logo ? `<img src="${s.logo}" alt="${s.name}">` : `<span class="se-fallback">${s.name}</span>`}
       <span class="se-name">${s.name}</span>
       <span class="se-meta">${s.count} pieza${s.count===1?'':'s'}${s.releaseDate ? ` · ${s.releaseDate.slice(0,4)}` : ''}</span>
@@ -1577,7 +1602,7 @@ function buildSetExplorer(){
   `).join("");
   grid.querySelectorAll(".set-explorer-item").forEach(item => {
     item.addEventListener("click", (ev) => {
-      if (ev.target.closest(".se-upload-logo") || ev.target.closest(".se-upload-link")) return; // no abrir el filtro si le dieron a uno de los botones de logo
+      if (ev.target.closest(".se-upload-logo") || ev.target.closest(".se-upload-link") || ev.target.closest(".se-remove-bg")) return; // no abrir el filtro si le dieron a uno de los botones de logo
       const setName = item.dataset.set;
       state.sets.clear();
       state.sets.add(setName);
@@ -1611,6 +1636,15 @@ function buildSetExplorer(){
       const url = prompt("Pega el link (URL) de la imagen del logo de este set:");
       if (!url || !url.trim()) return;
       processLogoImage(setName, url.trim(), { fromUrl: true });
+    });
+  });
+  grid.querySelectorAll(".se-remove-bg").forEach(btn => {
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const setName = btn.dataset.set;
+      const current = sets.find(s => s.name === setName)?.logo;
+      if (!current) return;
+      reprocessLogoBg(setName, current);
     });
   });
 }
@@ -1671,6 +1705,28 @@ function processLogoImage(setName, imgSrc, { fromUrl } = {}){
   img.src = imgSrc;
 }
 
+// vuelve a pasar un logo YA guardado por el algoritmo de quitar fondo (por si quedó guardado
+// antes de que existiera esta función, o si el fondo no se detectó bien la primera vez).
+// Si el logo es un link externo que el sitio de origen no deja "leer" (CORS), no se puede editar
+// aquí — hay que descargarlo y volver a subirlo con 📎 para que quede editable.
+function reprocessLogoBg(setName, currentUrl){
+  const img = new Image();
+  if (!currentUrl.startsWith("data:")) img.crossOrigin = "anonymous";
+  img.onload = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+      canvas.getContext("2d").drawImage(img, 0, 0);
+      const rawUrl = canvas.toDataURL("image/png");
+      removeWhiteBackground(rawUrl, url => saveLogo(setName, url), () => alert("No se detectó un fondo sólido que quitar en esta imagen."));
+    } catch (err) {
+      alert("Esta imagen está enlazada desde otra página que no permite editarla aquí (por seguridad del propio sitio de origen). Para quitarle el fondo, descárgala a tu dispositivo y súbela de nuevo con 📎.");
+    }
+  };
+  img.onerror = () => alert("No se pudo cargar la imagen actual para editarla.");
+  img.src = currentUrl;
+}
+
 function openSetExplorer(){
   document.getElementById("setExplorerModal").classList.add("open");
   document.getElementById("setExplorerBackdrop").classList.add("open");
@@ -1680,6 +1736,10 @@ function closeSetExplorer(){
   document.getElementById("setExplorerBackdrop").classList.remove("open");
 }
 document.getElementById("setExplorerToggle").addEventListener("click", openSetExplorer);
+document.querySelectorAll('#setLangFilter .pay-opt[data-lang]').forEach(btn => {
+  const code = btn.dataset.lang;
+  if (LANG_INFO[code]) btn.insertAdjacentHTML("afterbegin", LANG_INFO[code].flag);
+});
 document.querySelectorAll('#setLangFilter .pay-opt').forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll('#setLangFilter .pay-opt').forEach(b => b.classList.remove("active"));
@@ -2692,7 +2752,7 @@ function refreshAllViews(){
   updateCategoryCounts();
 }
 updateCategoryCounts();
-fetch(`${WORKER_URL}/products`)
+fetch(`${WORKER_URL}/products`, { cache: "no-store" })
   .then(r => r.json())
   .then(data => {
     if (data.products && data.products.length){
@@ -2704,7 +2764,7 @@ fetch(`${WORKER_URL}/products`)
   })
   .catch(() => {});
 
-fetch(`${WORKER_URL}/stock-overrides`)
+fetch(`${WORKER_URL}/stock-overrides`, { cache: "no-store" })
   .then(r => r.json())
   .then(data => {
     const overrides = data.overrides || {};
@@ -2717,7 +2777,7 @@ fetch(`${WORKER_URL}/stock-overrides`)
   })
   .catch(() => {});
 
-fetch(`${WORKER_URL}/edits`)
+fetch(`${WORKER_URL}/edits`, { cache: "no-store" })
   .then(r => r.json())
   .then(data => {
     const edits = data.edits || {};
@@ -2736,7 +2796,7 @@ fetch(`${WORKER_URL}/edits`)
 
 // logos de sets subidos a mano desde "Explorar por expansión" (KV "SET_LOGOS" del Worker) —
 // así se ven igual en cualquier dispositivo, no solo en el navegador donde se subieron
-fetch(`${WORKER_URL}/set-logos`)
+fetch(`${WORKER_URL}/set-logos`, { cache: "no-store" })
   .then(r => r.json())
   .then(data => {
     serverSetLogos = data.logos || {};
@@ -2746,7 +2806,7 @@ fetch(`${WORKER_URL}/set-logos`)
 
 // historial de precios: si el precio de hoy es mayor al de hace ~3+ días (o al más viejo
 // disponible si aún no hay tanto historial), marcamos la pieza como "📈 En alza"
-fetch(`${WORKER_URL}/price-history`)
+fetch(`${WORKER_URL}/price-history`, { cache: "no-store" })
   .then(r => r.json())
   .then(data => {
     const history = data.history || {};

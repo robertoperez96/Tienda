@@ -328,7 +328,7 @@
       <button class="btn btn-ghost" id="unlockAllImagesBtn" type="button">🔓 Desbloquear todas las imágenes</button>
       <button class="btn btn-ghost" id="lockAllPricesBtn" type="button">🔒 Bloquear todos los precios</button>
       <button class="btn btn-ghost" id="unlockAllPricesBtn" type="button">🔓 Desbloquear todos los precios</button>
-      <button class="btn btn-ghost" id="compressAllBtn" type="button" style="color:var(--ember-bright);">🗜️ Comprimir fotos pesadas ya guardadas</button>
+      <button class="btn btn-ghost" id="compressAllBtn" type="button" style="color:var(--ember-bright);">☁️ Subir fotos pesadas al hosting ligero</button>
     </div>
     <div class="status-msg" id="compressStatus"></div>
     <table id="catalogTable">
@@ -345,7 +345,7 @@
       <button class="btn btn-foil" id="exportBtn">Descargar cards-data.js</button>
     </div>
     <p class="hint" style="margin-top:10px;">Al descargar, reemplaza el archivo <code>cards-data.js</code> dentro de la carpeta de tu sitio (o vuelve a arrastrar toda la carpeta a Netlify). index.html lo lee automáticamente.</p>
-    <p class="hint">Para las cartas que la búsqueda automática no encuentre: en la columna "Imagen (URL)" puedes pegar directo un screenshot (Ctrl+V, o mantén presionado y "Pegar" en el cel) o tocar 📎 para subir una foto desde tu dispositivo. Ojo: esto guarda la imagen dentro del propio cards-data.js, así que el archivo pesará más mientras más fotos subas así — para cartas comunes mejor deja que la búsqueda automática lo haga.</p>
+    <p class="hint">Para las cartas que la búsqueda automática no encuentre: en la columna "Imagen (URL)" puedes pegar directo un screenshot (Ctrl+V, o mantén presionado y "Pegar" en el cel) o tocar 📎 para subir una foto desde tu dispositivo. Esa foto se sube sola a un hosting ligero (no queda pesada dentro de cards-data.js) — si el Worker no responde (por ejemplo, si todavía no creaste el KV "PRODUCT_IMAGES", ver worker.js), se guarda igual que antes, incrustada en el archivo, sin que pierdas la foto.</p>
   </div>
 </div>
 
@@ -473,6 +473,23 @@ function compressImage(file, maxDim, callback){
   reader.readAsDataURL(file);
 }
 
+// sube una foto ya comprimida (dataUrl) al hosting liviano del Worker, para que NO se quede
+// embebida dentro de cards-data.js (eso fue lo que hizo crecer ese archivo a 18+ MB y provocaba
+// que el catálogo cargara vacío en el cel/compu al recargar). Si el Worker no responde (sin
+// internet, o todavía no creaste el KV "PRODUCT_IMAGES" — ver worker.js), devuelve null y quien
+// llama sigue usando la foto local de siempre: nada se pierde, solo pesará más como antes.
+async function hostImage(dataUrl){
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/upload-image`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: ADMIN_PASSWORD, dataUrl })
+    });
+    const data = await res.json();
+    return (data && data.ok && data.url) ? data.url : null;
+  } catch (err) { return null; }
+}
+
 function persist(){
   try{
     localStorage.setItem("vitrina_admin_catalog", JSON.stringify(catalog));
@@ -569,7 +586,12 @@ function renderCatalog(){
           const file = it.getAsFile();
           compressImage(file, 700, dataUrl => {
             const item = catalog.find(c => c.id === Number(inp.dataset.id));
-            if (item){ item.image = dataUrl; persist(); renderCatalog(); }
+            if (item){
+              item.image = dataUrl; persist(); renderCatalog();
+              hostImage(dataUrl).then(hostedUrl => {
+                if (hostedUrl && item.image === dataUrl){ item.image = hostedUrl; persist(); renderCatalog(); }
+              });
+            }
           });
           break;
         }
@@ -582,7 +604,12 @@ function renderCatalog(){
       if (!file) return;
       compressImage(file, 700, dataUrl => {
         const item = catalog.find(c => c.id === Number(fileInp.dataset.id));
-        if (item){ item.image = dataUrl; persist(); renderCatalog(); }
+        if (item){
+          item.image = dataUrl; persist(); renderCatalog();
+          hostImage(dataUrl).then(hostedUrl => {
+            if (hostedUrl && item.image === dataUrl){ item.image = hostedUrl; persist(); renderCatalog(); }
+          });
+        }
       });
     });
   });
@@ -694,9 +721,9 @@ const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // W
   const title = document.getElementById("liveChangesTitle");
   try {
     const [prodRes, stockRes, editsRes] = await Promise.all([
-      fetch(`${WORKER_URL}/products`).then(r => r.json()).catch(() => ({products:[]})),
-      fetch(`${WORKER_URL}/stock-overrides`).then(r => r.json()).catch(() => ({overrides:{}})),
-      fetch(`${WORKER_URL}/edits`).then(r => r.json()).catch(() => ({edits:{}})),
+      fetch(`${WORKER_URL}/products`, { cache: "no-store" }).then(r => r.json()).catch(() => ({products:[]})),
+      fetch(`${WORKER_URL}/stock-overrides`, { cache: "no-store" }).then(r => r.json()).catch(() => ({overrides:{}})),
+      fetch(`${WORKER_URL}/edits`, { cache: "no-store" }).then(r => r.json()).catch(() => ({edits:{}})),
     ]);
     const newProducts = (prodRes.products || []).filter(p => !catalog.some(c => c.id === p.id || (typeof p.id === "string" && String(c.id) === p.id)));
     const overrides = stockRes.overrides || {};
@@ -1238,14 +1265,25 @@ function renderQuickGallery(){
     btn.addEventListener("click", () => {
       const i = Number(btn.dataset.i);
       btn.textContent = "…";
-      removeWhiteBackground(quickImages[i], (cleanUrl) => { quickImages[i] = cleanUrl; renderQuickGallery(); },
+      removeWhiteBackground(quickImages[i], (cleanUrl) => {
+          quickImages[i] = cleanUrl; renderQuickGallery();
+          // se le quitó el fondo -> vuelve a ser una imagen local pesada, hay que resubirla
+          hostImage(cleanUrl).then(hostedUrl => {
+            if (hostedUrl && quickImages[i] === cleanUrl){ quickImages[i] = hostedUrl; renderQuickGallery(); }
+          });
+        },
         () => { btn.textContent = "⚠️"; setTimeout(() => renderQuickGallery(), 1800); });
     });
   });
 }
 function addQuickImage(dataUrl){
-  quickImages.push(dataUrl);
+  const i = quickImages.push(dataUrl) - 1;
   renderQuickGallery();
+  // sube la foto al hosting liviano en segundo plano — la vista previa ya se ve al instante
+  // con la copia local, y en cuanto el Worker responde se cambia por el link (sin recargar nada)
+  hostImage(dataUrl).then(hostedUrl => {
+    if (hostedUrl && quickImages[i] === dataUrl){ quickImages[i] = hostedUrl; renderQuickGallery(); }
+  });
 }
 
 // vuelve transparente el fondo blanco/casi blanco de una imagen, con borde suavizado
@@ -1417,7 +1455,7 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
   }
   status.textContent = "Buscando productos publicados en vivo…";
   try {
-    const res = await fetch(`${WORKER_URL}/products`);
+    const res = await fetch(`${WORKER_URL}/products`, { cache: "no-store" });
     const data = await res.json();
     // por si PRODUCTS y ANALYTICS comparten el mismo KV, ignoramos cualquier
     // cosa que no sea un producto real (debe tener nombre y precio)
@@ -1432,7 +1470,7 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
     // ajustes de stock hechos con "Marcar como vendido" desde el resumen de pedido
     let stockSynced = 0;
     try {
-      const stockRes = await fetch(`${WORKER_URL}/stock-overrides`);
+      const stockRes = await fetch(`${WORKER_URL}/stock-overrides`, { cache: "no-store" });
       const stockData = await stockRes.json();
       const overrides = stockData.overrides || {};
       Object.keys(overrides).forEach(id => {
@@ -1445,7 +1483,7 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
     let editsSynced = 0;
     let deletedSynced = 0;
     try {
-      const editsRes = await fetch(`${WORKER_URL}/edits`);
+      const editsRes = await fetch(`${WORKER_URL}/edits`, { cache: "no-store" });
       const editsData = await editsRes.json();
       const edits = editsData.edits || {};
       Object.keys(edits).forEach(id => {
@@ -1488,23 +1526,53 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
   }
 });
 
+// migra fotos YA guardadas como texto pesado (de antes de que existiera el hosting, o de
+// veces que el Worker no respondió al subirlas) hacia el hosting ligero del Worker. Revisa
+// tanto la foto principal (c.image) como la galería completa (c.images) de cada pieza.
+// Si el Worker no responde para alguna, la comprime más como respaldo (comportamiento de
+// antes) para que al menos pese menos, en vez de dejarla como estaba.
+function isHeavyDataUrl(u){ return typeof u === "string" && u.startsWith("data:") && u.length > 20000; }
 document.getElementById("compressAllBtn").addEventListener("click", async () => {
   const status = document.getElementById("compressStatus");
-  const heavy = catalog.filter(c => c.image && c.image.startsWith("data:") && c.image.length > 120000);
-  if (!heavy.length){ status.textContent = "No encontré fotos pesadas guardadas como archivo — el problema debe venir de otro lado."; return; }
-  let done = 0;
-  for (const item of heavy){
-    status.textContent = `Comprimiendo ${done+1} de ${heavy.length}: ${item.name}…`;
-    await new Promise(resolve => {
-      fetch(item.image).then(r => r.blob()).then(blob => {
-        compressImage(blob, 600, dataUrl => { item.image = dataUrl; resolve(); });
-      }).catch(() => resolve());
-    });
+  const targets = catalog.filter(c => isHeavyDataUrl(c.image) || (Array.isArray(c.images) && c.images.some(isHeavyDataUrl)));
+  if (!targets.length){ status.textContent = "No encontré fotos pesadas guardadas dentro del archivo — el problema debe venir de otro lado."; return; }
+  let hosted = 0, compressed = 0, done = 0;
+  for (const item of targets){
+    status.textContent = `Optimizando ${done+1} de ${targets.length}: ${item.name}…`;
+    if (isHeavyDataUrl(item.image)){
+      const hostedUrl = await hostImage(item.image);
+      if (hostedUrl){ item.image = hostedUrl; hosted++; }
+      else {
+        await new Promise(resolve => {
+          fetch(item.image).then(r => r.blob()).then(blob => {
+            compressImage(blob, 600, dataUrl => { item.image = dataUrl; resolve(); });
+          }).catch(() => resolve());
+        });
+        compressed++;
+      }
+    }
+    if (Array.isArray(item.images)){
+      for (let i = 0; i < item.images.length; i++){
+        if (!isHeavyDataUrl(item.images[i])) continue;
+        const hostedUrl = await hostImage(item.images[i]);
+        if (hostedUrl){ item.images[i] = hostedUrl; hosted++; }
+        else {
+          await new Promise(resolve => {
+            fetch(item.images[i]).then(r => r.blob()).then(blob => {
+              compressImage(blob, 600, dataUrl => { item.images[i] = dataUrl; resolve(); });
+            }).catch(() => resolve());
+          });
+          compressed++;
+        }
+      }
+    }
     done++;
+    persist();
   }
-  persist();
   renderCatalog();
-  status.textContent = `Listo: se comprimieron ${done} fotos. Intenta guardar/descargar de nuevo.`;
+  status.textContent = hosted
+    ? `Listo: ${hosted} foto(s) se subieron al hosting ligero (ya casi no pesan nada dentro de cards-data.js)${compressed ? `, y ${compressed} más solo se comprimieron porque el Worker no respondió` : ""}. Ahora descarga cards-data.js de nuevo y súbelo a tu sitio.`
+    : `El Worker no respondió para ninguna (¿ya creaste el KV "PRODUCT_IMAGES" y desplegaste el worker.js más reciente?) — mientras tanto comprimí ${compressed} foto(s) para que pesen menos.`;
 });
 </script>
 </div>
