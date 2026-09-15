@@ -161,9 +161,15 @@
     position:relative;
   }
   .se-lang-badge{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:9px;color:var(--cream-dim);background:rgba(11,14,20,.6);border-radius:999px;padding:2px 6px;}
-  .se-upload-logo{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:2;}
-  .se-upload-logo:hover{background:var(--foil-bright);}
-  @media (max-width:600px){ .se-upload-logo{width:32px;height:32px;font-size:15px;top:4px;right:4px;} }
+  .se-upload-logo,.se-upload-link{position:absolute;top:6px;width:26px;height:26px;border-radius:999px;background:rgba(201,162,39,.85);border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:2;}
+  .se-upload-logo{right:6px;}
+  .se-upload-link{right:36px;}
+  .se-upload-logo:hover,.se-upload-link:hover{background:var(--foil-bright);}
+  @media (max-width:600px){
+    .se-upload-logo,.se-upload-link{width:32px;height:32px;font-size:15px;top:4px;}
+    .se-upload-logo{right:4px;}
+    .se-upload-link{right:40px;}
+  }
   .se-admin-hint{grid-column:1/-1;font-size:12px;color:var(--foil-bright);background:rgba(201,162,39,.10);border:1px dashed var(--foil-dim);border-radius:8px;padding:8px 12px;margin-bottom:4px;}
   .set-explorer-item:hover{border-color:var(--foil-dim);transform:translateY(-2px);background:var(--ink-4);}
   .set-explorer-item img{max-width:100%;max-height:38px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
@@ -1554,11 +1560,12 @@ function buildSetExplorer(){
   sets.sort((a,b) => (b.releaseDate || "0000-00-00").localeCompare(a.releaseDate || "0000-00-00"));
   if (!sets.length){ grid.innerHTML = `<p style="grid-column:1/-1;color:var(--slate);font-size:13px;">No hay expansiones en este idioma.</p>`; return; }
   const missing = sets.filter(s => !s.logo).length;
-  const hint = (isAdminSession() && missing) ? `<div class="se-admin-hint">📎 Toca el broche dorado en la esquina de un set sin logo (${missing}) para subirle uno — se guarda para todos, no solo en este dispositivo.</div>` : '';
+  const hint = (isAdminSession() && missing) ? `<div class="se-admin-hint">📎 Sube una foto del logo, o 🔗 pega el link de una imagen de internet, en cualquier set sin logo (${missing}) — se guarda para todos, no solo en este dispositivo.</div>` : '';
   grid.innerHTML = hint + sets.map(s => `
     <div class="set-explorer-item" data-set="${s.name}">
       ${s.langCode !== "en" ? `<span class="se-lang-badge">${LANG_INFO[s.langCode].flag} ${s.langCode.toUpperCase()}</span>` : ''}
-      ${!s.logo && isAdminSession() ? `<button type="button" class="se-upload-logo" data-set="${s.name}" title="Subir logo de esta expansión">📎</button>` : ''}
+      ${!s.logo && isAdminSession() ? `<button type="button" class="se-upload-logo" data-set="${s.name}" title="Subir foto del logo desde tu dispositivo">📎</button>` : ''}
+      ${!s.logo && isAdminSession() ? `<button type="button" class="se-upload-link" data-set="${s.name}" title="Pegar link de una imagen de internet">🔗</button>` : ''}
       ${s.logo ? `<img src="${s.logo}" alt="${s.name}">` : `<span class="se-fallback">${s.name}</span>`}
       <span class="se-name">${s.name}</span>
       <span class="se-meta">${s.count} pieza${s.count===1?'':'s'}${s.releaseDate ? ` · ${s.releaseDate.slice(0,4)}` : ''}</span>
@@ -1566,7 +1573,7 @@ function buildSetExplorer(){
   `).join("");
   grid.querySelectorAll(".set-explorer-item").forEach(item => {
     item.addEventListener("click", (ev) => {
-      if (ev.target.closest(".se-upload-logo")) return; // no abrir el filtro si le dieron al botón de subir logo
+      if (ev.target.closest(".se-upload-logo") || ev.target.closest(".se-upload-link")) return; // no abrir el filtro si le dieron a uno de los botones de logo
       const setName = item.dataset.set;
       state.sets.clear();
       state.sets.add(setName);
@@ -1587,47 +1594,77 @@ function buildSetExplorer(){
         const file = input.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = () => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const maxDim = 300;
-            let { width, height } = img;
-            if (width > maxDim || height > maxDim){
-              if (width > height){ height = Math.round(height*maxDim/width); width = maxDim; }
-              else { width = Math.round(width*maxDim/height); height = maxDim; }
-            }
-            canvas.width = width; canvas.height = height;
-            canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-            const rawUrl = canvas.toDataURL("image/png");
-            const saveLogo = (url) => {
-              // guarda de inmediato en este navegador (respaldo/offline) y se ve al instante
-              const logos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
-              logos[setName] = url;
-              localStorage.setItem("vitrina_custom_set_logos", JSON.stringify(logos));
-              buildSetExplorer();
-              // y lo manda al Worker para que quede igual en todos los dispositivos y para tus visitantes
-              fetch(`${WORKER_URL}/admin/save-set-logo`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), set: setName, logo: url })
-              })
-                .then(r => r.json())
-                .then(data => {
-                  if (data.ok){ serverSetLogos[setName] = url; buildSetExplorer(); }
-                  else alert(`El logo se ve en este navegador, pero no se pudo guardar en el servidor: ${data.error || "error desconocido"}. Verifica el KV "SET_LOGOS" en el Worker.`);
-                })
-                .catch(() => alert("El logo se ve en este navegador, pero no se pudo guardar en el servidor (sin conexión al Worker). Vuelve a intentar cuando tengas internet."));
-            };
-            removeWhiteBackground(rawUrl, saveLogo, () => saveLogo(rawUrl)); // si falla quitar el fondo, igual guarda la original
-          };
-          img.src = reader.result;
-        };
+        reader.onload = () => processLogoImage(setName, reader.result);
         reader.readAsDataURL(file);
       };
       input.click();
     });
   });
+  grid.querySelectorAll(".se-upload-link").forEach(btn => {
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const setName = btn.dataset.set;
+      const url = prompt("Pega el link (URL) de la imagen del logo de este set:");
+      if (!url || !url.trim()) return;
+      processLogoImage(setName, url.trim(), { fromUrl: true });
+    });
+  });
+}
+
+// guarda el logo final: de inmediato en este navegador (respaldo/offline, se ve al instante)
+// y también en el Worker para que quede igual en todos los dispositivos y para tus visitantes
+function saveLogo(setName, url){
+  const logos = JSON.parse(localStorage.getItem("vitrina_custom_set_logos") || "{}");
+  logos[setName] = url;
+  localStorage.setItem("vitrina_custom_set_logos", JSON.stringify(logos));
+  buildSetExplorer();
+  fetch(`${WORKER_URL}/admin/save-set-logo`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), set: setName, logo: url })
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok){ serverSetLogos[setName] = url; buildSetExplorer(); }
+      else alert(`El logo se ve en este navegador, pero no se pudo guardar en el servidor: ${data.error || "error desconocido"}. Verifica el KV "SET_LOGOS" en el Worker.`);
+    })
+    .catch(() => alert("El logo se ve en este navegador, pero no se pudo guardar en el servidor (sin conexión al Worker). Vuelve a intentar cuando tengas internet."));
+}
+
+// procesa una imagen (achica a 300px y le quita el fondo blanco) antes de guardarla como logo.
+// imgSrc puede ser un data: URL (foto subida) o un link http(s) (pegado a mano). Con un link,
+// muchas páginas no permiten "leer" la imagen para procesarla (por su propia configuración de
+// seguridad) — en ese caso, en vez de fallar, guardamos el link tal cual: se ve igual de bien,
+// solo que no queda copiada de forma independiente (si esa página borra la imagen algún día,
+// se iría también de tu catálogo — para evitar eso, mejor descarga la imagen a tu dispositivo
+// y súbela con el botón 📎).
+function processLogoImage(setName, imgSrc, { fromUrl } = {}){
+  const img = new Image();
+  if (fromUrl) img.crossOrigin = "anonymous";
+  img.onload = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      const maxDim = 300;
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim){
+        if (width > height){ height = Math.round(height*maxDim/width); width = maxDim; }
+        else { width = Math.round(width*maxDim/height); height = maxDim; }
+      }
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      const rawUrl = canvas.toDataURL("image/png"); // aquí truena si el link no permite copiarse (CORS)
+      removeWhiteBackground(rawUrl, url => saveLogo(setName, url), () => saveLogo(setName, rawUrl));
+    } catch (err) {
+      if (fromUrl){
+        saveLogo(setName, imgSrc); // esa página no deja copiar su imagen — la enlazamos tal cual
+        alert('Esa imagen quedó enlazada directamente porque el sitio de origen no permite copiarla (no se le pudo achicar ni quitar el fondo). Funciona igual, pero si esa página la llega a borrar algún día, se iría también de tu catálogo. Para que quede 100% independiente, descarga la imagen a tu dispositivo y súbela con el botón 📎.');
+      }
+    }
+  };
+  img.onerror = () => {
+    if (fromUrl) alert("No se pudo cargar esa imagen — revisa que el link sea correcto y termine en una imagen (.png, .jpg, etc.), o intenta con otro link.");
+  };
+  img.src = imgSrc;
 }
 
 function openSetExplorer(){
