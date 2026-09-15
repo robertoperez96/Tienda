@@ -1374,6 +1374,60 @@ function saveCart(){ localStorage.setItem("vitrina_cart_v2", JSON.stringify(stat
 const SET_ICONS = {};
 const SET_META = {}; // {logo, releaseDate} por nombre de set, para "Explorar por expansión"
 
+// fechas e idiomas a mano para sets que NO están en esa base de datos pública (chinos, japoneses, exclusivos, promocionales)
+// agrega aquí más conforme los necesites — la key debe ser el nombre EXACTO como está en tu catálogo, en minúsculas
+// verificado contra fuentes reales (Cardmarket, Bulbapedia, Bill's Archive, etc.)
+// NOTA: esto tiene que declararse ANTES de applySetData/findSetMeta (aunque sean funciones, que sí
+// se "izan" completas) porque cuando ya hay caché de 7 días guardada, applySetData se llama de
+// inmediato al cargar la página, en el mismo momento en que se ejecuta este bloque de arriba a
+// abajo — si MANUAL_SET_DATES quedaba declarada más abajo, esa llamada inmediata explotaba con
+// "Cannot access before initialization" y tumbaba TODO el catálogo (por eso solo pasaba al
+// refrescar, nunca la primera vez que se abría el sitio: la primera vez no hay caché todavía).
+const MANUAL_SET_DATES = {
+  "collect 151 hope": "2025-04-15",   // chino — 2do de la serie Collect 151 (entre Journey 17-ene-25 y Surprise 18-jul-25)
+  "abyss eye": "2026-05-22",          // japonés
+  "mega dream ex": "2025-11-28",      // japonés — versión JP de "Ascended Heroes"
+  "inferno x": "2025-09-26",          // japonés — versión JP de "Phantasmal Flames"
+  "mcdonald's promo (2025)": "2025-08-09", // japonés — promo Happy Meal Japón
+  "gem pack 2": "2025-05-16",         // chino
+  "gem pack vol. 3": "2025-09-26",    // chino
+  "gem pack vol. 4": "2026-02-06",    // chino
+  // respaldo para sets en inglés bien conocidos, por si la API pública falla o se satura
+  "ascended heroes": "2026-01-30",
+  "perfect order": "2026-03-27",
+  "chaos rising": "2026-05-22",
+  "pitch black": "2026-07-17",
+  "brilliant stars": "2022-02-25",
+  "crown zenith": "2023-01-20",
+  "crown zenith: galarian gallery": "2023-01-20",
+};
+const MANUAL_SET_LANG = {
+  "collect 151 hope": "cn",
+  "abyss eye": "jp",
+  "mega dream ex": "jp",
+  "inferno x": "jp",
+  "mcdonald's promo (2025)": "jp",
+  "gem pack 2": "cn",
+  "gem pack vol. 3": "cn",
+  "gem pack vol. 4": "cn",
+};
+
+// NOTA: LANG_INFO y serverSetLogos/setExplorerLangFilter también tienen que declararse aquí
+// (antes de applySetData/buildSetExplorer) por la misma razón que MANUAL_SET_DATES arriba: con
+// el caché de 7 días ya guardado, buildSetExplorer() corre de inmediato al cargar la página y
+// los usa todos — si quedaban declarados más abajo, el mismo "Cannot access before
+// initialization" volvía a tumbar TODO el catálogo (esta vez con serverSetLogos).
+const LANG_INFO = {
+  en: { label: "Inglés", flag: `<svg viewBox="0 0 60 30" width="14" height="7"><clipPath id="lf-s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><g clip-path="url(#lf-s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>` },
+  jp: { label: "Japonés", flag: `<svg viewBox="0 0 30 20" width="14" height="9"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>` },
+  cn: { label: "Chino", flag: `<svg viewBox="0 0 30 20" width="14" height="9"><rect width="30" height="20" fill="#de2910"/><path d="M5 4l1.2 3.6H10l-3 2.2 1.1 3.6L5 11.2l-3.1 2.2 1.1-3.6L0 7.6h3.8z" fill="#ffde00"/></svg>` },
+};
+let setExplorerLangFilter = "all";
+// logos subidos a mano para sets sin logo oficial. serverSetLogos viene del Worker (KV
+// "SET_LOGOS") y es la fuente compartida — se ve igual en cualquier dispositivo, incluidos
+// los de tus clientes. El localStorage local queda solo como respaldo/caché mientras carga.
+let serverSetLogos = {};
+
 function applySetData(sets){
   sets.forEach(s => {
     const key = s.name.toLowerCase();
@@ -1418,42 +1472,6 @@ if (cached && cached.ts && (Date.now() - cached.ts) < 7 * 24 * 60 * 60 * 1000 &&
     });
 }
 
-// fechas e idiomas a mano para sets que NO están en esa base de datos pública (chinos, japoneses, exclusivos, promocionales)
-// agrega aquí más conforme los necesites — la key debe ser el nombre EXACTO como está en tu catálogo, en minúsculas
-// verificado contra fuentes reales (Cardmarket, Bulbapedia, Bill's Archive, etc.)
-const MANUAL_SET_DATES = {
-  "collect 151 hope": "2025-04-15",   // chino — 2do de la serie Collect 151 (entre Journey 17-ene-25 y Surprise 18-jul-25)
-  "abyss eye": "2026-05-22",          // japonés
-  "mega dream ex": "2025-11-28",      // japonés — versión JP de "Ascended Heroes"
-  "inferno x": "2025-09-26",          // japonés — versión JP de "Phantasmal Flames"
-  "mcdonald's promo (2025)": "2025-08-09", // japonés — promo Happy Meal Japón
-  "gem pack 2": "2025-05-16",         // chino
-  "gem pack vol. 3": "2025-09-26",    // chino
-  "gem pack vol. 4": "2026-02-06",    // chino
-  // respaldo para sets en inglés bien conocidos, por si la API pública falla o se satura
-  "ascended heroes": "2026-01-30",
-  "perfect order": "2026-03-27",
-  "chaos rising": "2026-05-22",
-  "pitch black": "2026-07-17",
-  "brilliant stars": "2022-02-25",
-  "crown zenith": "2023-01-20",
-  "crown zenith: galarian gallery": "2023-01-20",
-};
-const MANUAL_SET_LANG = {
-  "collect 151 hope": "cn",
-  "abyss eye": "jp",
-  "mega dream ex": "jp",
-  "inferno x": "jp",
-  "mcdonald's promo (2025)": "jp",
-  "gem pack 2": "cn",
-  "gem pack vol. 3": "cn",
-  "gem pack vol. 4": "cn",
-};
-const LANG_INFO = {
-  en: { label: "Inglés", flag: `<svg viewBox="0 0 60 30" width="14" height="7"><clipPath id="lf-s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><g clip-path="url(#lf-s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>` },
-  jp: { label: "Japonés", flag: `<svg viewBox="0 0 30 20" width="14" height="9"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>` },
-  cn: { label: "Chino", flag: `<svg viewBox="0 0 30 20" width="14" height="9"><rect width="30" height="20" fill="#de2910"/><path d="M5 4l1.2 3.6H10l-3 2.2 1.1 3.6L5 11.2l-3.1 2.2 1.1-3.6L0 7.6h3.8z" fill="#ffde00"/></svg>` },
-};
 function getLangInfo(card){
   const setKey = (card.set || "").toLowerCase();
   const override = MANUAL_SET_LANG[setKey];
@@ -1567,11 +1585,6 @@ function renderSetChips(){
   });
 }
 
-let setExplorerLangFilter = "all";
-// logos subidos a mano para sets sin logo oficial. serverSetLogos viene del Worker (KV
-// "SET_LOGOS") y es la fuente compartida — se ve igual en cualquier dispositivo, incluidos
-// los de tus clientes. El localStorage local queda solo como respaldo/caché mientras carga.
-let serverSetLogos = {};
 function buildSetExplorer(){
   const grid = document.getElementById("setExplorerGrid");
   if (!grid) return;
@@ -1661,10 +1674,18 @@ function saveLogo(setName, url){
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), set: setName, logo: url })
   })
-    .then(r => r.json())
-    .then(data => {
-      if (data.ok){ serverSetLogos[setName] = url; buildSetExplorer(); }
-      else alert(`El logo se ve en este navegador, pero no se pudo guardar en el servidor: ${data.error || "error desconocido"}. Verifica el KV "SET_LOGOS" en el Worker.`);
+    .then(async r => ({ status: r.status, data: await r.json().catch(() => ({})) }))
+    .then(({ status, data }) => {
+      if (data.ok){ serverSetLogos[setName] = url; buildSetExplorer(); return; }
+      if (status === 401){
+        // la contraseña guardada en este navegador (la que escribiste al entrar como admin) no
+        // es la ADMIN_PASSWORD real de tu Worker — se borra para que la próxima acción te la
+        // vuelva a pedir, en vez de seguir fallando en silencio con la misma contraseña mala
+        sessionStorage.removeItem("vitrina_admin_pass");
+        alert('El logo se ve en este navegador, pero no se guardó en el servidor: la contraseña de admin no es correcta. Vuelve a intentar (te va a pedir la contraseña de nuevo) y escribe la ADMIN_PASSWORD real que configuraste en tu Worker de Cloudflare.');
+        return;
+      }
+      alert(`El logo se ve en este navegador, pero no se pudo guardar en el servidor: ${data.error || "error desconocido"}. Verifica el KV "SET_LOGOS" en el Worker.`);
     })
     .catch(() => alert("El logo se ve en este navegador, pero no se pudo guardar en el servidor (sin conexión al Worker). Vuelve a intentar cuando tengas internet."));
 }
@@ -3050,6 +3071,9 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         }
       } else {
         status.textContent = data.error || "No se pudo guardar.";
+        // contraseña guardada mala -> se borra para que la próxima acción de admin la vuelva a
+        // pedir, en vez de seguir fallando en silencio con la misma contraseña incorrecta
+        if (res.status === 401) sessionStorage.removeItem("vitrina_admin_pass");
       }
     } catch (err) {
       status.textContent = "No se pudo conectar con el servidor.";
@@ -3073,7 +3097,11 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
           body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(editingId) })
         });
         const data = await res.json();
-        if (!data.ok){ status.textContent = data.error || "No se pudo eliminar."; return; }
+        if (!data.ok){
+          status.textContent = data.error || "No se pudo eliminar.";
+          if (res.status === 401) sessionStorage.removeItem("vitrina_admin_pass");
+          return;
+        }
       } else {
         // piezas de cards-data.js: se marcan como eliminadas en Cloudflare — el sitio las
         // esconde para siempre en cada visita, aunque sigan físicamente en el archivo
@@ -3083,7 +3111,11 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
           body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(editingId), changes: { deleted: true } })
         });
         const data = await res.json();
-        if (!data.ok){ status.textContent = data.error || "No se pudo eliminar."; return; }
+        if (!data.ok){
+          status.textContent = data.error || "No se pudo eliminar.";
+          if (res.status === 401) sessionStorage.removeItem("vitrina_admin_pass");
+          return;
+        }
       }
       const i = CARDS.findIndex(c => String(c.id) === String(editingId));
       if (i > -1) CARDS.splice(i, 1);
@@ -3190,8 +3222,9 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
           const checks = [...document.querySelectorAll(".trend-suggest-check")];
           applyBtn.disabled = true;
           applyBtn.textContent = "Guardando…";
-          let ok = 0, fail = 0;
+          let ok = 0, fail = 0, badPassword = false;
           for (const chk of checks){
+            if (badPassword) break; // la contraseña ya salió mala una vez, no sigas gastando llamadas con la misma
             const id = chk.dataset.id;
             const card = CARDS.find(c => String(c.id) === String(id));
             const wantHot = chk.checked;
@@ -3203,13 +3236,19 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
                 body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(id), changes: { hot: wantHot } })
               });
               const data = await res.json();
-              if (data.ok){ card.hot = wantHot; ok++; } else { fail++; }
+              if (data.ok){ card.hot = wantHot; ok++; }
+              else {
+                fail++;
+                if (res.status === 401){ badPassword = true; sessionStorage.removeItem("vitrina_admin_pass"); }
+              }
             } catch (e) { fail++; }
           }
           refreshAllViews();
           applyBtn.disabled = false;
           applyBtn.textContent = 'Aplicar marcados como "🔥 Muy buscada"';
-          trendStatus.textContent = fail
+          trendStatus.textContent = badPassword
+            ? `✓ ${ok} actualizada(s) — se detuvo porque la contraseña de admin no es correcta. Vuelve a entrar como admin y repite con las que falten.`
+            : fail
             ? `✓ ${ok} actualizada(s), ${fail} con error — intenta de nuevo con esas.`
             : (ok ? `✓ ${ok} actualizada(s) — ya se ven en el sitio.` : "Sin cambios que guardar.");
         });
