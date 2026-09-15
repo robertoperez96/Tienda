@@ -307,13 +307,13 @@
     .card-name{font-size:12.5px;margin:0 0 4px;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;}
     .card-price{font-size:14px;}
     .add-to-cart-btn{padding:7px;font-size:11px;margin-top:7px;}
-    .card-select-dot{width:18px;height:18px;top:7px;right:7px;}
+    .card-select-dot{width:19px;height:19px;}
     .card-select-dot svg{width:9px;height:9px;}
-    .wish-btn{width:22px;height:22px;top:7px;left:7px;}
+    .wish-btn{width:22px;height:22px;}
     .wish-btn svg{width:11px;height:11px;}
-    .badge{font-size:9px;padding:2px 5px;top:7px;}
-    .badge.left{left:33px;}
-    .badge.stock{right:7px;bottom:7px;}
+    .badge{font-size:8.5px;padding:2px 5px;}
+    .badge-hot{font-size:9px;padding:3px 8px;}
+    .card-badges-row{margin-bottom:6px;}
   }
   @media (max-width:420px){.grid{grid-template-columns:1fr 1fr;}}
   .card{background:var(--ink-3);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;position:relative;box-shadow:var(--shadow-card);opacity:0;transform:translateY(14px);transition:border-color .15s,transform .15s ease;}
@@ -445,14 +445,19 @@
   .card-art .sheen{position:absolute;inset:0;background:radial-gradient(220px 220px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 55%);mix-blend-mode:overlay;opacity:0;transition:opacity .2s;pointer-events:none;z-index:2;}
   .card:hover .card-art .sheen{opacity:1;}
   .card-art svg.gem{width:44px;height:44px;opacity:.85;position:relative;z-index:1;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));}
-  .badge{position:absolute;top:9px;font-family:var(--font-mono);font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:5px;letter-spacing:.03em;z-index:3;}
-  .badge.left{left:41px;background:rgba(11,14,20,.72);color:var(--foil-bright);border:1px solid var(--foil-dim);}
-  .badge.stock{right:9px;top:auto;bottom:9px;background:rgba(11,14,20,.72);color:var(--ok);border:1px solid rgba(76,139,107,.4);}
-  .badge.sold{right:9px;top:auto;bottom:9px;background:rgba(181,72,42,0.85);color:var(--cream);border:1px solid var(--ember);}
+  /* Corazón, círculo de selección, "Nuevo/Muy buscada/Última pieza" etc. YA NO van encima de la
+     foto de la carta (tapaban el nombre/HP impresos en cartas reales) — ahora viven en una fila
+     dentro de card-info, arriba del set/nombre. La foto queda siempre limpia. */
+  .card-badges-row{display:flex;align-items:center;justify-content:space-between;gap:6px;row-gap:6px;flex-wrap:wrap;min-height:24px;margin-bottom:8px;}
+  .card-status-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0;}
+  .card-icon-controls{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;}
+  .badge{font-family:var(--font-mono);font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:5px;letter-spacing:.03em;white-space:nowrap;}
+  .badge.left{background:rgba(11,14,20,.5);color:var(--foil-bright);border:1px solid var(--foil-dim);}
+  .badge.stock{background:rgba(11,14,20,.5);color:var(--ok);border:1px solid rgba(76,139,107,.4);}
+  .badge.sold{background:rgba(181,72,42,0.85);color:var(--cream);border:1px solid var(--ember);}
   .badge-hot{
-    position:absolute;top:9px;left:50%;transform:translateX(-50%);z-index:3;
     font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.02em;
-    padding:4px 10px;border-radius:999px;white-space:nowrap;
+    padding:4px 10px;border-radius:999px;white-space:nowrap;display:inline-block;
     background:linear-gradient(135deg,#3a1608,#5c2410);
     border:1px solid rgba(255,140,60,.5);color:#ffb37a;
     box-shadow:0 0 14px -2px rgba(255,120,40,.45);
@@ -466,14 +471,15 @@
   .card.sold-out{opacity:.55;}
   .card.sold-out .card-art{cursor:not-allowed;}
   .add-to-cart-btn:disabled{opacity:.5;cursor:not-allowed;}
-  .card-select-dot{position:absolute;top:9px;right:9px;width:22px;height:22px;border-radius:999px;border:1.5px solid rgba(237,230,214,.5);background:rgba(11,14,20,.5);z-index:3;display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer;}
+  .card-select-dot{width:22px;height:22px;border-radius:999px;border:1.5px solid rgba(237,230,214,.5);background:transparent;display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer;flex-shrink:0;}
   .card-select-dot:hover{transform:scale(1.12);border-color:var(--foil);}
-  .wish-btn{position:absolute;top:9px;left:9px;width:26px;height:26px;border-radius:999px;border:none;background:rgba(11,14,20,.55);backdrop-filter:blur(3px);z-index:3;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;padding:0;}
+  .wish-btn{width:26px;height:26px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;padding:0;flex-shrink:0;}
   .wish-btn svg{width:14px;height:14px;color:rgba(237,230,214,.55);transition:all .15s;}
+  .wish-btn:hover{border-color:#e8607a;}
   .wish-btn:hover svg{color:#e8607a;transform:scale(1.12);}
   .wish-btn.active svg{color:#e8607a;}
-  .wish-btn.active{background:rgba(232,96,122,.14);}
-  .admin-edit-btn{position:absolute;bottom:9px;left:9px;width:26px;height:26px;border-radius:999px;border:none;background:rgba(201,162,39,.85);z-index:3;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 4px 10px -3px rgba(0,0,0,.6);}
+  .wish-btn.active{background:rgba(232,96,122,.14);border-color:#e8607a;}
+  .admin-edit-btn{width:26px;height:26px;border-radius:999px;border:none;background:rgba(201,162,39,.85);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0;}
   .admin-edit-btn svg{width:13px;height:13px;color:#171205;}
   .admin-edit-btn:hover{background:var(--foil-bright);transform:scale(1.08);}
   .card.selected .card-select-dot{background:var(--foil);border-color:var(--foil);}
@@ -1349,13 +1355,17 @@ function applySetData(sets){
 }
 
 // guardamos en caché 7 días — así no gastamos la consulta gratis de la API cada vez
-// que alguien visita el sitio, y los logos siguen apareciendo aunque la API esté saturada
+// que alguien visita el sitio, y los logos siguen apareciendo aunque la API esté saturada.
+// Pedimos los datos a NUESTRO Worker (no directo a api.pokemontcg.io) porque esa API pública
+// bloquea CORS de forma inconsistente según el navegador/dispositivo — por eso antes los logos
+// solo se veían en algunos navegadores y no en otros (celular, incógnito, etc.). El Worker
+// hace la consulta por su cuenta (sin restricción de CORS) y nos la reenvía ya lista.
 const SET_CACHE_KEY = "vitrina_set_data_cache_v1";
 const cached = JSON.parse(localStorage.getItem(SET_CACHE_KEY) || "null");
 if (cached && cached.ts && (Date.now() - cached.ts) < 7 * 24 * 60 * 60 * 1000 && cached.sets?.length){
   applySetData(cached.sets);
 } else {
-  fetch("https://api.pokemontcg.io/v2/sets?select=name,images,releaseDate")
+  fetch(`${WORKER_URL}/set-data`)
     .then(r => r.json())
     .then(data => {
       const sets = data.data || [];
@@ -1709,14 +1719,20 @@ function renderCard(card){
     <div class="card-art${card.image ? ' loading' : ''}" data-toggle="1">
       <div class="sheen"></div>
       ${artImg || GEM_ICON}
-      ${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}
-      ${card.hot && !soldOut ? '<span class="badge-hot">🔥 Muy buscada</span>' : ''}
-      ${soldOut ? '<span class="badge sold">Agotado</span>' : (card.stock === 1 ? '<span class="badge stock">Última pieza</span>' : (card.kind==="sellado" ? `<span class="badge stock">Disponible: ${card.stock}</span>` : ''))}
-      <button type="button" class="wish-btn${wished ? ' active' : ''}" data-id="${card.id}" aria-label="Guardar para después">${HEART_ICON}</button>
-      ${isAdminSession() ? `<button type="button" class="admin-edit-btn" data-id="${card.id}" aria-label="Editar (admin)" title="Editar (solo tú lo ves)">${EDIT_ICON}</button>` : ''}
-      <span class="card-select-dot">${CHECK_ICON}</span>
     </div>
     <div class="card-info">
+      <div class="card-badges-row">
+        <div class="card-status-tags">
+          ${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}
+          ${card.hot && !soldOut ? '<span class="badge-hot">🔥 Muy buscada</span>' : ''}
+          ${soldOut ? '<span class="badge sold">Agotado</span>' : (card.stock === 1 ? '<span class="badge stock">Última pieza</span>' : (card.kind==="sellado" ? `<span class="badge stock">Disponible: ${card.stock}</span>` : ''))}
+        </div>
+        <div class="card-icon-controls">
+          ${isAdminSession() ? `<button type="button" class="admin-edit-btn" data-id="${card.id}" aria-label="Editar (admin)" title="Editar (solo tú lo ves)">${EDIT_ICON}</button>` : ''}
+          <button type="button" class="wish-btn${wished ? ' active' : ''}" data-id="${card.id}" aria-label="Guardar para después">${HEART_ICON}</button>
+          <span class="card-select-dot">${CHECK_ICON}</span>
+        </div>
+      </div>
       <div class="card-set"><span>${card.set}</span>${card.num ? `<span>${card.code}${String(card.num).padStart(3,"0")}/${card.total}</span>` : ""}</div>
       <p class="card-name">${card.name}</p>
       <div class="card-meta"><span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}</div>
