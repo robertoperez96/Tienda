@@ -139,20 +139,35 @@
     background:linear-gradient(180deg,rgba(11,14,20,0.98),rgba(11,14,20,0.92));
     backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,162,39,.18);
     box-shadow:0 10px 24px -14px rgba(0,0,0,.5);
+    transition:box-shadow .25s ease;
   }
-  .category-nav-inner{display:flex;gap:12px;padding:14px 24px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .category-nav-inner{display:flex;gap:12px;padding:14px 24px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:padding .22s ease,gap .22s ease;}
   .category-nav-inner::-webkit-scrollbar{display:none;}
   .cat-tab{
     display:flex;align-items:center;gap:9px;flex-shrink:0;
     padding:11px 20px;border-radius:999px;text-decoration:none;
     background:var(--ink-2);border:1px solid var(--line-strong);
     color:var(--cream-dim);font-size:13.5px;font-weight:600;
-    transition:all .2s ease;
+    transition:all .2s ease,padding .22s ease,font-size .22s ease,gap .22s ease;
   }
-  .cat-tab .cat-count{font-family:var(--font-mono);font-size:10.5px;color:var(--slate);background:rgba(237,230,214,.06);border-radius:999px;padding:1px 7px;}
+  .cat-tab .cat-count{font-family:var(--font-mono);font-size:10.5px;color:var(--slate);background:rgba(237,230,214,.06);border-radius:999px;padding:1px 7px;transition:font-size .22s ease,padding .22s ease;}
   .cat-tab.active .cat-count{color:var(--foil-bright);background:rgba(201,162,39,.18);}
-  .cat-tab .cat-icon{font-size:17px;}
+  .cat-tab .cat-icon{font-size:17px;transition:font-size .22s ease;}
   .cat-tab-small{font-size:12px;padding:10px 16px;}
+
+  /* estado "pegado": la barra se compacta al bajar para tapar menos contenido */
+  .category-nav.is-stuck{box-shadow:0 6px 16px -10px rgba(0,0,0,.6);}
+  .category-nav.is-stuck .category-nav-inner{padding:6px 24px;gap:8px;}
+  .category-nav.is-stuck .cat-tab{padding:6px 14px;font-size:12px;gap:6px;}
+  .category-nav.is-stuck .cat-tab-small{padding:6px 12px;font-size:10.5px;}
+  .category-nav.is-stuck .cat-tab .cat-icon{font-size:13px;}
+  .category-nav.is-stuck .cat-tab .cat-count{font-size:9.5px;padding:0 5px;}
+  @media (max-width:640px){
+    .category-nav.is-stuck .category-nav-inner{padding:5px 16px;gap:6px;}
+    .category-nav.is-stuck .cat-tab{padding:5px 8px;font-size:10.5px;}
+    .category-nav.is-stuck .cat-tab-small{padding:5px 7px;font-size:9px;}
+    .category-nav.is-stuck .cat-tab .cat-icon{font-size:12px;}
+  }
   .jp-flag svg{border-radius:2px;box-shadow:0 0 0 1px rgba(237,230,214,.25);display:block;}
   .set-explorer-item{
     display:flex;flex-direction:column;align-items:center;gap:8px;
@@ -191,7 +206,17 @@
     border-color:var(--foil);color:var(--foil-bright);
     box-shadow:0 6px 16px -6px rgba(201,162,39,.35);
   }
-  @media (max-width:640px){ .category-nav-inner{padding:10px 16px;gap:8px;} .cat-tab{padding:9px 16px;font-size:12.5px;} .cat-tab-small{font-size:10.5px;padding:9px 13px;} }
+  @media (max-width:640px){
+    .category-nav-inner{
+      display:grid;grid-template-columns:repeat(2,1fr);
+      gap:8px;padding:10px 16px;overflow-x:visible;
+    }
+    .cat-tab{
+      padding:9px 10px;font-size:12px;border-radius:14px;
+      justify-content:center;text-align:center;white-space:normal;line-height:1.25;
+    }
+    .cat-tab-small{font-size:10px;padding:9px 8px;}
+  }
 
   section.hero{padding:28px 0 22px;position:relative;overflow:hidden;}
   .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;}
@@ -809,6 +834,7 @@
   </div>
 </header>
 
+<div id="categoryNavSentinel" style="position:relative;height:0;"></div>
 <div class="category-nav" id="categoryNav">
   <div class="wrap category-nav-inner">
     <a href="#catalogo" class="cat-tab active" data-cat="cartas">
@@ -2358,6 +2384,17 @@ document.getElementById("cardGrid").addEventListener("mousemove", e => {
 });
 
 function resetAndRender(){ visibleCount = PAGE_SIZE; render(); }
+
+const categoryNavEl = document.getElementById("categoryNav");
+const categoryNavSentinel = document.getElementById("categoryNavSentinel");
+if (categoryNavEl && categoryNavSentinel){
+  const stickyObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      categoryNavEl.classList.toggle("is-stuck", !entry.isIntersecting);
+    });
+  }, { rootMargin: "-73px 0px 0px 0px", threshold: 0 });
+  stickyObserver.observe(categoryNavSentinel);
+}
 
 const infiniteObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
