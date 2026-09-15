@@ -1100,7 +1100,7 @@
 
 <footer>
   <div class="wrap footer-logo-wrap">
-    <img src="pokebaul-logo.png" alt="PokéBaúl — TCG &amp; Coleccionables" class="footer-hero-logo" width="1024" height="434">
+    <img src="pokebaul-logo-v2.jpg" alt="PokéBaúl — Colecciona lo extraordinario" class="footer-hero-logo" width="1024" height="390">
   </div>
   <div class="wrap footer-grid">
     <div class="footer-brand">
@@ -1390,10 +1390,16 @@
    navegadores lo cachean de forma agresiva. Si esa descarga se interrumpe una sola vez
    (señal débil, cambio de wifi a datos, etc.), el navegador puede quedar con una copia
    incompleta guardada en caché y repetirla en cada recarga normal — eso es lo que causaba
-   el catálogo vacío "hasta que borrabas caché o entrabas en incógnito". Agregar "?v=" con
-   la hora actual obliga a pedir SIEMPRE una copia nueva por la red, así nunca puede quedarse
-   pegado sirviendo una copia rota. */
-document.write('<script src="cards-data.js?v=' + Date.now() + '"><' + '/script>');
+   el catálogo vacío "hasta que borrabas caché o entrabas en incógnito".
+   Antes usábamos la hora exacta (Date.now()) como "?v=", lo que obligaba a descargar
+   los ~18MB en CADA carga de página, incluso para el mismo visitante recargando dos
+   veces seguidas — eso es lo que más gasta banda ancha (y créditos en hosts como Netlify).
+   Ahora usamos la FECHA (día actual) como versión: sigue forzando una copia nueva por
+   red como máximo una vez al día (así una copia rota nunca puede quedarse pegada por
+   más de 24h), pero dentro del mismo día el navegador puede reutilizar su copia en
+   caché en vez de volver a descargar el archivo completo. */
+const cacheBustVersion = new Date().toISOString().slice(0,10).replace(/-/g,"");
+document.write('<script src="cards-data.js?v=' + cacheBustVersion + '"><' + '/script>');
 </script>
 <script>
 // red de seguridad: si aun así window.CARDS llegó vacío (ej. sin conexión un instante),
