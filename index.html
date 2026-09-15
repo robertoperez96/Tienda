@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi Colección · Catálogo Pokémon TCG</title>
-<meta name="description" content="Catálogo de cartas y producto sellado Pokémon TCG. Precios en MXN, estado verificado, aparta por WhatsApp y paga por transferencia o efectivo.">
+<title>PokéBaúl · Catálogo Pokémon TCG</title>
+<meta name="description" content="PokéBaúl — catálogo de cartas y producto sellado Pokémon TCG. Precios en MXN, estado verificado, aparta por WhatsApp y paga por transferencia o efectivo.">
 
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
@@ -13,16 +13,16 @@
 <meta name="theme-color" content="#0b0e14">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Mi Colección · Cartas, sellado, acrílicos y coleccionables Pokémon">
-<meta property="og:description" content="Separa lo que te guste por WhatsApp.">
+<meta property="og:title" content="PokéBaúl · Cartas, sellado, acrílicos y coleccionables Pokémon">
+<meta property="og:description" content="PokéBaúl: separa lo que te guste por WhatsApp.">
 <meta property="og:image" content="https://robertoperez96.github.io/Tienda/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://robertoperez96.github.io/Tienda/">
 <meta property="og:locale" content="es_MX">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Mi Colección · Cartas, sellado, acrílicos y coleccionables Pokémon">
-<meta name="twitter:description" content="Separa lo que te guste por WhatsApp.">
+<meta name="twitter:title" content="PokéBaúl · Cartas, sellado, acrílicos y coleccionables Pokémon">
+<meta name="twitter:description" content="PokéBaúl: separa lo que te guste por WhatsApp.">
 <meta name="twitter:image" content="https://robertoperez96.github.io/Tienda/og-image.jpg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -194,6 +194,9 @@
   @media (max-width:640px){ .category-nav-inner{padding:10px 16px;gap:8px;} .cat-tab{padding:9px 16px;font-size:12.5px;} .cat-tab-small{font-size:10.5px;padding:9px 13px;} }
 
   section.hero{padding:28px 0 22px;position:relative;overflow:hidden;}
+  .hero-logo-wrap{text-align:center;margin-bottom:6px;}
+  .hero-logo{max-width:560px;width:100%;height:auto;filter:drop-shadow(0 0 30px rgba(232,199,102,.22));}
+  @media (max-width:600px){.hero-logo{max-width:88%;}}
   .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;}
   @media (max-width:900px){.hero-grid{grid-template-columns:1fr;gap:18px;}}
   h1.hero-title{font-family:var(--font-display);font-weight:560;font-size:clamp(24px,3vw,34px);line-height:1.1;letter-spacing:-.01em;margin:8px 0 8px;}
@@ -599,6 +602,7 @@
   footer{border-top:1px solid var(--line);padding:40px 0 120px;}
   .footer-grid{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;}
   .footer-brand p{color:var(--slate);font-size:13px;max-width:40ch;margin-top:10px;}
+  .footer-logo{width:230px;height:auto;display:block;}
   .footer-links{display:flex;gap:50px;flex-wrap:wrap;}
   .footer-col h5{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--slate);margin:0 0 12px;}
   .footer-col a{display:block;text-decoration:none;color:var(--cream-dim);font-size:13.5px;margin-bottom:8px;}
@@ -763,7 +767,7 @@
   <div class="wrap site-bar">
     <a href="#top" class="brand">
       <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7l9 5 9-5-9-5z" stroke="#e8c766" stroke-width="1.4" stroke-linejoin="round"/><path d="M3 12l9 5 9-5" stroke="#e8c766" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
-      <span class="brand-word">Mi Colección<span>.</span></span>
+      <span class="brand-word">PokéBaúl<span>.</span></span>
     </a>
     <nav class="main-nav">
       <a href="#como-comprar">Cómo comprar</a>
@@ -826,10 +830,13 @@
 <main id="top">
   <div id="cardsView">
   <section class="hero">
+    <div class="wrap hero-logo-wrap">
+      <img src="pokebaul-logo.png" alt="PokéBaúl — TCG &amp; Coleccionables" class="hero-logo" width="1024" height="434">
+    </div>
     <div class="wrap hero-grid">
       <div>
-        <h1 class="hero-title">Encuentra el producto que <em>falta</em> en tu colección.</h1>
-        <p class="hero-sub">Singles y producto sellado, artículos exclusivos del Pokémon Center, acrílicos, coleccionables y juguetes.</p>
+        <h1 class="hero-title">Encuentra la pieza que le <em>falta</em> a tu colección.</h1>
+        <p class="hero-sub">Cartas, sellado, artículos exclusivos del Pokémon Center, acrílicos y coleccionables — todo en un solo lugar.</p>
         <div class="stat-strip">
           <div class="stat"><b id="statSold">19</b><span>vendidas este mes</span></div>
           <div class="stat"><b id="statTotal">0</b><span>piezas activas</span></div>
@@ -1030,7 +1037,7 @@
 <footer>
   <div class="wrap footer-grid">
     <div class="footer-brand">
-      <span class="brand-word">Mi Colección<span>.</span></span>
+      <img src="pokebaul-logo.png" alt="PokéBaúl — TCG &amp; Coleccionables" class="footer-logo" width="1024" height="434">
       <p>Catálogo independiente de cartas y producto sellado Pokémon TCG para coleccionistas. Precios sugeridos, sujetos a disponibilidad.</p>
     </div>
     <div class="footer-links">
@@ -1341,7 +1348,7 @@ if (!window.CARDS || !window.CARDS.length) {
    Solo cambia WHATSAPP_PHONE por tu número real.
    ===================================================================== */
 const WHATSAPP_PHONE = "528111707319"; // <-- tu número real
-const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de Mi Colección
+const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de PokéBaúl
 const MERCADOPAGO_ENABLED = false; // <-- ponlo en true cuando quieras activar el cobro real de nuevo
 const BANK_INFO = { // <-- reemplaza con tus datos reales para transferencia
   banco: "Tu banco",
@@ -2126,7 +2133,7 @@ function buildCarousel(){
   if (!el) return;
   const featured = CARDS.filter(c => c.featured && c.image);
   if (!featured.length){
-    el.innerHTML = `<div class="carousel-track" style="animation:none;"><div class="carousel-card" style="border-right:none;cursor:default;"><div class="carousel-info" style="text-align:center;"><div class="featured-tag">Mi Colección</div><p class="name" style="max-width:none;white-space:normal;">Marca piezas como "destacado" en admin.html para que aparezcan aquí.</p></div></div></div>`;
+    el.innerHTML = `<div class="carousel-track" style="animation:none;"><div class="carousel-card" style="border-right:none;cursor:default;"><div class="carousel-info" style="text-align:center;"><div class="featured-tag">PokéBaúl</div><p class="name" style="max-width:none;white-space:normal;">Marca piezas como "destacado" en admin.html para que aparezcan aquí.</p></div></div></div>`;
     return;
   }
 
