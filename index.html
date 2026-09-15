@@ -1795,8 +1795,8 @@ document.getElementById("setExplorerBackdrop").addEventListener("click", closeSe
 
 function buildFilterUI(){
   renderSetChips();
-  const buildChecks = (container, key, targetSet) => {
-    unique(key).forEach(val => {
+  const buildChecks = (container, key, targetSet, valuesOverride) => {
+    (valuesOverride || unique(key)).forEach(val => {
       const id = `chk-${key}-${val}`.replace(/\s+/g,"-");
       const row = document.createElement("label");
       const flag = key === "language" ? flagForLangText(val) : "";
@@ -1813,7 +1813,12 @@ function buildFilterUI(){
   };
   buildChecks(document.getElementById("rarityChecks"), "rarity", state.rarities);
   buildChecks(document.getElementById("condChecks"), "condition", state.conditions);
-  buildChecks(document.getElementById("langChecks"), "language", state.languages);
+  // el filtro de idioma usa el idioma YA RESUELTO (getLangInfo, el mismo que se ve en la
+  // bandera de cada carta) en vez del campo "language" crudo del catálogo — así nunca se
+  // desalinean: antes una carta de un set 100% japonés (por MANUAL_SET_LANG) podía traer
+  // "Inglés" guardado por error de importación y aparecía con bandera 🇯🇵 pero se colaba en
+  // el filtro de Inglés, que sí comparaba contra el campo crudo.
+  buildChecks(document.getElementById("langChecks"), "language", state.languages, [...new Set(CARDS.map(c => getLangInfo(c).label))]);
 }
 
 function matches(card){
@@ -1824,7 +1829,7 @@ function matches(card){
   if (state.sets.size && !state.sets.has(card.set)) return false;
   if (state.rarities.size && !state.rarities.has(card.rarity)) return false;
   if (state.conditions.size && !state.conditions.has(card.condition)) return false;
-  if (state.languages.size && !state.languages.has(card.language)) return false;
+  if (state.languages.size && !state.languages.has(getLangInfo(card).label)) return false;
   if (state.priceMin != null && card.price < state.priceMin) return false;
   if (state.priceMax != null && card.price > state.priceMax) return false;
   return true;
