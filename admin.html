@@ -473,21 +473,43 @@ function compressImage(file, maxDim, callback){
   reader.readAsDataURL(file);
 }
 
+// el ADMIN_PASSWORD del panel (arriba, para entrar aquí) y el ADMIN_PASSWORD del Worker (el que
+// pusiste en Cloudflare, "Variables and Secrets") NO tienen por qué ser el mismo — el propio
+// worker.js siempre lo dijo ("puede ser la misma... o una distinta"). Por eso NO reutilizamos
+// la constante de arriba para subir fotos: se pregunta la del Worker una sola vez por sesión
+// (como ya se hace en otros botones de este panel) y se reutiliza de ahí en adelante.
+let workerAdminPassword = null;
+function getWorkerPassword(){
+  if (workerAdminPassword === null){
+    workerAdminPassword = prompt('Contraseña de ADMIN_PASSWORD de tu Worker (la que configuraste en Cloudflare, "Variables and Secrets" — puede ser distinta a la de este panel). Se usará para subir tus fotos al hosting ligero:') || "";
+  }
+  return workerAdminPassword;
+}
+
 // sube una foto ya comprimida (dataUrl) al hosting liviano del Worker, para que NO se quede
 // embebida dentro de cards-data.js (eso fue lo que hizo crecer ese archivo a 18+ MB y provocaba
 // que el catálogo cargara vacío en el cel/compu al recargar). Si el Worker no responde (sin
-// internet, o todavía no creaste el KV "PRODUCT_IMAGES" — ver worker.js), devuelve null y quien
-// llama sigue usando la foto local de siempre: nada se pierde, solo pesará más como antes.
+// internet, contraseña incorrecta, todavía no creaste el KV "PRODUCT_IMAGES", o pegaste el
+// código nuevo en Cloudflare pero no le diste "Deploy" otra vez), devuelve
+// { url: null, error: "razón" } y quien llama sigue usando la foto local de siempre: nada se
+// pierde, solo pesará más como antes. El "error" es para poder mostrarte la razón exacta.
 async function hostImage(dataUrl){
+  const pass = getWorkerPassword();
+  if (!pass) return { url: null, error: "No se ingresó la contraseña del Worker." };
   try {
     const res = await fetch(`${WORKER_URL}/admin/upload-image`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: ADMIN_PASSWORD, dataUrl })
+      body: JSON.stringify({ password: pass, dataUrl })
     });
-    const data = await res.json();
-    return (data && data.ok && data.url) ? data.url : null;
-  } catch (err) { return null; }
+    let data = {};
+    try { data = await res.json(); } catch { /* el Worker no devolvió JSON (ej. sigue con el código viejo) */ }
+    if (data && data.ok && data.url) return { url: data.url, error: null };
+    if (res.status === 401) workerAdminPassword = null; // contraseña mala -> la próxima vez se vuelve a preguntar
+    return { url: null, error: (data && data.error) ? data.error : `El Worker respondió ${res.status} sin un link válido (¿le diste "Deploy" después de pegar el código nuevo?).` };
+  } catch (err) {
+    return { url: null, error: `No se pudo contactar al Worker (${err.message || "sin conexión"}).` };
+  }
 }
 
 function persist(){
@@ -588,7 +610,7 @@ function renderCatalog(){
             const item = catalog.find(c => c.id === Number(inp.dataset.id));
             if (item){
               item.image = dataUrl; persist(); renderCatalog();
-              hostImage(dataUrl).then(hostedUrl => {
+              hostImage(dataUrl).then(({ url: hostedUrl }) => {
                 if (hostedUrl && item.image === dataUrl){ item.image = hostedUrl; persist(); renderCatalog(); }
               });
             }
@@ -606,7 +628,7 @@ function renderCatalog(){
         const item = catalog.find(c => c.id === Number(fileInp.dataset.id));
         if (item){
           item.image = dataUrl; persist(); renderCatalog();
-          hostImage(dataUrl).then(hostedUrl => {
+          hostImage(dataUrl).then(({ url: hostedUrl }) => {
             if (hostedUrl && item.image === dataUrl){ item.image = hostedUrl; persist(); renderCatalog(); }
           });
         }
@@ -887,14 +909,19 @@ const FX_STORAGE_KEY = "vitrina_admin_fx_mxn";
 document.getElementById("fxRate").value = localStorage.getItem(FX_STORAGE_KEY) || "18.5";
 
 async function refreshFx(){
+  // antes llamaba directo a api.frankfurter.app, pero el navegador a veces bloquea esa
+  // llamada por CORS (igual que pasaba con la API de sets) — ahora pasa por el Worker, que sí
+  // puede llamarla sin restricción.
   const status = document.getElementById("autoUpdateStatus");
   try{
-    const res = await fetch("https://api.frankfurter.app/latest?from=USD&to=MXN");
+    const res = await fetch(`${WORKER_URL}/fx-rate`, { cache: "no-store" });
     const data = await res.json();
-    if (data?.rates?.MXN){
-      document.getElementById("fxRate").value = data.rates.MXN.toFixed(2);
-      localStorage.setItem(FX_STORAGE_KEY, data.rates.MXN.toFixed(2));
-      status.textContent = `Tipo de cambio actualizado: $${data.rates.MXN.toFixed(2)} MXN por USD.`;
+    if (data?.rate){
+      document.getElementById("fxRate").value = data.rate.toFixed(2);
+      localStorage.setItem(FX_STORAGE_KEY, data.rate.toFixed(2));
+      status.textContent = `Tipo de cambio actualizado: $${data.rate.toFixed(2)} MXN por USD.`;
+    } else {
+      status.textContent = "No se pudo obtener el tipo de cambio automático, usa el valor manual.";
     }
   } catch(err){
     status.textContent = "No se pudo obtener el tipo de cambio automático, usa el valor manual.";
@@ -1268,7 +1295,7 @@ function renderQuickGallery(){
       removeWhiteBackground(quickImages[i], (cleanUrl) => {
           quickImages[i] = cleanUrl; renderQuickGallery();
           // se le quitó el fondo -> vuelve a ser una imagen local pesada, hay que resubirla
-          hostImage(cleanUrl).then(hostedUrl => {
+          hostImage(cleanUrl).then(({ url: hostedUrl }) => {
             if (hostedUrl && quickImages[i] === cleanUrl){ quickImages[i] = hostedUrl; renderQuickGallery(); }
           });
         },
@@ -1281,7 +1308,7 @@ function addQuickImage(dataUrl){
   renderQuickGallery();
   // sube la foto al hosting liviano en segundo plano — la vista previa ya se ve al instante
   // con la copia local, y en cuanto el Worker responde se cambia por el link (sin recargar nada)
-  hostImage(dataUrl).then(hostedUrl => {
+  hostImage(dataUrl).then(({ url: hostedUrl }) => {
     if (hostedUrl && quickImages[i] === dataUrl){ quickImages[i] = hostedUrl; renderQuickGallery(); }
   });
 }
@@ -1532,36 +1559,44 @@ document.getElementById("importLiveBtn").addEventListener("click", async () => {
 // Si el Worker no responde para alguna, la comprime más como respaldo (comportamiento de
 // antes) para que al menos pese menos, en vez de dejarla como estaba.
 function isHeavyDataUrl(u){ return typeof u === "string" && u.startsWith("data:") && u.length > 20000; }
+// evita que UNA foto corrupta/rara se quede colgada para siempre y trabe todo el proceso de
+// migración — si no termina en 8s (fetch+compressImage no tienen su propio timeout), seguimos
+// con la siguiente foto en vez de quedarnos esperando indefinidamente.
+function withTimeout(promise, ms){
+  return Promise.race([promise, new Promise(resolve => setTimeout(resolve, ms))]);
+}
 document.getElementById("compressAllBtn").addEventListener("click", async () => {
   const status = document.getElementById("compressStatus");
   const targets = catalog.filter(c => isHeavyDataUrl(c.image) || (Array.isArray(c.images) && c.images.some(isHeavyDataUrl)));
   if (!targets.length){ status.textContent = "No encontré fotos pesadas guardadas dentro del archivo — el problema debe venir de otro lado."; return; }
-  let hosted = 0, compressed = 0, done = 0;
+  let hosted = 0, compressed = 0, done = 0, lastError = null;
   for (const item of targets){
     status.textContent = `Optimizando ${done+1} de ${targets.length}: ${item.name}…`;
     if (isHeavyDataUrl(item.image)){
-      const hostedUrl = await hostImage(item.image);
-      if (hostedUrl){ item.image = hostedUrl; hosted++; }
+      const result = await hostImage(item.image);
+      if (result.url){ item.image = result.url; hosted++; }
       else {
-        await new Promise(resolve => {
+        lastError = result.error;
+        await withTimeout(new Promise(resolve => {
           fetch(item.image).then(r => r.blob()).then(blob => {
             compressImage(blob, 600, dataUrl => { item.image = dataUrl; resolve(); });
           }).catch(() => resolve());
-        });
+        }), 8000);
         compressed++;
       }
     }
     if (Array.isArray(item.images)){
       for (let i = 0; i < item.images.length; i++){
         if (!isHeavyDataUrl(item.images[i])) continue;
-        const hostedUrl = await hostImage(item.images[i]);
-        if (hostedUrl){ item.images[i] = hostedUrl; hosted++; }
+        const result = await hostImage(item.images[i]);
+        if (result.url){ item.images[i] = result.url; hosted++; }
         else {
-          await new Promise(resolve => {
+          lastError = result.error;
+          await withTimeout(new Promise(resolve => {
             fetch(item.images[i]).then(r => r.blob()).then(blob => {
               compressImage(blob, 600, dataUrl => { item.images[i] = dataUrl; resolve(); });
             }).catch(() => resolve());
-          });
+          }), 8000);
           compressed++;
         }
       }
@@ -1571,8 +1606,8 @@ document.getElementById("compressAllBtn").addEventListener("click", async () => 
   }
   renderCatalog();
   status.textContent = hosted
-    ? `Listo: ${hosted} foto(s) se subieron al hosting ligero (ya casi no pesan nada dentro de cards-data.js)${compressed ? `, y ${compressed} más solo se comprimieron porque el Worker no respondió` : ""}. Ahora descarga cards-data.js de nuevo y súbelo a tu sitio.`
-    : `El Worker no respondió para ninguna (¿ya creaste el KV "PRODUCT_IMAGES" y desplegaste el worker.js más reciente?) — mientras tanto comprimí ${compressed} foto(s) para que pesen menos.`;
+    ? `Listo: ${hosted} foto(s) se subieron al hosting ligero (ya casi no pesan nada dentro de cards-data.js)${compressed ? `, y ${compressed} más solo se comprimieron porque el Worker no respondió (motivo: "${lastError}")` : ""}. Ahora descarga cards-data.js de nuevo y súbelo a tu sitio.`
+    : `El Worker no aceptó ninguna foto — motivo exacto: "${lastError || "desconocido"}". Si dice "Contraseña incorrecta", escribiste mal el ADMIN_PASSWORD de tu Worker cuando te lo pregunté (dale clic de nuevo al botón para que te lo vuelva a preguntar). Si dice "Falta configurar el KV", revisa que el binding en Cloudflare se llame EXACTO "PRODUCT_IMAGES". Si dice "sin un link válido" o similar, seguramente pegaste el worker.js nuevo en Cloudflare pero te faltó darle "Deploy" otra vez. Mientras tanto comprimí ${compressed} foto(s) para que pesen menos.`;
 });
 </script>
 </div>
