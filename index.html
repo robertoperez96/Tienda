@@ -2539,6 +2539,25 @@ document.querySelectorAll(".backToCardsLink").forEach(link => {
   link.addEventListener("click", e => { e.preventDefault(); showCardsView(); });
 });
 
+/* enlaces directos para compartir: si alguien abre la página con
+   #acrilicos, #juguetes o #pcjp en el link, mostramos esa sección de
+   una vez en lugar del catálogo por defecto. Así puedes compartir, por
+   ejemplo, https://tu-sitio/#acrilicos y a quien le des clic le abre
+   directo esa sección. */
+(function openViewFromSharedLink(){
+  const hash = location.hash.replace("#", "");
+  if (hash === "acrilicos") showAcrylicsView();
+  else if (hash === "juguetes") showToysView();
+  else if (hash === "pcjp") showPcjpView();
+})();
+window.addEventListener("hashchange", () => {
+  const hash = location.hash.replace("#", "");
+  if (hash === "acrilicos") showAcrylicsView();
+  else if (hash === "juguetes") showToysView();
+  else if (hash === "pcjp") showPcjpView();
+  else if (hash === "catalogo" || hash === "") showCardsView();
+});
+
 let searchTrackTimer;
 document.getElementById("searchInput").addEventListener("input", e => {
   state.query = e.target.value; resetAndRender();
