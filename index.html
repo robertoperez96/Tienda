@@ -1188,6 +1188,7 @@
       <button type="button" class="pay-opt" id="adminTabEdit" style="flex:1;">✏️ Editar</button>
       <button type="button" class="pay-opt" id="adminTabBulk" style="flex:1;">📋 Inventario rápido</button>
       <button type="button" class="pay-opt" id="adminTabPrices" style="flex:1;">💲 Precios</button>
+      <button type="button" class="pay-opt" id="adminTabCoupons" style="flex:1;">🎟️ Cupones</button>
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
     </div>
 
@@ -1213,14 +1214,32 @@
         <span class="field-label">Nombre</span>
         <input type="text" id="adminName" placeholder="Nombre del producto" style="width:100%;">
       </div>
+      <div class="field" style="margin-bottom:10px;">
+        <span class="field-label">Descripción (opcional)</span>
+        <textarea id="adminDescription" placeholder="Detalles que quieras que vea el cliente al abrir esta pieza: estado, historia, detalles, medidas, etc." style="width:100%;min-height:64px;resize:vertical;background:var(--ink);border:1px solid var(--line-strong);border-radius:8px;color:var(--cream);padding:9px 11px;font:inherit;"></textarea>
+      </div>
       <div id="adminSetNumField">
         <div class="field" style="margin-bottom:10px;">
           <span class="field-label">Expansión</span>
           <input type="text" id="adminSet" placeholder="Expansión (ej. Escarlata y Púrpura)" list="setOptions" style="width:100%;">
         </div>
-        <div class="row" style="display:flex;gap:8px;margin-bottom:10px;">
+        <div class="row" id="adminNumTotalRow" style="display:flex;gap:8px;margin-bottom:10px;">
           <div class="field-mini"><span class="field-label">Núm. de carta</span><input type="number" id="adminNum" placeholder="ej. 25" style="width:100%;"></div>
           <div class="field-mini"><span class="field-label">Total del set</span><input type="number" id="adminTotal" placeholder="ej. 198" style="width:100%;"></div>
+        </div>
+        <div class="row" id="adminRarityRow" style="display:flex;gap:8px;margin-bottom:10px;">
+          <div class="field-mini"><span class="field-label">Rareza</span><input type="text" id="adminRarity" placeholder="ej. Holo Rare" list="rarityOptions" style="width:100%;"></div>
+        </div>
+      </div>
+      <div class="row" style="display:flex;gap:8px;margin-bottom:10px;">
+        <div class="field-mini"><span class="field-label">Condición</span><input type="text" id="adminCondition" placeholder="Nuevo" list="conditionOptions" style="width:100%;"></div>
+        <div class="field-mini">
+          <span class="field-label">Idioma</span>
+          <select id="adminLanguage" style="width:100%;">
+            <option value="Inglés">🇬🇧 Inglés</option>
+            <option value="Japonés">🇯🇵 Japonés</option>
+            <option value="Chino">🇨🇳 Chino</option>
+          </select>
         </div>
       </div>
       <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
@@ -1236,6 +1255,8 @@
       <input type="file" id="adminFileInput" accept="image/*" multiple style="display:none;">
       <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
       <p style="font-size:10.5px;color:var(--slate);margin-top:4px;">La primera foto es la principal (la del catálogo). Las demás forman una galería que se ve al expandir la imagen.</p>
+      <button type="button" class="price-suggest-btn" id="adminAiIdentifyBtn" style="width:100%;justify-content:center;margin-top:10px;">🤖 Identificar con IA (llena los campos de arriba solo)</button>
+      <p class="price-suggest-hint" id="adminAiIdentifyHint" style="margin-top:4px;"></p>
       <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
         <input type="checkbox" id="adminFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
       </label>
@@ -1274,12 +1295,16 @@
           <span class="field-label">Nombre</span>
           <input type="text" id="editName" placeholder="Nombre del producto" style="width:100%;">
         </div>
+        <div class="field" style="margin-bottom:10px;">
+          <span class="field-label">Descripción (opcional)</span>
+          <textarea id="editDescription" placeholder="Detalles que quieras que vea el cliente al abrir esta pieza: estado, historia, detalles, medidas, etc." style="width:100%;min-height:64px;resize:vertical;background:var(--ink);border:1px solid var(--line-strong);border-radius:8px;color:var(--cream);padding:9px 11px;font:inherit;"></textarea>
+        </div>
         <div id="editSetNumField">
           <div class="field" style="margin-bottom:10px;">
             <span class="field-label">Expansión</span>
             <input type="text" id="editSet" placeholder="Expansión (ej. Escarlata y Púrpura)" list="setOptions" style="width:100%;">
           </div>
-          <div class="row" style="display:flex;gap:8px;margin-bottom:10px;">
+          <div class="row" id="editNumTotalRow" style="display:flex;gap:8px;margin-bottom:10px;">
             <div class="field-mini"><span class="field-label">Núm. de carta</span><input type="number" id="editNum" placeholder="ej. 25" style="width:100%;"></div>
             <div class="field-mini"><span class="field-label">Total del set</span><input type="number" id="editTotal" placeholder="ej. 198" style="width:100%;"></div>
           </div>
@@ -1303,13 +1328,29 @@
             </select>
           </div>
         </div>
+        <div class="row" style="display:flex;gap:8px;margin-bottom:10px;">
+          <div class="field-mini"><span class="field-label">Condición</span><input type="text" id="editCondition" placeholder="Nuevo" list="conditionOptions" style="width:100%;"></div>
+        </div>
         <datalist id="rarityOptions"></datalist>
         <datalist id="setOptions"></datalist>
+        <datalist id="conditionOptions">
+          <option value="Nuevo"></option>
+          <option value="Vintage"></option>
+          <option value="Usado"></option>
+          <option value="Con detalles"></option>
+          <option value="NM (Near Mint)"></option>
+          <option value="LP (Ligeramente jugada)"></option>
+          <option value="MP (Jugada)"></option>
+          <option value="HP (Muy jugada)"></option>
+          <option value="DMG (Dañada)"></option>
+        </datalist>
         <div id="editImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
         <button type="button" class="btn btn-ghost" id="editUploadBtn" style="width:100%;margin-bottom:8px;">📎 Agregar foto(s)</button>
         <input type="file" id="editFileInput" accept="image/*" multiple style="display:none;">
         <input type="text" id="editPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
         <p style="font-size:10.5px;color:var(--slate);margin-top:4px;">La primera foto es la principal. Las demás forman una galería.</p>
+        <button type="button" class="price-suggest-btn" id="editAiIdentifyBtn" style="width:100%;justify-content:center;margin-top:10px;">🤖 Volver a identificar con IA</button>
+        <p class="price-suggest-hint" id="editAiIdentifyHint" style="margin-top:4px;"></p>
         <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--cream-dim);">
           <input type="checkbox" id="editFeatured" style="width:16px;height:16px;"> Destacado en el carrusel
         </label>
@@ -1364,6 +1405,22 @@
       </div>
     </div>
 
+    <div id="adminCouponsPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Descuentos</span><h3>Cupones de descuento</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 14px;">Crea el código y el % que tú quieras. Se aplica solo en el carrito cuando el cliente lo escribe y le da "Aplicar" — puedes activarlo o desactivarlo cuando quieras, sin tocar nada más.</p>
+      <div class="field" style="margin-bottom:8px;">
+        <span class="field-label">Código</span>
+        <input type="text" id="couponCodeInput" placeholder="Ej. VERANO10" style="width:100%;text-transform:uppercase;">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <span class="field-label">% de descuento</span>
+        <input type="number" id="couponPercentInput" placeholder="10" min="1" max="100" style="width:100%;">
+      </div>
+      <button type="button" class="btn btn-foil" id="couponSaveBtn" style="width:100%;justify-content:center;margin-bottom:6px;">Guardar cupón</button>
+      <p class="promo-status" id="couponSaveStatus"></p>
+      <div id="couponsAdminList" style="margin-top:14px;"></div>
+    </div>
+
     <div id="adminAnalyticsPanel" style="display:none;">
       <div class="order-head"><span class="eyebrow">Solo tú lo ves</span><h3>Qué le interesa a tu gente</h3></div>
       <div id="adminAnalyticsBody" style="font-size:13px;color:var(--cream-dim);">Cargando…</div>
@@ -1404,6 +1461,7 @@
     <div class="zoom-meta" id="zoomMeta"></div>
     <div class="zoom-price" id="zoomPrice"></div>
     <div id="zoomStock" class="zoom-stock"></div>
+    <p id="zoomDescription" style="display:none;font-size:13px;line-height:1.55;color:var(--cream-dim);margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line);white-space:pre-wrap;"></p>
     <button type="button" class="btn btn-foil" id="zoomAddBtn" style="width:100%;justify-content:center;margin-top:14px;">Agregar al carrito</button>
     <button type="button" id="zoomShareBtn" style="width:100%;justify-content:center;margin-top:8px;display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--line-strong);color:var(--cream-dim);border-radius:10px;padding:9px;font-size:12.5px;cursor:pointer;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 13.5l6.8 3.9M15.4 6.6L8.6 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -1518,7 +1576,7 @@
     </div>
     <p class="coupon-status" id="couponStatus"></p>
     <div class="drawer-total" id="drawerSubtotalRow" style="display:none;"><span>Subtotal</span><span id="drawerSubtotal">$0</span></div>
-    <div class="drawer-total" id="drawerDiscountRow" style="display:none;color:var(--ok);"><span>Descuento</span><span id="drawerDiscountAmount">-$0</span></div>
+    <div class="drawer-total" id="drawerDiscountRow" style="display:none;color:var(--ok);"><span id="drawerDiscountLabel">Descuento</span><span id="drawerDiscountAmount">-$0</span></div>
     <div class="drawer-total" id="acrylicPromoRow" style="display:none;color:var(--foil-bright);"><span>🎁 Promo acrílicos (-10%)</span><span id="acrylicPromoAmount">-$0</span></div>
     <div class="drawer-total"><span>Total aproximado</span><b id="drawerTotal">$0</b></div>
     <a href="#" class="btn btn-foil" id="whatsappBtn" target="_blank" rel="noopener">Apartar por WhatsApp</a>
@@ -1592,11 +1650,28 @@ const HEART_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-7.5-
 const EDIT_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function isAdminSession(){ return !!sessionStorage.getItem("vitrina_admin_pass"); }
 
+// cupón aplicado en el carrito: { code, percent } | null — guardado en localStorage para que
+// sobreviva a recargar la página. Antes solo existía el cupón fijo "BIENVENIDO5" al 5%; esto
+// migra ese valor viejo (si alguien ya lo tenía aplicado) al nuevo formato general.
+function loadAppliedCoupon(){
+  try {
+    const raw = localStorage.getItem("vitrina_coupon_v2");
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  if (localStorage.getItem("vitrina_coupon") === "BIENVENIDO5") return { code: "BIENVENIDO5", percent: 5 };
+  return null;
+}
+function saveAppliedCoupon(coupon){
+  if (coupon) localStorage.setItem("vitrina_coupon_v2", JSON.stringify(coupon));
+  else localStorage.removeItem("vitrina_coupon_v2");
+  localStorage.removeItem("vitrina_coupon"); // limpia la llave vieja para no dejar datos duplicados/confusos
+}
+
 const state = {
   query:"", kind:"all", sets:new Set(), rarities:new Set(), conditions:new Set(), languages:new Set(),
   priceMin:null, priceMax:null, sort:"price-desc",
   selected: JSON.parse(localStorage.getItem("vitrina_cart_v2") || "{}"), // {id: qty}
-  couponApplied: localStorage.getItem("vitrina_coupon") === "BIENVENIDO5",
+  appliedCoupon: loadAppliedCoupon(), // {code, percent} | null
   delivery: localStorage.getItem("vitrina_delivery") || "punto-medio",
   wishlist: new Set(JSON.parse(localStorage.getItem("vitrina_wishlist") || "[]"))
 };
@@ -2179,7 +2254,7 @@ function renderCard(card){
     <div class="card-info">
       <div class="card-set"><span>${card.set}</span>${card.num ? `<span>${card.code}${String(card.num).padStart(3,"0")}/${card.total}</span>` : ""}</div>
       <p class="card-name">${card.name}</p>
-      <div class="card-meta"><span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}</div>
+      <div class="card-meta">${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}<span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}</div>
       <div class="card-price-row"><span class="card-price">${money(card.price)}</span><span class="card-cond">${card.condition}</span></div>
       ${card.kind==="sellado" ? `
       <div class="qty-stepper">
@@ -2321,7 +2396,17 @@ function openZoom(card){
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
   document.getElementById("zoomName").textContent = card.name;
   const langInfo = getLangInfo(card);
-  document.getElementById("zoomMeta").innerHTML = `<span class="tag">${card.rarity}</span><span class="tag" style="display:inline-flex;align-items:center;gap:5px;">${langInfo.flag} ${langInfo.label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}<span class="tag">${card.condition}</span>`;
+  document.getElementById("zoomMeta").innerHTML = `${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}<span class="tag" style="display:inline-flex;align-items:center;gap:5px;">${langInfo.flag} ${langInfo.label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}${card.condition ? `<span class="tag">${card.condition}</span>` : ''}`;
+  const descEl = document.getElementById("zoomDescription");
+  if (descEl){
+    if (card.description && card.description.trim()){
+      descEl.textContent = card.description;
+      descEl.style.display = "block";
+    } else {
+      descEl.textContent = "";
+      descEl.style.display = "none";
+    }
+  }
   document.getElementById("zoomPrice").textContent = money(card.price);
   const stockEl = document.getElementById("zoomStock");
   stockEl.textContent = soldOut ? "Agotado" : (card.kind==="sellado" ? `Disponible: ${card.stock}` : (card.stock===1 ? "Última pieza disponible" : "Disponible"));
@@ -2599,12 +2684,14 @@ function updateCartUI(){
   const nonAcrylicSubtotal = total - acrylicSubtotal;
   const acrylicPromo = (nonAcrylicSubtotal >= 500 && acrylicSubtotal > 0) ? Math.round(acrylicSubtotal * 0.10) : 0;
 
-  const discount = state.couponApplied ? Math.round(total * 0.05) : 0;
+  const discount = state.appliedCoupon ? Math.round(total * (state.appliedCoupon.percent / 100)) : 0;
   const finalTotal = total - discount - acrylicPromo;
   document.getElementById("drawerSubtotalRow").style.display = (discount || acrylicPromo) ? "flex" : "none";
   document.getElementById("drawerDiscountRow").style.display = discount ? "flex" : "none";
   document.getElementById("acrylicPromoRow").style.display = acrylicPromo ? "flex" : "none";
   document.getElementById("drawerSubtotal").textContent = money(total);
+  const discountLabelEl = document.getElementById("drawerDiscountLabel");
+  if (discountLabelEl) discountLabelEl.textContent = state.appliedCoupon ? `Cupón ${state.appliedCoupon.code} (-${state.appliedCoupon.percent}%)` : "Descuento";
   document.getElementById("drawerDiscountAmount").textContent = `-${money(discount)}`;
   document.getElementById("acrylicPromoAmount").textContent = `-${money(acrylicPromo)}`;
   document.getElementById("drawerTotal").textContent = money(finalTotal);
@@ -2614,7 +2701,8 @@ function updateCartUI(){
   // mandamos un link corto a un resumen de pedido en el propio sitio — funciona
   // igual de bien con 2 piezas que con 50
   const itemsCode = entries.map(({card,qty}) => `${card.id}x${qty}`).join(",");
-  const orderUrl = `${location.origin}${location.pathname}?pedido=${encodeURIComponent(itemsCode)}${state.couponApplied ? "&c=1" : ""}${acrylicPromo ? "&ap=1" : ""}&e=${state.delivery}`;
+  const couponParam = state.appliedCoupon ? `&cc=${encodeURIComponent(state.appliedCoupon.code)}&cp=${state.appliedCoupon.percent}` : "";
+  const orderUrl = `${location.origin}${location.pathname}?pedido=${encodeURIComponent(itemsCode)}${couponParam}${acrylicPromo ? "&ap=1" : ""}&e=${state.delivery}`;
   const msg = `Hola, quiero apartar mi pedido:%0A${encodeURIComponent(orderUrl)}%0A%0AEntrega: ${encodeURIComponent(DELIVERY_LABELS[state.delivery])}%0ATotal: ${money(finalTotal)}`;
   document.getElementById("whatsappBtn").href = count ? `https://wa.me/${WHATSAPP_PHONE}?text=${msg}` : `https://wa.me/${WHATSAPP_PHONE}`;
 
@@ -2976,13 +3064,35 @@ window.addEventListener("scroll", () => {
 }, { passive: true });
 backToTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
-if (state.couponApplied){
-  document.getElementById("couponInput").value = "BIENVENIDO5";
+if (state.appliedCoupon){
+  document.getElementById("couponInput").value = state.appliedCoupon.code;
   document.getElementById("couponInput").disabled = true;
   document.getElementById("couponApplyBtn").disabled = true;
   const st = document.getElementById("couponStatus");
-  st.textContent = "✓ Cupón aplicado: 5% de descuento";
+  st.textContent = `✓ Cupón aplicado: ${state.appliedCoupon.percent}% de descuento`;
   st.className = "coupon-status ok";
+  // revalida en silencio contra el servidor por si Roberto lo desactivó o cambió el % desde
+  // la última vez que este cliente lo aplicó — si ya no es válido, lo quita sin hacer ruido
+  fetch(`${WORKER_URL}/validate-coupon?code=${encodeURIComponent(state.appliedCoupon.code)}`, { cache: "no-store" })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.ok){
+        state.appliedCoupon = null;
+        saveAppliedCoupon(null);
+        document.getElementById("couponInput").value = "";
+        document.getElementById("couponInput").disabled = false;
+        document.getElementById("couponApplyBtn").disabled = false;
+        st.textContent = "";
+        st.className = "coupon-status";
+        updateCartUI();
+      } else if (data.percent !== state.appliedCoupon.percent){
+        state.appliedCoupon = { code: data.code, percent: data.percent };
+        saveAppliedCoupon(state.appliedCoupon);
+        st.textContent = `✓ Cupón aplicado: ${data.percent}% de descuento`;
+        updateCartUI();
+      }
+    })
+    .catch(() => {}); // sin internet o el worker no responde: se queda con lo que ya tenía guardado
 }
 
 document.querySelectorAll("#deliveryOptions .pay-opt").forEach(btn => {
@@ -2996,22 +3106,36 @@ document.querySelectorAll("#deliveryOptions .pay-opt").forEach(btn => {
   });
 });
 
-document.getElementById("couponApplyBtn").addEventListener("click", () => {
+document.getElementById("couponApplyBtn").addEventListener("click", async () => {
   const input = document.getElementById("couponInput");
+  const applyBtn = document.getElementById("couponApplyBtn");
   const status = document.getElementById("couponStatus");
   const code = input.value.trim().toUpperCase();
-  if (code === "BIENVENIDO5"){
-    state.couponApplied = true;
-    trackEvent("coupon_used", "BIENVENIDO5");
-    localStorage.setItem("vitrina_coupon", "BIENVENIDO5");
-    status.textContent = "✓ Cupón aplicado: 5% de descuento";
-    status.className = "coupon-status ok";
-    input.disabled = true;
-    document.getElementById("couponApplyBtn").disabled = true;
-    updateCartUI();
-  } else {
-    status.textContent = "Ese código no es válido.";
+  if (!code){ status.textContent = "Escribe un código."; status.className = "coupon-status err"; return; }
+  applyBtn.disabled = true;
+  status.textContent = "Verificando…";
+  status.className = "coupon-status";
+  try {
+    const res = await fetch(`${WORKER_URL}/validate-coupon?code=${encodeURIComponent(code)}`, { cache: "no-store" });
+    const data = await res.json();
+    if (data.ok){
+      state.appliedCoupon = { code: data.code, percent: data.percent };
+      saveAppliedCoupon(state.appliedCoupon);
+      trackEvent("coupon_used", data.code);
+      status.textContent = `✓ Cupón aplicado: ${data.percent}% de descuento`;
+      status.className = "coupon-status ok";
+      input.value = data.code;
+      input.disabled = true;
+      updateCartUI();
+    } else {
+      status.textContent = data.error || "Ese código no es válido.";
+      status.className = "coupon-status err";
+      applyBtn.disabled = false;
+    }
+  } catch (err) {
+    status.textContent = "No se pudo verificar el cupón. Intenta de nuevo.";
     status.className = "coupon-status err";
+    applyBtn.disabled = false;
   }
 });
 
@@ -3242,8 +3366,30 @@ fetch(`${WORKER_URL}/price-history`, { cache: "no-store" })
   .catch(() => {});
 
 /* ---- tracking silencioso de interacción (para las analíticas privadas) ---- */
+// Excluye del conteo de analíticas los clics hechos desde tus propios dispositivos personales
+// (laptop, celular), aunque no hayas entrado con la contraseña de admin en ese momento — antes
+// solo se excluían los clics mientras el panel de admin estaba abierto (isAdminSession), pero
+// Roberto también navega el sitio como si fuera cliente para probarlo, y esos clics SÍ se
+// estaban contando y sesgando las estadísticas. La marca queda guardada en localStorage (no en
+// sessionStorage), así que sobrevive aunque cierres el navegador — se activa UNA VEZ visitando
+// tu propio sitio con "?notrack=1" al final del link, desde cada dispositivo que quieras excluir.
+(function(){
+  const params = new URLSearchParams(location.search);
+  if (!params.has("notrack")) return;
+  if (params.get("notrack") === "0"){
+    localStorage.removeItem("vitrina_no_track");
+    if (typeof showToast === "function") showToast("Este dispositivo SÍ va a contar en las analíticas de nuevo.");
+  } else {
+    localStorage.setItem("vitrina_no_track", "1");
+    if (typeof showToast === "function") showToast("Listo — este dispositivo ya no se va a contar en tus analíticas.");
+  }
+})();
+function isDeviceExcludedFromTracking(){ return localStorage.getItem("vitrina_no_track") === "1"; }
+
 function trackEvent(type, key){
-  if (isAdminSession()) return; // no contamos tus propios clics de prueba, para no ensuciar los datos reales
+  // no contamos tus propios clics de prueba, para no ensuciar los datos reales: ni mientras el
+  // panel de admin está abierto, ni en un dispositivo que marcaste con "?notrack=1"
+  if (isAdminSession() || isDeviceExcludedFromTracking()) return;
   fetch(`${WORKER_URL}/track`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -3305,17 +3451,20 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("adminTabEdit").classList.toggle("active", tab === "edit");
     document.getElementById("adminTabBulk").classList.toggle("active", tab === "bulk");
     document.getElementById("adminTabPrices").classList.toggle("active", tab === "prices");
+    document.getElementById("adminTabCoupons").classList.toggle("active", tab === "coupons");
     document.getElementById("adminTabAnalytics").classList.toggle("active", tab === "analytics");
     document.getElementById("adminAddForm").style.display = tab === "add" ? "block" : "none";
     document.getElementById("adminEditPanel").style.display = tab === "edit" ? "block" : "none";
     document.getElementById("adminBulkPanel").style.display = tab === "bulk" ? "block" : "none";
     document.getElementById("adminPricesPanel").style.display = tab === "prices" ? "block" : "none";
+    document.getElementById("adminCouponsPanel").style.display = tab === "coupons" ? "block" : "none";
     document.getElementById("adminAnalyticsPanel").style.display = tab === "analytics" ? "block" : "none";
   }
   document.getElementById("adminTabAdd").addEventListener("click", () => showAdminTab("add"));
   document.getElementById("adminTabEdit").addEventListener("click", () => { showAdminTab("edit"); resetEditSearch(); });
   document.getElementById("adminTabBulk").addEventListener("click", () => { showAdminTab("bulk"); populateBulkSetSelect(); });
   document.getElementById("adminTabPrices").addEventListener("click", () => showAdminTab("prices"));
+  document.getElementById("adminTabCoupons").addEventListener("click", () => { showAdminTab("coupons"); loadCoupons(); });
   document.getElementById("adminTabAnalytics").addEventListener("click", async () => { showAdminTab("analytics"); await loadAnalytics(); });
 
   /* ---- editar producto existente ---- */
@@ -3375,20 +3524,32 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     });
   });
 
+  // La expansión (set) aplica a carta suelta Y a producto sellado (una caja/booster box de la
+  // expansión X también tiene expansión). El número/total de carta SOLO tiene sentido para una
+  // carta suelta — un producto sellado no tiene "número de carta", así que ese renglón se
+  // esconde cuando el tipo es "sellado". Categorías que no son pokemon (pcjp/toy/acrylic) no
+  // llevan nada de esto, como ya pidió Roberto.
   function updateAdminKindVisibility(){
     const isPokemon = document.getElementById("adminCategory").value === "pokemon";
+    const isSingle = document.getElementById("adminKind").value === "single";
     document.getElementById("adminKindField").style.display = isPokemon ? "block" : "none";
     document.getElementById("adminSetNumField").style.display = isPokemon ? "block" : "none";
+    document.getElementById("adminNumTotalRow").style.display = (isPokemon && isSingle) ? "flex" : "none";
+    document.getElementById("adminRarityRow").style.display = (isPokemon && isSingle) ? "flex" : "none";
   }
   document.getElementById("adminCategory").addEventListener("change", updateAdminKindVisibility);
+  document.getElementById("adminKind").addEventListener("change", updateAdminKindVisibility);
   updateAdminKindVisibility();
 
   function updateEditKindVisibility(){
     const isPokemon = document.getElementById("editCategory").value === "pokemon";
+    const isSingle = document.getElementById("editKind").value === "single";
     document.getElementById("editKindField").style.display = isPokemon ? "block" : "none";
     document.getElementById("editSetNumField").style.display = isPokemon ? "block" : "none";
+    document.getElementById("editNumTotalRow").style.display = (isPokemon && isSingle) ? "flex" : "none";
   }
   document.getElementById("editCategory").addEventListener("change", updateEditKindVisibility);
+  document.getElementById("editKind").addEventListener("change", updateEditKindVisibility);
 
   function openEditForm(id){
     const card = CARDS.find(c => String(c.id) === String(id));
@@ -3401,6 +3562,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("editKind").value = (card.kind === "sellado") ? "sellado" : "single";
     updateEditKindVisibility();
     document.getElementById("editName").value = card.name;
+    document.getElementById("editDescription").value = card.description || "";
     document.getElementById("editSet").value = card.set || "";
     document.getElementById("editNum").value = card.num || "";
     document.getElementById("editTotal").value = card.total || "";
@@ -3408,6 +3570,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("editStock").value = card.stock;
     document.getElementById("editRarity").value = card.rarity || "";
     document.getElementById("editLanguage").value = ["Inglés","Japonés","Chino"].includes(card.language) ? card.language : "Inglés";
+    document.getElementById("editCondition").value = card.condition || "";
     const rarityOptions = document.getElementById("rarityOptions");
     if (!rarityOptions.childElementCount){
       unique("rarity").filter(Boolean).sort().forEach(r => rarityOptions.insertAdjacentHTML("beforeend", `<option value="${r}">`));
@@ -3459,6 +3622,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       stock: Number(document.getElementById("editStock").value),
       rarity: document.getElementById("editRarity").value.trim(),
       language: document.getElementById("editLanguage").value,
+      condition: document.getElementById("editCondition").value.trim(),
+      description: document.getElementById("editDescription").value.trim(),
       featured: document.getElementById("editFeatured").checked,
       hot: document.getElementById("editHot").checked,
     };
@@ -3629,7 +3794,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         section("📂 Secciones más visitadas", byType.category_view, k => ({cartas:"Catálogo",juguetes:"Coleccionables y Juguetes",acrilicos:"Acrílicos",pcjp:"Exclusivos Pokémon Center JP"}[k] || k)) +
         section("📱 Dispositivo", byType.device_type, k => k === "movil" ? "Celular" : "Escritorio") +
         section("🔗 De dónde llega la gente", byType.traffic_source, k => k) +
-        section("🎁 Uso del cupón", byType.coupon_used, () => "BIENVENIDO5 usado");
+        section("🎁 Uso de cupones", byType.coupon_used, k => `${k} usado`);
 
       const applyBtn = document.getElementById("applyTrendingBtn");
       if (applyBtn){
@@ -3776,9 +3941,13 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       category: document.getElementById("adminCategory").value,
       kind: document.getElementById("adminCategory").value === "pokemon" ? document.getElementById("adminKind").value : document.getElementById("adminCategory").value,
       name, price, stock: Number(document.getElementById("adminStock").value) || 1,
+      description: document.getElementById("adminDescription").value.trim(),
       set: document.getElementById("adminSet").value.trim(),
       num: Number(document.getElementById("adminNum").value) || 0,
       total: Number(document.getElementById("adminTotal").value) || 0,
+      rarity: document.getElementById("adminRarity").value.trim(),
+      language: document.getElementById("adminLanguage").value,
+      condition: document.getElementById("adminCondition").value.trim(),
       featured: document.getElementById("adminFeatured").checked,
       hot: document.getElementById("adminHot").checked,
       image: adminImages[0] || "", images: adminImages
@@ -3801,9 +3970,13 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
           body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(data.product.id), price: data.product.price })
         }).catch(() => {});
         document.getElementById("adminName").value = "";
+        document.getElementById("adminDescription").value = "";
         document.getElementById("adminSet").value = "";
         document.getElementById("adminNum").value = "";
         document.getElementById("adminTotal").value = "";
+        document.getElementById("adminRarity").value = "";
+        document.getElementById("adminLanguage").value = "Inglés";
+        document.getElementById("adminCondition").value = "";
         document.getElementById("adminPrice").value = "";
         document.getElementById("adminStock").value = "1";
         document.getElementById("adminFeatured").checked = false;
@@ -3922,6 +4095,98 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
 
   document.getElementById("adminSuggestPriceBtn").addEventListener("click", () => suggestPriceFor("add"));
   document.getElementById("editSuggestPriceBtn").addEventListener("click", () => suggestPriceFor("edit"));
+
+  /* ---- "🤖 Identificar con IA": manda la primera foto ya subida al Worker (que la analiza con
+     Workers AI) y rellena solos los campos del formulario — funciona para las 4 categorías
+     (carta suelta, producto sellado, juguete/coleccionable, acrílico, PCJP), cada una con sus
+     propios campos: la IA decide qué categoría/tipo es y solo llena lo que aplique. Roberto
+     siempre revisa y corrige antes de publicar — esto es un punto de partida, no la verdad final. */
+  const AI_CATEGORY_VALUES = ["pokemon", "pcjp", "toy", "acrylic"];
+  const AI_LANGUAGE_VALUES = ["Inglés", "Japonés", "Chino"];
+
+  async function runAiIdentify(mode){
+    const ids = mode === "add"
+      ? { images: () => adminImages, category: "adminCategory", kind: "adminKind", name: "adminName",
+          description: "adminDescription", set: "adminSet", num: "adminNum", total: "adminTotal",
+          rarity: "adminRarity", condition: "adminCondition", language: "adminLanguage",
+          hint: "adminAiIdentifyHint", btn: "adminAiIdentifyBtn",
+          updateVisibility: () => typeof updateAdminKindVisibility === "function" && updateAdminKindVisibility() }
+      : { images: () => editImages, category: "editCategory", kind: "editKind", name: "editName",
+          description: "editDescription", set: "editSet", num: "editNum", total: "editTotal",
+          rarity: "editRarity", condition: "editCondition", language: "editLanguage",
+          hint: "editAiIdentifyHint", btn: "editAiIdentifyBtn",
+          updateVisibility: () => typeof updateEditKindVisibility === "function" && updateEditKindVisibility() };
+    const hint = document.getElementById(ids.hint);
+    const btn = document.getElementById(ids.btn);
+    const images = ids.images();
+    if (!images.length){ hint.className = "price-suggest-hint"; hint.textContent = "Primero sube o pega al menos una foto."; return; }
+    const firstImage = images[0];
+    const payload = { password: sessionStorage.getItem("vitrina_admin_pass") };
+    if (firstImage.startsWith("data:")) payload.image = firstImage;
+    else payload.imageUrl = firstImage;
+    btn.disabled = true;
+    hint.className = "price-suggest-hint";
+    hint.textContent = "🤖 Analizando la foto (puede tardar unos segundos)…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/ai-identify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.ok){
+        hint.className = "price-suggest-hint warn";
+        hint.innerHTML = data.error || "No se pudo analizar la foto.";
+        if (res.status === 401) sessionStorage.removeItem("vitrina_admin_pass");
+        return;
+      }
+      const r = data.result || {};
+      const category = AI_CATEGORY_VALUES.includes(r.category) ? r.category : "pokemon";
+      const isPokemon = category === "pokemon";
+      const kind = r.kind === "sellado" ? "sellado" : "single";
+      document.getElementById(ids.category).value = category;
+      if (isPokemon) document.getElementById(ids.kind).value = kind;
+      ids.updateVisibility();
+      if (r.name) document.getElementById(ids.name).value = r.name;
+      const descEl = document.getElementById(ids.description);
+      if (descEl && r.description) descEl.value = r.description;
+      // set/num/total/rareza solo aplican a pokemon — si la IA dijo otra categoría, se dejan
+      // vacíos aunque haya alcanzado a devolver algo, para no ensuciar el producto con datos
+      // que no le corresponden a ese tipo
+      document.getElementById(ids.set).value = isPokemon ? (r.set || "") : "";
+      document.getElementById(ids.num).value = (isPokemon && kind === "single") ? (r.num || "") : "";
+      document.getElementById(ids.total).value = (isPokemon && kind === "single") ? (r.total || "") : "";
+      const rarityEl = document.getElementById(ids.rarity);
+      if (rarityEl) rarityEl.value = (isPokemon && kind === "single") ? (r.rarity || "") : "";
+      const conditionEl = document.getElementById(ids.condition);
+      if (conditionEl && r.condition) conditionEl.value = r.condition;
+      if (AI_LANGUAGE_VALUES.includes(r.language)){
+        document.getElementById(ids.language).value = r.language;
+      }
+      // si es una carta Pokémon suelta, encadenamos también la búsqueda de precio en TCGplayer
+      // (usa el mismo "Sugerir precio" de siempre) — así con un solo botón queda nombre,
+      // expansión, número, rareza, condición Y precio. Para sellado/juguete/acrílico/PCJP no
+      // existe una base de datos de precios automática (solo TCGplayer cubre cartas sueltas),
+      // así que ahí el precio se lo sigues poniendo tú a mano.
+      let priceNote;
+      if (isPokemon && kind === "single" && r.set){
+        priceNote = " También busqué el precio sugerido de TCGplayer — revisa el aviso junto al precio, aquí abajo.";
+        await suggestPriceFor(mode);
+      } else {
+        priceNote = " El precio no lo puedo sugerir solo para este tipo de producto (solo hay datos de precio automáticos para cartas Pokémon sueltas) — ese lo pones tú.";
+      }
+      const confidenceLabel = { alta: "confianza alta", media: "confianza media", baja: "confianza baja — revisa bien" }[r.confidence] || "";
+      hint.className = "price-suggest-hint";
+      hint.innerHTML = `🤖 Sugerencia lista${confidenceLabel ? ` (${confidenceLabel})` : ""} — revisa y corrige lo que haga falta antes de publicar.${priceNote}`;
+    } catch (err) {
+      hint.className = "price-suggest-hint warn";
+      hint.textContent = "No se pudo conectar con el servidor para analizar la foto.";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+  document.getElementById("adminAiIdentifyBtn").addEventListener("click", () => runAiIdentify("add"));
+  document.getElementById("editAiIdentifyBtn").addEventListener("click", () => runAiIdentify("edit"));
 
   function bulkCardAlreadyOwned(card){
     const num = parseInt(card.number, 10) || 0;
@@ -4298,6 +4563,118 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       ? `✓ ${done} actualizadas — ${failed} con error.`
       : `✓ ${done} actualizadas.`;
   });
+
+  /* ---- "🎟️ Cupones": crear/editar código + %, activar/desactivar y borrar, sin tocar código ---- */
+  let couponsCache = [];
+
+  function renderCouponsAdminList(){
+    const wrap = document.getElementById("couponsAdminList");
+    if (!couponsCache.length){
+      wrap.innerHTML = `<p style="font-size:12px;color:var(--slate);">Todavía no tienes ningún cupón guardado. El de bienvenida "BIENVENIDO5" (5%) sigue funcionando solo aunque no lo crees aquí — créalo si quieres poder apagarlo o cambiarle el %.</p>`;
+      return;
+    }
+    wrap.innerHTML = couponsCache.map(c => `
+      <div class="coupon-admin-row" data-code="${c.code}" style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;">
+        <div style="flex:1;min-width:120px;">
+          <div style="font-size:13.5px;font-weight:700;letter-spacing:.02em;">${c.code} <span style="color:var(--foil-bright);font-weight:400;">−${c.percent}%</span></div>
+          <div style="font-size:11px;color:${c.enabled ? "var(--ok)" : "var(--slate)"};">${c.enabled ? "● Activo" : "○ Desactivado"}</div>
+        </div>
+        <button type="button" class="btn btn-ghost coupon-toggle-btn" data-code="${c.code}" style="padding:6px 10px;font-size:11.5px;">${c.enabled ? "Desactivar" : "Activar"}</button>
+        <button type="button" class="btn btn-ghost coupon-edit-btn" data-code="${c.code}" style="padding:6px 10px;font-size:11.5px;">Editar</button>
+        <button type="button" class="btn btn-ghost coupon-delete-btn" data-code="${c.code}" style="padding:6px 10px;font-size:11.5px;color:var(--ember-bright);">Borrar</button>
+      </div>`).join("");
+
+    wrap.querySelectorAll(".coupon-toggle-btn").forEach(btn => btn.addEventListener("click", async () => {
+      const coupon = couponsCache.find(c => c.code === btn.dataset.code);
+      if (!coupon) return;
+      btn.disabled = true;
+      await saveCouponRequest({ code: coupon.code, percent: coupon.percent, enabled: !coupon.enabled });
+      await loadCoupons();
+    }));
+    wrap.querySelectorAll(".coupon-edit-btn").forEach(btn => btn.addEventListener("click", () => {
+      const coupon = couponsCache.find(c => c.code === btn.dataset.code);
+      if (!coupon) return;
+      document.getElementById("couponCodeInput").value = coupon.code;
+      document.getElementById("couponPercentInput").value = coupon.percent;
+      document.getElementById("couponCodeInput").scrollIntoView({ behavior: "smooth", block: "center" });
+    }));
+    wrap.querySelectorAll(".coupon-delete-btn").forEach(btn => btn.addEventListener("click", async () => {
+      if (!confirm(`¿Borrar el cupón ${btn.dataset.code}? Ya no se va a poder aplicar en el carrito.`)) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${WORKER_URL}/admin/delete-coupon`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), code: btn.dataset.code })
+        });
+        const data = await res.json();
+        if (!data.ok) alert(data.error || "No se pudo borrar.");
+      } catch { alert("No se pudo conectar con el servidor."); }
+      await loadCoupons();
+    }));
+  }
+
+  async function loadCoupons(){
+    const wrap = document.getElementById("couponsAdminList");
+    wrap.innerHTML = `<p style="font-size:12px;color:var(--slate);">Cargando…</p>`;
+    try {
+      const pass = sessionStorage.getItem("vitrina_admin_pass");
+      const res = await fetch(`${WORKER_URL}/admin/coupons?password=${encodeURIComponent(pass)}`, { cache: "no-store" });
+      const data = await res.json();
+      if (res.status === 401){ wrap.innerHTML = `<p style="font-size:12px;color:var(--ember-bright);">Contraseña incorrecta.</p>`; return; }
+      couponsCache = data.coupons || [];
+      renderCouponsAdminList();
+    } catch {
+      wrap.innerHTML = `<p style="font-size:12px;color:var(--ember-bright);">No se pudo conectar con el servidor.</p>`;
+    }
+  }
+  window.loadCoupons = loadCoupons;
+
+  async function saveCouponRequest(payload){
+    const status = document.getElementById("couponSaveStatus");
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/save-coupon`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), ...payload })
+      });
+      const data = await res.json();
+      if (!data.ok){
+        if (status){ status.textContent = data.error || "No se pudo guardar."; status.style.color = "var(--ember-bright)"; }
+        return false;
+      }
+      return true;
+    } catch {
+      if (status){ status.textContent = "No se pudo conectar con el servidor."; status.style.color = "var(--ember-bright)"; }
+      return false;
+    }
+  }
+
+  document.getElementById("couponSaveBtn").addEventListener("click", async () => {
+    const codeInput = document.getElementById("couponCodeInput");
+    const percentInput = document.getElementById("couponPercentInput");
+    const status = document.getElementById("couponSaveStatus");
+    const code = codeInput.value.trim().toUpperCase();
+    const percent = Number(percentInput.value);
+    status.style.color = "";
+    if (!code){ status.textContent = "Escribe un código."; status.style.color = "var(--ember-bright)"; return; }
+    if (!percent || percent <= 0 || percent > 100){ status.textContent = "El % debe ser un número entre 1 y 100."; status.style.color = "var(--ember-bright)"; return; }
+    const btn = document.getElementById("couponSaveBtn");
+    btn.disabled = true;
+    status.textContent = "Guardando…";
+    // si ya existe ese código, conserva si estaba activo o desactivado — el botón
+    // Activar/Desactivar es lo único que debe cambiar eso, no editar el % desde aquí
+    const existing = couponsCache.find(c => c.code === code);
+    const enabled = existing ? existing.enabled : true;
+    const ok = await saveCouponRequest({ code, percent, enabled });
+    btn.disabled = false;
+    if (ok){
+      status.textContent = `✓ Cupón ${code} guardado${enabled ? " y activo" : " (queda desactivado, como ya estaba)"}.`;
+      status.style.color = "var(--ok)";
+      codeInput.value = ""; percentInput.value = "";
+      await loadCoupons();
+    }
+  });
 })();
 
 /* ---- abre una pieza específica si el link trae ?producto=ID (compartido por alguien) ---- */
@@ -4324,14 +4701,18 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
 
   if (!items.length) return;
 
-  const hasCoupon = params.get("c") === "1";
+  // "cc"/"cp" = código y % del cupón (formato nuevo, cualquier cupón); "c=1" es de links viejos
+  // ya compartidos antes de que existiera esto, que siempre significaban BIENVENIDO5 al 5%
+  const couponCode = params.get("cc") || (params.get("c") === "1" ? "BIENVENIDO5" : "");
+  const couponPercent = couponCode ? (Number(params.get("cp")) || (couponCode === "BIENVENIDO5" ? 5 : 0)) : 0;
+  const hasCoupon = !!couponCode && couponPercent > 0;
   const hasAcrylicPromo = params.get("ap") === "1";
   const deliveryKey = params.get("e") || "";
   const deliveryLabel = DELIVERY_LABELS[deliveryKey] || "";
   const subtotal = items.reduce((s,e) => s + e.card.price*e.qty, 0);
   const acrylicSubtotal = items.filter(e => e.card.category === "acrylic").reduce((s,e) => s + e.card.price*e.qty, 0);
   const acrylicPromo = (hasAcrylicPromo && (subtotal - acrylicSubtotal) >= 500 && acrylicSubtotal > 0) ? Math.round(acrylicSubtotal * 0.10) : 0;
-  const discount = hasCoupon ? Math.round(subtotal * 0.05) : 0;
+  const discount = hasCoupon ? Math.round(subtotal * (couponPercent / 100)) : 0;
   const total = subtotal - discount - acrylicPromo;
 
   if (deliveryLabel){
@@ -4387,13 +4768,13 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   const totals = document.getElementById("orderTotals");
   totals.innerHTML = `
     ${(hasCoupon || acrylicPromo) ? `<div class="row"><span>Subtotal</span><span>${money(subtotal)}</span></div>` : ""}
-    ${hasCoupon ? `<div class="row discount"><span>Cupón BIENVENIDO5 (-5%)</span><span>-${money(discount)}</span></div>` : ""}
+    ${hasCoupon ? `<div class="row discount"><span>Cupón ${couponCode} (-${couponPercent}%)</span><span>-${money(discount)}</span></div>` : ""}
     ${acrylicPromo ? `<div class="row discount"><span>🎁 Promo acrílicos (-10%)</span><span>-${money(acrylicPromo)}</span></div>` : ""}
     <div class="row total"><span>Total</span><b>${money(total)}</b></div>
   `;
 
   const lines = items.map(({card,qty}) => `• ${card.name}${qty>1?` x${qty}`:''} — ${money(card.price*qty)}`);
-  const waMsg = `Hola, quiero confirmar mi pedido:%0A%0A${lines.join("%0A")}%0A${hasCoupon ? `%0ACupón BIENVENIDO5 (-5%25): -${money(discount)}` : ""}${acrylicPromo ? `%0APromo acrílicos (-10%25): -${money(acrylicPromo)}` : ""}${deliveryLabel ? `%0AEntrega: ${encodeURIComponent(deliveryLabel)}` : ""}%0ATotal: ${money(total)}`;
+  const waMsg = `Hola, quiero confirmar mi pedido:%0A%0A${lines.join("%0A")}%0A${hasCoupon ? `%0ACupón ${couponCode} (-${couponPercent}%25): -${money(discount)}` : ""}${acrylicPromo ? `%0APromo acrílicos (-10%25): -${money(acrylicPromo)}` : ""}${deliveryLabel ? `%0AEntrega: ${encodeURIComponent(deliveryLabel)}` : ""}%0ATotal: ${money(total)}`;
   document.getElementById("orderWhatsappBtn").href = `https://wa.me/${WHATSAPP_PHONE}?text=${waMsg}`;
 
   document.getElementById("orderModal").classList.add("open");
