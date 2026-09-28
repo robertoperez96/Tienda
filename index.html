@@ -923,6 +923,41 @@
   }
   .toast .toast-icon svg{width:14px;height:14px;color:var(--foil-bright);}
   .toast .toast-text b{color:var(--foil-bright);font-weight:600;}
+
+  /* ---- Inventario rápido por expansión: grid de imágenes a pantalla completa ---- */
+  .order-modal.bulk-full{width:97vw!important;max-width:1600px!important;height:94vh!important;max-height:94vh!important;padding:16px 18px 12px!important;}
+  .bulk-layout-toggle{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .bulk-layout-opt{flex:1;min-width:150px;background:var(--ink);border:1px solid var(--line-strong);color:var(--cream-dim);border-radius:8px;padding:9px 6px;font-size:12px;cursor:pointer;transition:all .15s;}
+  .bulk-layout-opt.active{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);font-weight:600;}
+  .bulk-layout-opt:hover{border-color:var(--foil-dim);}
+  .bulk-density-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;background:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;}
+  .bulk-density-label{font-size:12px;color:var(--cream-dim);}
+  .bulk-density-controls{display:flex;align-items:center;gap:12px;}
+  .bulk-density-btn{width:28px;height:28px;border-radius:7px;background:var(--ink-3);border:1px solid var(--line-strong);color:var(--cream);font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .bulk-density-btn:hover:not(:disabled){border-color:var(--foil-dim);background:rgba(201,162,39,0.08);}
+  .bulk-density-btn:disabled{opacity:.35;cursor:default;}
+  .bulk-density-value{font-family:var(--font-mono);font-size:13px;color:var(--foil-bright);min-width:16px;text-align:center;}
+  .bulk-grid{display:grid;gap:14px;margin-top:4px;}
+  .bulk-grid.layout-vertical{gap:10px;}
+  .bulk-card-cell{position:relative;border-radius:12px;overflow:hidden;border:1.5px solid var(--line-strong);background:var(--ink-3);display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s;}
+  .bulk-card-cell.checked{border-color:var(--foil-bright);box-shadow:0 0 0 2px var(--foil-dim);}
+  .bulk-card-cell.owned{opacity:.5;}
+  .bulk-card-img{position:relative;width:100%;aspect-ratio:5/7;background-size:cover;background-position:center;background-color:var(--ink-4);cursor:pointer;flex-shrink:0;}
+  .bulk-card-img:not(.has-img){display:flex;align-items:center;justify-content:center;}
+  .bulk-check-badge{position:absolute;top:7px;right:7px;width:28px;height:28px;border-radius:999px;background:rgba(11,14,20,.72);border:2px solid rgba(237,230,214,.5);display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;color:transparent;transition:all .15s;pointer-events:none;}
+  .bulk-card-cell.checked .bulk-check-badge{background:var(--foil-bright);border-color:var(--foil-bright);color:#171205;}
+  .bulk-owned-badge{position:absolute;top:7px;left:7px;background:rgba(76,139,107,.9);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px;pointer-events:none;}
+  .bulk-zoom-btn{position:absolute;bottom:7px;right:7px;width:27px;height:27px;border-radius:8px;background:rgba(11,14,20,.72);border:1px solid rgba(237,230,214,.35);color:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;}
+  .bulk-zoom-btn:hover{background:rgba(11,14,20,.9);}
+  .bulk-cell-info{padding:7px 8px 0;flex:1;}
+  .bulk-cell-name{font-size:12.5px;font-weight:600;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bulk-cell-meta{font-size:10.5px;color:var(--slate);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bulk-cell-actions{display:flex;gap:8px;padding:4px 8px 0;}
+  .bulk-cell-actions button{background:none;border:none;padding:0;color:var(--slate);cursor:pointer;text-decoration:underline;font-size:9.5px;}
+  .bulk-inputs{display:none;gap:6px;padding:6px 8px 8px;}
+  .bulk-inputs>div{flex:1;min-width:0;}
+  .bulk-inputs input{width:100%;padding:5px 6px;font-size:11.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);box-sizing:border-box;}
+  .bulk-ref-line{font-size:9px;color:var(--slate);padding:0 8px 8px;}
 </style>
 </head>
 <body>
@@ -1451,6 +1486,18 @@
         <button type="button" class="pay-opt" data-lang="jp">Japonés</button>
         <button type="button" class="pay-opt" data-lang="cn">Chino</button>
       </div>
+      <div class="bulk-layout-toggle" id="bulkLayoutToggle">
+        <button type="button" class="bulk-layout-opt" data-layout="horizontal">🖥️ Horizontal (computadora)</button>
+        <button type="button" class="bulk-layout-opt" data-layout="vertical">📱 Vertical (celular/tablet)</button>
+      </div>
+      <div class="bulk-density-row" id="bulkDensityRow">
+        <span class="bulk-density-label">Cartas por fila</span>
+        <div class="bulk-density-controls">
+          <button type="button" class="bulk-density-btn" id="bulkDensityMinus" aria-label="Menos cartas por fila (se ven más grandes)">−</button>
+          <span class="bulk-density-value" id="bulkDensityValue">6</span>
+          <button type="button" class="bulk-density-btn" id="bulkDensityPlus" aria-label="Más cartas por fila (se ven más chicas)">+</button>
+        </div>
+      </div>
       <div class="field" style="margin-bottom:6px;">
         <span class="field-label">Expansión (de más nueva a más antigua)</span>
         <select id="bulkSetSelect" style="width:100%;">
@@ -1465,7 +1512,7 @@
       <button type="button" class="btn btn-ghost" id="bulkRefreshPricesBtn" style="width:100%;justify-content:center;margin-bottom:6px;">🔄 Buscar / actualizar precios sugeridos</button>
       <p style="font-size:11px;color:var(--slate);margin:0 0 14px;">Si el nombre exacto no da resultados (los sets recién anunciados a veces tardan en aparecer en la base de datos pública), prueba con otra variante o escríbelo a mano.</p>
       <p class="promo-status" id="bulkSearchStatus"></p>
-      <div id="bulkCardsList"></div>
+      <div id="bulkCardsList" class="bulk-grid"></div>
       <div id="bulkSaveBar" style="display:none;position:sticky;bottom:0;background:var(--ink-2);padding:12px 0 4px;margin-top:6px;border-top:1px solid var(--line-strong);">
         <button type="button" class="btn btn-foil" id="bulkSaveBtn" style="width:100%;justify-content:center;">Agregar seleccionadas (<span id="bulkSelectedCount">0</span>)</button>
         <p class="promo-status" id="bulkSaveStatus"></p>
@@ -3650,6 +3697,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("adminAnalyticsPanel").style.display = tab === "analytics" ? "block" : "none";
     document.getElementById("adminTabConfig").classList.toggle("active", tab === "config");
     document.getElementById("adminConfigPanel").style.display = tab === "config" ? "block" : "none";
+    document.getElementById("adminModal").classList.toggle("bulk-full", tab === "bulk");
   }
   document.getElementById("adminTabAdd").addEventListener("click", () => showAdminTab("add"));
   document.getElementById("adminTabEdit").addEventListener("click", () => { showAdminTab("edit"); resetEditSearch(); });
@@ -4582,47 +4630,65 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       const usd = bestPrice(card.tcgplayer);
       const suggested = usd ? Math.round(usd * bulkFxRate) : null;
       return `
-      <div class="bulk-card-row" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);">
-        <input type="checkbox" class="bulk-check" data-i="${i}" ${owned ? "disabled" : ""} style="width:17px;height:17px;flex-shrink:0;">
-        <div class="bulk-thumb" data-i="${i}" title="${card.image ? "Ver foto más grande" : ""}" style="width:46px;height:64px;border-radius:6px;flex-shrink:0;background-size:cover;background-position:center;${card.image ? `background-image:url('${card.image}');cursor:zoom-in;` : `background:${TYPE_COLORS.incoloro}`}"></div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${card.name}</div>
-          <div style="font-size:11px;color:var(--slate);">${card.rarity || "—"} · ${card.number}/${card.set.printedTotal || "?"}${owned ? ' · <span style="color:var(--foil-bright);">✓ ya en tu catálogo</span>' : ''}</div>
-          <div style="margin-top:2px;">
-            <button type="button" class="bulk-img-upload" data-i="${i}" style="background:none;border:none;padding:0;color:var(--slate);font-size:10.5px;cursor:pointer;text-decoration:underline;">📎 ${card.image ? "Cambiar foto" : "Subir foto"}</button>
-            <span style="color:var(--slate);font-size:10.5px;"> · </span>
-            <button type="button" class="bulk-img-link" data-i="${i}" style="background:none;border:none;padding:0;color:var(--slate);font-size:10.5px;cursor:pointer;text-decoration:underline;">🔗 Pegar link</button>
-          </div>
-          <div class="bulk-inputs" data-i="${i}" style="display:none;gap:8px;margin-top:6px;">
-            <div style="flex:1;min-width:0;">
-              <span class="field-label" style="margin-bottom:2px;">Precio MXN</span>
-              <input type="number" class="bulk-price" data-i="${i}" placeholder="Precio MXN" value="${suggested || ''}" style="width:100%;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
-            </div>
-            <div style="width:78px;flex-shrink:0;">
-              <span class="field-label" style="margin-bottom:2px;">Stock</span>
-              <input type="number" class="bulk-stock" data-i="${i}" placeholder="1" value="1" min="0" style="width:100%;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
-            </div>
-          </div>
-          <div class="bulk-ref-line" data-i="${i}" style="font-size:10px;color:var(--slate);margin-top:2px;">${usd
-            ? `ref. TCGplayer: ~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ' (tipo de cambio de respaldo, no el del día)'}`
-            : `sin precio de referencia todavía (normal en piezas muy nuevas) · <a href="${ebaySearchUrl(card.name, card.set.name)}" target="_blank" rel="noopener" style="color:var(--foil-bright);">buscar en eBay</a>`}</div>
+      <div class="bulk-card-cell${owned ? " owned" : ""}" data-i="${i}">
+        <input type="checkbox" class="bulk-check" data-i="${i}" ${owned ? "disabled" : ""} style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;">
+        <div class="bulk-card-img${card.image ? " has-img" : ""}" data-i="${i}" title="${owned ? "Ya la tienes en tu catálogo" : "Toca para marcarla como tuya"}" style="${card.image ? `background-image:url('${card.image}');` : `background:${TYPE_COLORS.incoloro}`}">
+          <span class="bulk-check-badge" data-i="${i}">✓</span>
+          ${owned ? `<span class="bulk-owned-badge">✓ ya la tienes</span>` : ""}
+          <button type="button" class="bulk-zoom-btn" data-i="${i}" title="Ver foto más grande" ${card.image ? "" : "disabled style=\"display:none;\""}>🔍</button>
         </div>
+        <div class="bulk-cell-info">
+          <div class="bulk-cell-name">${card.name}</div>
+          <div class="bulk-cell-meta">${card.rarity || "—"} · ${card.number}/${card.set.printedTotal || "?"}</div>
+        </div>
+        <div class="bulk-cell-actions">
+          <button type="button" class="bulk-img-upload" data-i="${i}">📎 ${card.image ? "Cambiar foto" : "Subir foto"}</button>
+          <button type="button" class="bulk-img-link" data-i="${i}">🔗 Link</button>
+        </div>
+        <div class="bulk-inputs" data-i="${i}">
+          <div>
+            <span class="field-label" style="margin-bottom:2px;">Precio MXN</span>
+            <input type="number" class="bulk-price" data-i="${i}" placeholder="Precio MXN" value="${suggested || ''}">
+          </div>
+          <div style="max-width:64px;">
+            <span class="field-label" style="margin-bottom:2px;">Stock</span>
+            <input type="number" class="bulk-stock" data-i="${i}" placeholder="1" value="1" min="0">
+          </div>
+        </div>
+        <div class="bulk-ref-line" data-i="${i}" style="display:none;">${usd
+          ? `ref. TCGplayer: ~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ' (tipo de cambio de respaldo, no el del día)'}`
+          : `sin precio de referencia todavía · <a href="${ebaySearchUrl(card.name, card.set.name)}" target="_blank" rel="noopener" style="color:var(--foil-bright);">buscar en eBay</a>`}</div>
       </div>`;
     }).join("");
-    list.querySelectorAll(".bulk-thumb").forEach(thumb => {
-      thumb.addEventListener("click", () => {
-        const card = bulkFoundCards[Number(thumb.dataset.i)];
+    applyBulkLayout();
+    list.querySelectorAll(".bulk-card-img").forEach(img => {
+      img.addEventListener("click", (ev) => {
+        const i = Number(img.dataset.i);
+        const chk = list.querySelector(`.bulk-check[data-i="${i}"]`);
+        if (chk.disabled) return;
+        chk.checked = !chk.checked;
+        chk.dispatchEvent(new Event("change"));
+      });
+    });
+    list.querySelectorAll(".bulk-zoom-btn").forEach(btn => {
+      btn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        const card = bulkFoundCards[Number(btn.dataset.i)];
         if (card?.image) openImagePreview(card.image);
       });
     });
     list.querySelectorAll(".bulk-check").forEach(chk => {
       chk.addEventListener("change", () => {
+        const cell = list.querySelector(`.bulk-card-cell[data-i="${chk.dataset.i}"]`);
+        cell.classList.toggle("checked", chk.checked);
         list.querySelector(`.bulk-inputs[data-i="${chk.dataset.i}"]`).style.display = chk.checked ? "flex" : "none";
+        list.querySelector(`.bulk-ref-line[data-i="${chk.dataset.i}"]`).style.display = chk.checked ? "block" : "none";
         updateBulkSaveBar();
       });
     });
     list.querySelectorAll(".bulk-img-upload").forEach(btn => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
         const i = Number(btn.dataset.i);
         const input = document.createElement("input");
         input.type = "file"; input.accept = "image/*";
@@ -4635,7 +4701,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       });
     });
     list.querySelectorAll(".bulk-img-link").forEach(btn => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
         const i = Number(btn.dataset.i);
         const url = prompt("Pega el link (URL) de la foto para esta carta:");
         if (!url || !url.trim()) return;
@@ -4644,15 +4711,58 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     });
   }
 
-  // reemplaza la foto de una sola fila sin volver a pintar toda la lista — si no, se
+  // reemplaza la foto de una sola celda sin volver a pintar toda la grilla — si no, se
   // perderían los precios/stock que ya hayas escrito en las demás cartas marcadas
   function setBulkCardImage(i, url){
     bulkFoundCards[i].image = url;
-    const thumb = document.querySelector(`.bulk-thumb[data-i="${i}"]`);
-    if (thumb){ thumb.style.background = ""; thumb.style.backgroundImage = `url('${url}')`; thumb.style.backgroundSize = "cover"; thumb.style.backgroundPosition = "center"; thumb.style.cursor = "zoom-in"; thumb.title = "Ver foto más grande"; }
+    const img = document.querySelector(`.bulk-card-img[data-i="${i}"]`);
+    if (img){ img.style.background = ""; img.style.backgroundImage = `url('${url}')`; img.classList.add("has-img"); }
+    const zoomBtn = document.querySelector(`.bulk-zoom-btn[data-i="${i}"]`);
+    if (zoomBtn){ zoomBtn.disabled = false; zoomBtn.style.display = ""; }
     const uploadBtn = document.querySelector(`.bulk-img-upload[data-i="${i}"]`);
     if (uploadBtn) uploadBtn.textContent = "📎 Cambiar foto";
   }
+
+  // ---- disposición horizontal (compu, muchas columnas) vs vertical (celular/tablet, pocas
+  // columnas pero cada carta más grande) — recordada en localStorage, con un valor inicial
+  // razonable según el ancho de pantalla si Roberto todavía no ha elegido una vez ----
+  let bulkLayoutMode = localStorage.getItem("vitrina_bulk_layout") || (window.innerWidth >= 900 ? "horizontal" : "vertical");
+  // ---- cartas por fila (densidad): cada orientación recuerda su propio número, así Roberto
+  // puede tener, por ejemplo, 7 en horizontal y 3 en vertical sin que se pisen entre sí ----
+  const BULK_COLS_MIN = 2, BULK_COLS_MAX = 10;
+  function clampBulkCols(n){ return Math.max(BULK_COLS_MIN, Math.min(BULK_COLS_MAX, n || BULK_COLS_MIN)); }
+  let bulkColsByLayout = {
+    horizontal: clampBulkCols(parseInt(localStorage.getItem("vitrina_bulk_cols_horizontal"), 10) || 6),
+    vertical: clampBulkCols(parseInt(localStorage.getItem("vitrina_bulk_cols_vertical"), 10) || 2)
+  };
+  function applyBulkLayout(){
+    const list = document.getElementById("bulkCardsList");
+    list.classList.toggle("layout-horizontal", bulkLayoutMode === "horizontal");
+    list.classList.toggle("layout-vertical", bulkLayoutMode === "vertical");
+    document.querySelectorAll("#bulkLayoutToggle .bulk-layout-opt").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.layout === bulkLayoutMode);
+    });
+    const cols = bulkColsByLayout[bulkLayoutMode];
+    list.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+    document.getElementById("bulkDensityValue").textContent = cols;
+    document.getElementById("bulkDensityMinus").disabled = cols <= BULK_COLS_MIN;
+    document.getElementById("bulkDensityPlus").disabled = cols >= BULK_COLS_MAX;
+  }
+  document.querySelectorAll("#bulkLayoutToggle .bulk-layout-opt").forEach(btn => {
+    btn.addEventListener("click", () => {
+      bulkLayoutMode = btn.dataset.layout;
+      localStorage.setItem("vitrina_bulk_layout", bulkLayoutMode);
+      applyBulkLayout();
+    });
+  });
+  function changeBulkCols(delta){
+    bulkColsByLayout[bulkLayoutMode] = clampBulkCols(bulkColsByLayout[bulkLayoutMode] + delta);
+    localStorage.setItem(`vitrina_bulk_cols_${bulkLayoutMode}`, bulkColsByLayout[bulkLayoutMode]);
+    applyBulkLayout();
+  }
+  document.getElementById("bulkDensityMinus").addEventListener("click", () => changeBulkCols(-1));
+  document.getElementById("bulkDensityPlus").addEventListener("click", () => changeBulkCols(1));
+  applyBulkLayout();
 
   function updateBulkSaveBar(){
     const checked = [...document.querySelectorAll(".bulk-check:checked")];
