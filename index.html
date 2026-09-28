@@ -837,6 +837,14 @@
   #imagePreviewOverlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
   #imagePreviewOverlay.open{display:flex;}
   #imagePreviewOverlay img{max-width:min(92vw,520px);max-height:88vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);object-fit:contain;}
+  #bulkDetailOverlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:201;display:none;align-items:center;justify-content:center;padding:24px;}
+  #bulkDetailOverlay.open{display:flex;}
+  #bulkDetailCard{position:relative;background:var(--ink-2);border:1px solid var(--line-strong);border-radius:var(--radius-l);max-width:620px;width:100%;max-height:88vh;overflow-y:auto;display:flex;flex-wrap:wrap;box-shadow:0 30px 70px -20px rgba(0,0,0,.7);}
+  #bulkDetailImg{flex:1 1 240px;min-width:220px;aspect-ratio:5/7;background-size:cover;background-position:center;background-color:var(--ink-4);border-radius:var(--radius-l) 0 0 var(--radius-l);}
+  #bulkDetailInfo{flex:1 1 240px;min-width:220px;padding:28px 24px;}
+  #bulkDetailInfo h3{font-family:var(--font-display);font-weight:560;font-size:21px;margin:10px 0 10px;}
+  #bulkDetailInfo p{font-size:13px;color:var(--cream-dim);margin:0 0 10px;line-height:1.5;}
+  @media (max-width:560px){ #bulkDetailCard{max-height:92vh;} #bulkDetailImg{flex-basis:100%;border-radius:var(--radius-l) var(--radius-l) 0 0;aspect-ratio:5/6;} }
 
   /* ---- resumen de pedido (abre desde el link de WhatsApp) ---- */
   #orderBackdrop{z-index:105;}
@@ -949,7 +957,8 @@
   .bulk-owned-badge{position:absolute;top:7px;left:7px;background:rgba(76,139,107,.9);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px;pointer-events:none;}
   .bulk-zoom-btn{position:absolute;bottom:7px;right:7px;width:27px;height:27px;border-radius:8px;background:rgba(11,14,20,.72);border:1px solid rgba(237,230,214,.35);color:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;}
   .bulk-zoom-btn:hover{background:rgba(11,14,20,.9);}
-  .bulk-cell-info{padding:7px 8px 0;flex:1;}
+  .bulk-cell-info{padding:7px 8px 0;flex:1;cursor:pointer;}
+  .bulk-cell-info:hover .bulk-cell-name{color:var(--foil-bright);}
   .bulk-cell-name{font-size:12.5px;font-weight:600;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .bulk-cell-meta{font-size:10.5px;color:var(--slate);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .bulk-cell-actions{display:flex;gap:8px;padding:4px 8px 0;}
@@ -1305,6 +1314,7 @@
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
       <button type="button" class="pay-opt" id="adminTabConfig" style="flex:1;">⚙️ Config</button>
     </div>
+    <button type="button" id="adminLogoutBtn" style="background:none;border:none;padding:0;color:var(--slate);font-size:11px;cursor:pointer;text-decoration:underline;margin:-10px 0 16px;display:block;">🚪 Cerrar sesión de admin</button>
 
     <div id="adminAddForm">
       <div class="order-head"><span class="eyebrow">Agregar producto</span><h3>Publicar directo en el sitio</h3></div>
@@ -1732,6 +1742,19 @@
 
 <!-- vista ampliada de una sola foto (usado en "Inventario rápido" del panel admin) -->
 <div id="imagePreviewOverlay"><img id="imagePreviewImg" src="" alt="Vista ampliada"></div>
+<div id="bulkDetailOverlay">
+  <div id="bulkDetailCard">
+    <button type="button" class="zoom-close icon-btn" id="bulkDetailClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <div id="bulkDetailImg"></div>
+    <div id="bulkDetailInfo">
+      <span class="bulk-owned-badge" id="bulkDetailOwned" style="display:none;position:static;">✓ ya la tienes</span>
+      <h3 id="bulkDetailName"></h3>
+      <p id="bulkDetailMeta"></p>
+      <p id="bulkDetailPrice"></p>
+      <button type="button" class="btn btn-foil" id="bulkDetailToggle" style="width:100%;justify-content:center;margin-top:6px;"></button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* cards-data.js pesa varios MB (trae fotos propias incrustadas) y GitHub Pages/los
@@ -4273,6 +4296,16 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   closeBtn.addEventListener("click", closeModal);
   backdrop.addEventListener("click", closeModal);
 
+  // cierra solo la SESIÓN de admin (para que vuelva a pedir contraseña) — a propósito NO toca
+  // "vitrina_admin_device" (localStorage), así este dispositivo sigue sin contar en las
+  // analíticas aunque cierres sesión, tal como Roberto pidió desde el principio
+  document.getElementById("adminLogoutBtn").addEventListener("click", () => {
+    if (!confirm("¿Cerrar tu sesión de admin en este navegador? Vas a tener que volver a escribir la contraseña la próxima vez.")) return;
+    sessionStorage.removeItem("vitrina_admin_pass");
+    closeModal();
+    refreshAllViews();
+  });
+
   document.getElementById("adminLoginBtn").addEventListener("click", () => {
     const pass = document.getElementById("adminPasswordInput").value;
     const status = document.getElementById("adminLoginStatus");
@@ -4637,7 +4670,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
           ${owned ? `<span class="bulk-owned-badge">✓ ya la tienes</span>` : ""}
           <button type="button" class="bulk-zoom-btn" data-i="${i}" title="Ver foto más grande" ${card.image ? "" : "disabled style=\"display:none;\""}>🔍</button>
         </div>
-        <div class="bulk-cell-info">
+        <div class="bulk-cell-info" data-i="${i}" title="Ver el detalle completo de la carta">
           <div class="bulk-cell-name">${card.name}</div>
           <div class="bulk-cell-meta">${card.rarity || "—"} · ${card.number}/${card.set.printedTotal || "?"}</div>
         </div>
@@ -4675,6 +4708,12 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         ev.stopPropagation();
         const card = bulkFoundCards[Number(btn.dataset.i)];
         if (card?.image) openImagePreview(card.image);
+      });
+    });
+    list.querySelectorAll(".bulk-cell-info").forEach(info => {
+      info.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openBulkCardDetail(Number(info.dataset.i));
       });
     });
     list.querySelectorAll(".bulk-check").forEach(chk => {
@@ -4722,6 +4761,51 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     const uploadBtn = document.querySelector(`.bulk-img-upload[data-i="${i}"]`);
     if (uploadBtn) uploadBtn.textContent = "📎 Cambiar foto";
   }
+
+  // ---- al picarle al texto (nombre/rareza/número) de una carta se abre una ventanita con la
+  // foto grande y todo el detalle — para revisar bien antes de marcarla, sin tener que abrir el
+  // zoom del catálogo normal (esta carta ni siquiera es un producto todavía) ----
+  function openBulkCardDetail(i){
+    const card = bulkFoundCards[i];
+    if (!card) return;
+    const owned = bulkCardAlreadyOwned(card);
+    const usd = bestPrice(card.tcgplayer);
+    const mxn = usd ? Math.round(usd * bulkFxRate) : null;
+    const imgEl = document.getElementById("bulkDetailImg");
+    if (card.image){ imgEl.style.background = ""; imgEl.style.backgroundImage = `url('${card.image}')`; }
+    else { imgEl.style.backgroundImage = ""; imgEl.style.background = TYPE_COLORS.incoloro; }
+    document.getElementById("bulkDetailName").textContent = card.name;
+    document.getElementById("bulkDetailMeta").textContent = `${card.set.name} · ${card.number}/${card.set.printedTotal || "?"} · ${card.rarity || "—"}`;
+    document.getElementById("bulkDetailPrice").innerHTML = usd
+      ? `Precio de referencia (TCGplayer): <b style="color:var(--foil-bright);">$${mxn} MXN</b> <span style="color:var(--slate);">(~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ', tipo de cambio de respaldo'})</span>`
+      : `Sin precio de referencia todavía · <a href="${ebaySearchUrl(card.name, card.set.name)}" target="_blank" rel="noopener" style="color:var(--foil-bright);">buscar en eBay</a>`;
+    document.getElementById("bulkDetailOwned").style.display = owned ? "inline-block" : "none";
+    const toggleBtn = document.getElementById("bulkDetailToggle");
+    toggleBtn.dataset.i = i;
+    if (owned){
+      toggleBtn.style.display = "none";
+    } else {
+      toggleBtn.style.display = "block";
+      const chk = document.querySelector(`.bulk-check[data-i="${i}"]`);
+      toggleBtn.textContent = chk && chk.checked ? "✓ Marcada como tuya (picar para desmarcar)" : "Marcar como tuya";
+    }
+    document.getElementById("bulkDetailOverlay").classList.add("open");
+  }
+  function closeBulkCardDetail(){
+    document.getElementById("bulkDetailOverlay").classList.remove("open");
+  }
+  document.getElementById("bulkDetailClose").addEventListener("click", closeBulkCardDetail);
+  document.getElementById("bulkDetailOverlay").addEventListener("click", (ev) => {
+    if (ev.target.id === "bulkDetailOverlay") closeBulkCardDetail();
+  });
+  document.getElementById("bulkDetailToggle").addEventListener("click", () => {
+    const i = Number(document.getElementById("bulkDetailToggle").dataset.i);
+    const chk = document.querySelector(`.bulk-check[data-i="${i}"]`);
+    if (!chk || chk.disabled) return;
+    chk.checked = !chk.checked;
+    chk.dispatchEvent(new Event("change"));
+    openBulkCardDetail(i);
+  });
 
   // ---- disposición horizontal (compu, muchas columnas) vs vertical (celular/tablet, pocas
   // columnas pero cada carta más grande) — recordada en localStorage, con un valor inicial
