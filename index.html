@@ -1176,6 +1176,7 @@
     <div class="pay-options" style="margin-bottom:16px;">
       <button type="button" class="pay-opt active" id="adminTabAdd" style="flex:1;">➕ Agregar</button>
       <button type="button" class="pay-opt" id="adminTabEdit" style="flex:1;">✏️ Editar</button>
+      <button type="button" class="pay-opt" id="adminTabBulk" style="flex:1;">📋 Inventario rápido</button>
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
     </div>
 
@@ -1280,6 +1281,22 @@
         <button type="button" class="btn btn-foil" id="editSubmitBtn" style="width:100%;justify-content:center;margin-top:14px;">Guardar cambios</button>
         <button type="button" id="editDeleteBtn" style="width:100%;justify-content:center;margin-top:8px;background:none;border:1px dashed rgba(181,72,42,.5);color:var(--ember-bright);border-radius:10px;padding:9px;font-size:12.5px;cursor:pointer;">🗑️ Eliminar este producto (permanente)</button>
         <p class="promo-status" id="adminEditStatus"></p>
+      </div>
+    </div>
+
+    <div id="adminBulkPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Marca lo que ya tienes</span><h3>Inventario rápido por expansión</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 14px;">Busca todas las cartas de una expansión, tilda las que ya tienes físicamente, ponles precio y stock (te sugerimos un precio de referencia de TCGplayer) y se agregan todas juntas — sin tener que crearlas una por una.</p>
+      <div class="row" style="margin-bottom:10px;">
+        <input type="text" id="bulkSetName" placeholder="Nombre de la expansión (en inglés, como la conoce TCGplayer)" value="30th Celebration" style="flex:1;">
+      </div>
+      <button type="button" class="btn btn-foil" id="bulkSearchBtn" style="width:100%;justify-content:center;margin-bottom:6px;">Buscar cartas de esta expansión</button>
+      <p style="font-size:11px;color:var(--slate);margin:0 0 14px;">Si el nombre exacto no da resultados (los sets recién anunciados a veces tardan en aparecer en la base de datos pública), prueba variantes como "30th Anniversary", "30th Celebration" o pide ayuda para confirmar el nombre exacto.</p>
+      <p class="promo-status" id="bulkSearchStatus"></p>
+      <div id="bulkCardsList"></div>
+      <div id="bulkSaveBar" style="display:none;position:sticky;bottom:0;background:var(--ink-2);padding:12px 0 4px;margin-top:6px;border-top:1px solid var(--line-strong);">
+        <button type="button" class="btn btn-foil" id="bulkSaveBtn" style="width:100%;justify-content:center;">Agregar seleccionadas (<span id="bulkSelectedCount">0</span>)</button>
+        <p class="promo-status" id="bulkSaveStatus"></p>
       </div>
     </div>
 
@@ -3162,13 +3179,16 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   function showAdminTab(tab){
     document.getElementById("adminTabAdd").classList.toggle("active", tab === "add");
     document.getElementById("adminTabEdit").classList.toggle("active", tab === "edit");
+    document.getElementById("adminTabBulk").classList.toggle("active", tab === "bulk");
     document.getElementById("adminTabAnalytics").classList.toggle("active", tab === "analytics");
     document.getElementById("adminAddForm").style.display = tab === "add" ? "block" : "none";
     document.getElementById("adminEditPanel").style.display = tab === "edit" ? "block" : "none";
+    document.getElementById("adminBulkPanel").style.display = tab === "bulk" ? "block" : "none";
     document.getElementById("adminAnalyticsPanel").style.display = tab === "analytics" ? "block" : "none";
   }
   document.getElementById("adminTabAdd").addEventListener("click", () => showAdminTab("add"));
   document.getElementById("adminTabEdit").addEventListener("click", () => { showAdminTab("edit"); resetEditSearch(); });
+  document.getElementById("adminTabBulk").addEventListener("click", () => showAdminTab("bulk"));
   document.getElementById("adminTabAnalytics").addEventListener("click", async () => { showAdminTab("analytics"); await loadAnalytics(); });
 
   /* ---- editar producto existente ---- */
@@ -3678,6 +3698,180 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     } catch (err) {
       status.textContent = "No se pudo conectar con el servidor.";
     }
+  });
+
+  /* ---- Inventario rápido por expansión: checklist marcable de una expansión completa ---- */
+
+  // misma lógica que usa admin.html para elegir el mejor precio de TCGplayer dentro de los
+  // datos que ya trae la API pública (holofoil, normal, etc.) — preferimos el mayor entre
+  // "market" y "low" porque el market price sale raro cuando hay pocas ventas registradas
+  function bestPrice(tcgplayer){
+    if (!tcgplayer?.prices) return null;
+    const order = ["holofoil","reverseHolofoil","normal","1stEditionHolofoil","unlimitedHolofoil"];
+    for (const key of order){
+      const p = tcgplayer.prices[key];
+      if (!p) continue;
+      if (typeof p.market === "number" && typeof p.low === "number" && p.market > 0 && p.low > 0) return Math.max(p.market, p.low);
+      if (typeof p.market === "number" && p.market > 0) return p.market;
+      if (typeof p.low === "number" && p.low > 0) return p.low;
+      if (typeof p.mid === "number" && p.mid > 0) return p.mid;
+    }
+    return null;
+  }
+
+  let bulkFxRate = 18.5; // valor de respaldo si /fx-rate falla; se reemplaza con el real al buscar
+  let bulkFxLoaded = false;
+  let bulkFoundCards = [];
+
+  function bulkCardAlreadyOwned(card){
+    const num = parseInt(card.number, 10) || 0;
+    return CARDS.some(c => (c.set || "").toLowerCase() === (card.set.name || "").toLowerCase()
+      && Number(c.num) === num && c.name.toLowerCase() === card.name.toLowerCase());
+  }
+
+  function renderBulkCards(){
+    const list = document.getElementById("bulkCardsList");
+    if (!bulkFoundCards.length){ list.innerHTML = ""; updateBulkSaveBar(); return; }
+    list.innerHTML = bulkFoundCards.map((card, i) => {
+      const owned = bulkCardAlreadyOwned(card);
+      const usd = bestPrice(card.tcgplayer);
+      const suggested = usd ? Math.round(usd * bulkFxRate) : null;
+      return `
+      <div class="bulk-card-row" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);">
+        <input type="checkbox" class="bulk-check" data-i="${i}" ${owned ? "disabled" : ""} style="width:17px;height:17px;flex-shrink:0;">
+        <div class="bulk-thumb" data-i="${i}" style="width:32px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center;${card.image ? `background-image:url('${card.image}')` : `background:${TYPE_COLORS.incoloro}`}"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${card.name}</div>
+          <div style="font-size:11px;color:var(--slate);">${card.rarity || "—"} · ${card.number}/${card.set.printedTotal || "?"}${owned ? ' · <span style="color:var(--foil-bright);">✓ ya en tu catálogo</span>' : ''}</div>
+          <div style="margin-top:2px;">
+            <button type="button" class="bulk-img-upload" data-i="${i}" style="background:none;border:none;padding:0;color:var(--slate);font-size:10.5px;cursor:pointer;text-decoration:underline;">📎 ${card.image ? "Cambiar foto" : "Subir foto"}</button>
+            <span style="color:var(--slate);font-size:10.5px;"> · </span>
+            <button type="button" class="bulk-img-link" data-i="${i}" style="background:none;border:none;padding:0;color:var(--slate);font-size:10.5px;cursor:pointer;text-decoration:underline;">🔗 Pegar link</button>
+          </div>
+          <div class="bulk-inputs" data-i="${i}" style="display:none;gap:8px;margin-top:6px;">
+            <input type="number" class="bulk-price" data-i="${i}" placeholder="Precio MXN" value="${suggested || ''}" style="flex:1;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
+            <input type="number" class="bulk-stock" data-i="${i}" placeholder="Stock" value="1" style="width:70px;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
+          </div>
+          ${usd ? `<div style="font-size:10px;color:var(--slate);margin-top:2px;">ref. TCGplayer: ~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ' (tipo de cambio de respaldo, no el del día)'}</div>` : ''}
+        </div>
+      </div>`;
+    }).join("");
+    list.querySelectorAll(".bulk-check").forEach(chk => {
+      chk.addEventListener("change", () => {
+        list.querySelector(`.bulk-inputs[data-i="${chk.dataset.i}"]`).style.display = chk.checked ? "flex" : "none";
+        updateBulkSaveBar();
+      });
+    });
+    list.querySelectorAll(".bulk-img-upload").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.dataset.i);
+        const input = document.createElement("input");
+        input.type = "file"; input.accept = "image/*";
+        input.onchange = () => {
+          const file = input.files[0];
+          if (!file) return;
+          compressAdminImage(file, (dataUrl) => setBulkCardImage(i, dataUrl));
+        };
+        input.click();
+      });
+    });
+    list.querySelectorAll(".bulk-img-link").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.dataset.i);
+        const url = prompt("Pega el link (URL) de la foto para esta carta:");
+        if (!url || !url.trim()) return;
+        setBulkCardImage(i, url.trim());
+      });
+    });
+  }
+
+  // reemplaza la foto de una sola fila sin volver a pintar toda la lista — si no, se
+  // perderían los precios/stock que ya hayas escrito en las demás cartas marcadas
+  function setBulkCardImage(i, url){
+    bulkFoundCards[i].image = url;
+    const thumb = document.querySelector(`.bulk-thumb[data-i="${i}"]`);
+    if (thumb){ thumb.style.background = ""; thumb.style.backgroundImage = `url('${url}')`; thumb.style.backgroundSize = "cover"; thumb.style.backgroundPosition = "center"; }
+    const uploadBtn = document.querySelector(`.bulk-img-upload[data-i="${i}"]`);
+    if (uploadBtn) uploadBtn.textContent = "📎 Cambiar foto";
+  }
+
+  function updateBulkSaveBar(){
+    const checked = [...document.querySelectorAll(".bulk-check:checked")];
+    document.getElementById("bulkSaveBar").style.display = checked.length ? "block" : "none";
+    document.getElementById("bulkSelectedCount").textContent = checked.length;
+  }
+
+  document.getElementById("bulkSearchBtn").addEventListener("click", async () => {
+    const setName = document.getElementById("bulkSetName").value.trim();
+    const status = document.getElementById("bulkSearchStatus");
+    if (!setName){ status.textContent = "Escribe el nombre de la expansión."; return; }
+    status.textContent = "Buscando…";
+    document.getElementById("bulkCardsList").innerHTML = "";
+    document.getElementById("bulkSaveBar").style.display = "none";
+    try {
+      if (!bulkFxLoaded){
+        try {
+          const fxRes = await fetch(`${WORKER_URL}/fx-rate`, { cache: "no-store" });
+          const fxData = await fxRes.json();
+          if (fxData.rate){ bulkFxRate = fxData.rate; bulkFxLoaded = true; }
+        } catch {}
+      }
+      const res = await fetch(`${WORKER_URL}/cards-by-set?set=${encodeURIComponent(setName)}`, { cache: "no-store" });
+      const data = await res.json();
+      bulkFoundCards = data.cards || [];
+      // orden numérico real (la API a veces ordena "number" como texto: 10 antes que 2)
+      bulkFoundCards.sort((a,b) => (parseInt(a.number,10)||0) - (parseInt(b.number,10)||0));
+      if (!bulkFoundCards.length){
+        status.textContent = `No se encontraron cartas para "${setName}" — si es una expansión muy nueva, puede que la base de datos pública todavía no la tenga indexada. Intenta con otro nombre o vuelve a intentar más tarde.`;
+      } else {
+        const ownedCount = bulkFoundCards.filter(bulkCardAlreadyOwned).length;
+        status.textContent = `${bulkFoundCards.length} cartas encontradas${ownedCount ? ` (${ownedCount} ya están en tu catálogo)` : ""}. Tilda las que ya tienes físicamente.`;
+        renderBulkCards();
+      }
+    } catch (err) {
+      status.textContent = "No se pudo conectar con el servidor.";
+    }
+  });
+
+  document.getElementById("bulkSaveBtn").addEventListener("click", async () => {
+    const checks = [...document.querySelectorAll(".bulk-check:checked")];
+    const status = document.getElementById("bulkSaveStatus");
+    const btn = document.getElementById("bulkSaveBtn");
+    if (!checks.length) return;
+    btn.disabled = true;
+    let done = 0, failed = 0;
+    for (const chk of checks){
+      const i = Number(chk.dataset.i);
+      const card = bulkFoundCards[i];
+      const priceInput = document.querySelector(`.bulk-price[data-i="${i}"]`);
+      const stockInput = document.querySelector(`.bulk-stock[data-i="${i}"]`);
+      const price = Number(priceInput.value);
+      const stock = Number(stockInput.value) || 1;
+      status.textContent = `Guardando ${done+1} de ${checks.length}: ${card.name}…`;
+      if (!price){ failed++; done++; continue; }
+      const product = {
+        category: "pokemon", kind: "single", name: card.name,
+        set: card.set.name, num: parseInt(card.number, 10) || 0, total: card.set.printedTotal || 0,
+        rarity: card.rarity || "", price, stock, image: card.image || "", images: card.image ? [card.image] : []
+      };
+      try {
+        const res = await fetch(`${WORKER_URL}/admin/add-product`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), product })
+        });
+        const data = await res.json();
+        if (data.ok){ CARDS.push(data.product); done++; }
+        else { failed++; done++; }
+      } catch { failed++; done++; }
+    }
+    refreshAllViews();
+    renderBulkCards(); // vuelve a pintar para marcar como "ya en tu catálogo" las que se guardaron
+    document.getElementById("bulkSaveBar").style.display = "none";
+    btn.disabled = false;
+    status.textContent = failed
+      ? `✓ ${done - failed} agregadas — ${failed} con error (revisa que tengan precio).`
+      : `✓ ${done} agregadas — ya están en tu sitio.`;
   });
 
   // acceso rápido: abre el modal directo en "Editar" con la pieza ya cargada,
