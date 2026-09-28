@@ -521,6 +521,14 @@
   #promoEmail:focus{outline:none;border-color:var(--foil-dim);}
   .promo-note{font-size:10.5px;color:var(--slate);margin:10px 0 0;}
   .promo-status{font-size:12px;color:var(--ember-bright);margin:8px 0 0;min-height:14px;}
+  .field-label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--slate);text-transform:uppercase;margin:0 0 4px 2px;}
+  .field-mini{flex:1;min-width:0;}
+  .price-suggest-row{display:flex;gap:8px;align-items:center;margin:6px 0 2px;}
+  .price-suggest-btn{background:none;border:1px solid var(--foil-dim);color:var(--foil-bright);border-radius:7px;padding:6px 10px;font-size:11.5px;cursor:pointer;white-space:nowrap;}
+  .price-suggest-btn:hover{background:var(--foil-dim);}
+  .price-suggest-btn:disabled{opacity:.5;cursor:default;}
+  .price-suggest-hint{font-size:11px;color:var(--slate);line-height:1.4;}
+  .price-suggest-hint a{color:var(--foil-bright);}
   .promo-code{
     display:inline-block;font-family:var(--font-mono);font-size:20px;font-weight:600;
     letter-spacing:.06em;color:var(--foil-bright);background:var(--foil-dim);
@@ -1183,6 +1191,7 @@
     <div id="adminAddForm">
       <div class="order-head"><span class="eyebrow">Agregar producto</span><h3>Publicar directo en el sitio</h3></div>
       <div class="field" style="margin-bottom:10px;">
+        <span class="field-label">Categoría</span>
         <select id="adminCategory" style="width:100%;">
           <option value="pokemon">🃏 Carta Pokémon</option>
           <option value="pcjp">🇯🇵 Exclusivo Pokémon Center JP</option>
@@ -1191,24 +1200,35 @@
         </select>
       </div>
       <div class="field" id="adminKindField" style="margin-bottom:10px;">
+        <span class="field-label">Tipo</span>
         <select id="adminKind" style="width:100%;">
           <option value="single">🃏 Carta suelta (single)</option>
           <option value="sellado">📦 Producto sellado</option>
         </select>
       </div>
-      <div class="field" style="margin-bottom:10px;"><input type="text" id="adminName" placeholder="Nombre del producto" style="width:100%;"></div>
+      <div class="field" style="margin-bottom:10px;">
+        <span class="field-label">Nombre</span>
+        <input type="text" id="adminName" placeholder="Nombre del producto" style="width:100%;">
+      </div>
       <div id="adminSetNumField">
-        <div class="field" style="margin-bottom:10px;"><input type="text" id="adminSet" placeholder="Expansión (ej. Escarlata y Púrpura)" list="setOptions" style="width:100%;"></div>
-        <div class="row" style="margin-bottom:10px;">
-          <input type="number" id="adminNum" placeholder="Núm. de carta (ej. 25)" style="flex:1;">
-          <input type="number" id="adminTotal" placeholder="Total del set (ej. 198)" style="flex:1;">
+        <div class="field" style="margin-bottom:10px;">
+          <span class="field-label">Expansión</span>
+          <input type="text" id="adminSet" placeholder="Expansión (ej. Escarlata y Púrpura)" list="setOptions" style="width:100%;">
+        </div>
+        <div class="row" style="display:flex;gap:8px;margin-bottom:10px;">
+          <div class="field-mini"><span class="field-label">Núm. de carta</span><input type="number" id="adminNum" placeholder="ej. 25" style="width:100%;"></div>
+          <div class="field-mini"><span class="field-label">Total del set</span><input type="number" id="adminTotal" placeholder="ej. 198" style="width:100%;"></div>
         </div>
       </div>
-      <div class="row" style="margin-bottom:10px;">
-        <input type="number" id="adminPrice" placeholder="Precio (MXN)" style="flex:1;">
-        <input type="number" id="adminStock" placeholder="Stock" value="1" style="flex:1;">
+      <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
+        <div class="field-mini"><span class="field-label">Precio (MXN)</span><input type="number" id="adminPrice" placeholder="Precio (MXN)" style="width:100%;"></div>
+        <div class="field-mini"><span class="field-label">Stock</span><input type="number" id="adminStock" placeholder="Stock" value="1" style="width:100%;"></div>
       </div>
-      <div id="adminImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
+      <div class="price-suggest-row">
+        <button type="button" class="price-suggest-btn" id="adminSuggestPriceBtn">💲 Sugerir precio</button>
+        <span class="price-suggest-hint" id="adminSuggestPriceHint"></span>
+      </div>
+      <div id="adminImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;margin-top:6px;"></div>
       <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Agregar foto(s)</button>
       <input type="file" id="adminFileInput" accept="image/*" multiple style="display:none;">
       <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
@@ -1232,6 +1252,7 @@
       <div id="adminEditFormStep" style="display:none;">
         <button type="button" id="adminEditBack" style="background:none;border:none;color:var(--slate);font-size:12px;cursor:pointer;padding:0;margin-bottom:12px;">← Buscar otro</button>
         <div class="field" style="margin-bottom:10px;">
+          <span class="field-label">Categoría</span>
           <select id="editCategory" style="width:100%;">
             <option value="pokemon">🃏 Carta Pokémon</option>
             <option value="pcjp">🇯🇵 Exclusivo Pokémon Center JP</option>
@@ -1240,30 +1261,44 @@
           </select>
         </div>
         <div class="field" id="editKindField" style="margin-bottom:10px;">
+          <span class="field-label">Tipo</span>
           <select id="editKind" style="width:100%;">
             <option value="single">🃏 Carta suelta (single)</option>
             <option value="sellado">📦 Producto sellado</option>
           </select>
         </div>
-        <div class="field" style="margin-bottom:10px;"><input type="text" id="editName" placeholder="Nombre del producto" style="width:100%;"></div>
+        <div class="field" style="margin-bottom:10px;">
+          <span class="field-label">Nombre</span>
+          <input type="text" id="editName" placeholder="Nombre del producto" style="width:100%;">
+        </div>
         <div id="editSetNumField">
-          <div class="field" style="margin-bottom:10px;"><input type="text" id="editSet" placeholder="Expansión (ej. Escarlata y Púrpura)" list="setOptions" style="width:100%;"></div>
-          <div class="row" style="margin-bottom:10px;">
-            <input type="number" id="editNum" placeholder="Núm. de carta (ej. 25)" style="flex:1;">
-            <input type="number" id="editTotal" placeholder="Total del set (ej. 198)" style="flex:1;">
+          <div class="field" style="margin-bottom:10px;">
+            <span class="field-label">Expansión</span>
+            <input type="text" id="editSet" placeholder="Expansión (ej. Escarlata y Púrpura)" list="setOptions" style="width:100%;">
+          </div>
+          <div class="row" style="display:flex;gap:8px;margin-bottom:10px;">
+            <div class="field-mini"><span class="field-label">Núm. de carta</span><input type="number" id="editNum" placeholder="ej. 25" style="width:100%;"></div>
+            <div class="field-mini"><span class="field-label">Total del set</span><input type="number" id="editTotal" placeholder="ej. 198" style="width:100%;"></div>
           </div>
         </div>
-        <div class="row" style="margin-bottom:10px;">
-          <input type="number" id="editPrice" placeholder="Precio (MXN)" style="flex:1;">
-          <input type="number" id="editStock" placeholder="Stock" style="flex:1;">
+        <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
+          <div class="field-mini"><span class="field-label">Precio (MXN)</span><input type="number" id="editPrice" placeholder="Precio (MXN)" style="width:100%;"></div>
+          <div class="field-mini"><span class="field-label">Stock</span><input type="number" id="editStock" placeholder="Stock" style="width:100%;"></div>
         </div>
-        <div class="row" style="margin-bottom:10px;">
-          <input type="text" id="editRarity" placeholder="Rareza (ej. Holo Rare)" list="rarityOptions" style="flex:1;">
-          <select id="editLanguage" style="flex:1;">
-            <option value="Inglés">🇬🇧 Inglés</option>
-            <option value="Japonés">🇯🇵 Japonés</option>
-            <option value="Chino">🇨🇳 Chino</option>
-          </select>
+        <div class="price-suggest-row">
+          <button type="button" class="price-suggest-btn" id="editSuggestPriceBtn">💲 Sugerir precio</button>
+          <span class="price-suggest-hint" id="editSuggestPriceHint"></span>
+        </div>
+        <div class="row" style="display:flex;gap:8px;margin-bottom:10px;margin-top:6px;">
+          <div class="field-mini"><span class="field-label">Rareza</span><input type="text" id="editRarity" placeholder="ej. Holo Rare" list="rarityOptions" style="width:100%;"></div>
+          <div class="field-mini">
+            <span class="field-label">Idioma</span>
+            <select id="editLanguage" style="width:100%;">
+              <option value="Inglés">🇬🇧 Inglés</option>
+              <option value="Japonés">🇯🇵 Japonés</option>
+              <option value="Chino">🇨🇳 Chino</option>
+            </select>
+          </div>
         </div>
         <datalist id="rarityOptions"></datalist>
         <datalist id="setOptions"></datalist>
@@ -3723,6 +3758,63 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   let bulkFxLoaded = false;
   let bulkFoundCards = [];
 
+  // ---- Sugerencia de precio (TCGplayer + acceso directo a eBay) para el formulario de Agregar y el de Editar ----
+  // reutiliza el mismo endpoint /cards-by-set de "Inventario rápido": busca la carta por expansión+número
+  // (o por nombre si no hay número) y ofrece el mejor precio de TCGplayer que encuentre, convertido a MXN.
+  function ebaySearchUrl(name, setName){
+    const q = [name, setName].filter(Boolean).join(" ");
+    return `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(q)}`;
+  }
+
+  async function suggestPriceFor(mode){
+    const ids = mode === "add"
+      ? { name: "adminName", set: "adminSet", num: "adminNum", price: "adminPrice", hint: "adminSuggestPriceHint", btn: "adminSuggestPriceBtn" }
+      : { name: "editName", set: "editSet", num: "editNum", price: "editPrice", hint: "editSuggestPriceHint", btn: "editSuggestPriceBtn" };
+    const name = (document.getElementById(ids.name).value || "").trim();
+    const setName = (document.getElementById(ids.set).value || "").trim();
+    const numEl = document.getElementById(ids.num);
+    const num = numEl ? numEl.value.trim() : "";
+    const hint = document.getElementById(ids.hint);
+    const btn = document.getElementById(ids.btn);
+    const ebayLink = `<a href="${ebaySearchUrl(name, setName)}" target="_blank" rel="noopener">buscar en eBay</a>`;
+    if (!setName){ hint.innerHTML = "Escribe primero la expansión para poder buscar un precio de referencia."; return; }
+    btn.disabled = true;
+    hint.textContent = "Buscando precio de referencia…";
+    try {
+      if (!bulkFxLoaded){
+        try {
+          const fxRes = await fetch(`${WORKER_URL}/fx-rate`, { cache: "no-store" });
+          const fxData = await fxRes.json();
+          if (fxData.rate){ bulkFxRate = fxData.rate; bulkFxLoaded = true; }
+        } catch {}
+      }
+      const res = await fetch(`${WORKER_URL}/cards-by-set?set=${encodeURIComponent(setName)}`, { cache: "no-store" });
+      const data = await res.json();
+      const cards = data.cards || [];
+      let match = null;
+      if (num) match = cards.find(c => parseInt(c.number, 10) === parseInt(num, 10));
+      if (!match && name) match = cards.find(c => c.name.toLowerCase() === name.toLowerCase());
+      if (!match && name) match = cards.find(c => c.name.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(c.name.toLowerCase()));
+      const usd = match ? bestPrice(match.tcgplayer) : null;
+      if (usd){
+        const mxn = Math.round(usd * bulkFxRate);
+        document.getElementById(ids.price).value = mxn;
+        hint.innerHTML = `💲 Sugerido: <b>$${mxn} MXN</b> (TCGplayer ~$${usd.toFixed(2)} USD${bulkFxLoaded ? "" : ", tipo de cambio de respaldo"}) · ${ebayLink} para comparar`;
+      } else if (cards.length && !match) {
+        hint.innerHTML = `No encontré esa carta exacta dentro de "${setName}" — revisa el nombre/número, o ${ebayLink} para comparar manualmente.`;
+      } else {
+        hint.innerHTML = `Sin precio de referencia todavía en TCGplayer (normal en piezas muy nuevas, o si el nombre de la expansión no coincide exacto con TCGplayer). Puedes ${ebayLink} para comparar precios manualmente.`;
+      }
+    } catch (err) {
+      hint.innerHTML = `No se pudo consultar el precio de referencia ahora. Puedes ${ebayLink} para comparar manualmente.`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById("adminSuggestPriceBtn").addEventListener("click", () => suggestPriceFor("add"));
+  document.getElementById("editSuggestPriceBtn").addEventListener("click", () => suggestPriceFor("edit"));
+
   function bulkCardAlreadyOwned(card){
     const num = parseInt(card.number, 10) || 0;
     return CARDS.some(c => (c.set || "").toLowerCase() === (card.set.name || "").toLowerCase()
@@ -3752,7 +3844,9 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
             <input type="number" class="bulk-price" data-i="${i}" placeholder="Precio MXN" value="${suggested || ''}" style="flex:1;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
             <input type="number" class="bulk-stock" data-i="${i}" placeholder="Stock" value="1" style="width:70px;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
           </div>
-          ${usd ? `<div style="font-size:10px;color:var(--slate);margin-top:2px;">ref. TCGplayer: ~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ' (tipo de cambio de respaldo, no el del día)'}</div>` : ''}
+          <div style="font-size:10px;color:var(--slate);margin-top:2px;">${usd
+            ? `ref. TCGplayer: ~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ' (tipo de cambio de respaldo, no el del día)'}`
+            : `sin precio de referencia todavía (normal en piezas muy nuevas) · <a href="${ebaySearchUrl(card.name, card.set.name)}" target="_blank" rel="noopener" style="color:var(--foil-bright);">buscar en eBay</a>`}</div>
         </div>
       </div>`;
     }).join("");
