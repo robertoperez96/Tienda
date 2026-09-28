@@ -457,10 +457,27 @@
     body[data-view="binder-3x3"] #filterBackdrop.open{display:block;}
     /* la "página del binder": 3×3, cartas grandes, ocupando casi toda la pantalla — pensado
        para exhibirse en una tablet de ~13" en vertical, aunque escala igual en cualquier ancho */
-    body[data-view="binder-3x3"] #cardGrid{grid-template-columns:repeat(3,1fr);gap:22px;max-width:1100px;margin:0 auto;}
-    body[data-view="binder-3x3"] .card-name{font-size:15px;}
-    body[data-view="binder-3x3"] .card-price{font-size:19px;}
-    body[data-view="binder-3x3"] .card-set{font-size:12px;}
+    body[data-view="binder-3x3"] #cardGrid{grid-template-columns:repeat(3,1fr);gap:7px;max-width:1200px;margin:0 auto;}
+    /* recuadros de info al mínimo — solo expansión/número, nombre y precio. Todo lo demás
+       (rareza, idioma, condición) se sigue viendo, pero solo al dar clic sobre la imagen
+       (openZoom ya lo muestra completo), para que la carta sea lo único que ocupe espacio */
+    body[data-view="binder-3x3"] .card-art{padding:4px;}
+    body[data-view="binder-3x3"] .card-info{padding:4px 6px 5px;}
+    body[data-view="binder-3x3"] .card-set{font-size:8px;margin-bottom:1px;}
+    body[data-view="binder-3x3"] .card-set span:last-child{white-space:nowrap;}
+    body[data-view="binder-3x3"] .card-name{font-size:10.5px;margin:0 0 2px;-webkit-line-clamp:1;line-clamp:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    body[data-view="binder-3x3"] .card-meta{display:none;}
+    body[data-view="binder-3x3"] .card-price-row{align-items:center;justify-content:flex-start;}
+    body[data-view="binder-3x3"] .card-price{font-size:12.5px;}
+    body[data-view="binder-3x3"] .card-cond{display:none;}
+    body[data-view="binder-3x3"] .add-to-cart-btn{padding:4px;font-size:8.5px;margin-top:4px;gap:3px;}
+    body[data-view="binder-3x3"] .add-to-cart-btn svg{width:9px;height:9px;}
+    body[data-view="binder-3x3"] .qty-stepper{margin-top:4px;padding:2px;}
+    body[data-view="binder-3x3"] .qty-stepper button{width:18px;height:18px;font-size:11px;}
+    body[data-view="binder-3x3"] .qty-stepper span{font-size:9.5px;}
+    body[data-view="binder-3x3"] .card-corner-controls{top:4px;right:4px;gap:3px;}
+    body[data-view="binder-3x3"] .card-select-dot{width:18px;height:18px;}
+    body[data-view="binder-3x3"] .card-select-dot svg{width:9px;height:9px;}
   }
 
   /* columnas por modo, en celular/tablet angosta (≤900px) */
@@ -3070,6 +3087,17 @@ const closeFilters = () => { filtersPanel.classList.remove("open"); filterBackdr
 document.getElementById("filterToggle").addEventListener("click", openFilters);
 document.getElementById("filterClose").addEventListener("click", closeFilters);
 filterBackdrop.addEventListener("click", closeFilters);
+// el logo de PokéBaúl (arriba a la izquierda, siempre visible por ser parte del header fijo)
+// también abre los filtros, en cualquier vista/formato del catálogo de cartas (4/3/binder/celular)
+// — así no hace falta un botón aparte ni subir hasta la barra de herramientas. En las otras
+// secciones (acrílicos, juguetes, PCJP, que no tienen filtros) el logo se comporta normal.
+document.querySelector("a.brand").addEventListener("click", (ev) => {
+  const cardsViewActive = document.getElementById("cardsView").style.display !== "none";
+  if (cardsViewActive){
+    ev.preventDefault();
+    openFilters();
+  }
+});
 
 const drawer = document.getElementById("drawer");
 const drawerBackdrop = document.getElementById("drawerBackdrop");
@@ -3691,6 +3719,10 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       const data = await res.json();
       if (data.ok){
         status.textContent = "✓ Listo — analíticas reiniciadas. Como ya entraste al panel admin desde este dispositivo, tus clics de aquí ya no se cuentan; entra al panel una vez desde tus otros dispositivos (cel, laptop, etc.) y quedan igual de excluidos para siempre, sin necesitar ningún link especial.";
+        // marca "desde cuándo" para poder calcular más abajo un promedio de visitas por día
+        // (Cloudflare KV gratis solo permite 1,000 escrituras al día — con esto te avisamos
+        // en el panel cuando te vayas acercando, para migrar a tiempo a Analytics Engine)
+        localStorage.setItem("vitrina_analytics_reset_at", String(Date.now()));
         await loadAnalytics();
       } else {
         status.textContent = data.error || "No se pudo reiniciar.";
@@ -3999,6 +4031,28 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       // sola vez por visita (no por cada carta que se ve), así que sumarlos da el total de
       // visitas reales — no hace falta rastrear nada nuevo para esto.
       const totalSessions = sumCounts(byType.device_type) || sumCounts(byType.traffic_source);
+
+      // ---- NUEVO: aviso de cuándo migrar a Workers Analytics Engine — el plan gratis de KV
+      // (donde se guarda todo esto) solo permite 1,000 escrituras al día, y cada visita gasta
+      // entre 5 y 8. Si no hay fecha de referencia todavía (primera vez que corre este código),
+      // la ponemos ahora mismo para empezar a medir el promedio de visitas/día desde hoy.
+      if (!localStorage.getItem("vitrina_analytics_reset_at")) {
+        localStorage.setItem("vitrina_analytics_reset_at", String(Date.now()));
+      }
+      const measureSince = parseInt(localStorage.getItem("vitrina_analytics_reset_at")) || Date.now();
+      const daysMeasured = Math.max(1, Math.round((Date.now() - measureSince) / 86400000));
+      const avgSessionsPerDay = totalSessions ? Math.round(totalSessions / daysMeasured) : 0;
+      let quotaHtml = "";
+      if (totalSessions && daysMeasured >= 3) {
+        let level = "bien", color = "var(--foil-bright)", msg = "vas bien, sin riesgo de quedarte sin datos.";
+        if (avgSessionsPerDay >= 150) { level = "critico"; color = "var(--ember-bright)"; msg = "⚠️ escríbele a Claude para migrar YA a Analytics Engine — podrías estar perdiendo datos algunos días."; }
+        else if (avgSessionsPerDay >= 80) { level = "cerca"; color = "#e8b84a"; msg = "ya vas acercándote al límite gratis de Cloudflare — cuando puedas, avísale a Claude para preparar la migración a Analytics Engine antes de que falte."; }
+        quotaHtml = `
+          <div style="margin-bottom:16px;font-size:12px;color:var(--cream-dim);padding:8px 10px;border-radius:8px;border:1px solid var(--line);">
+            📶 Promedio de <b style="color:${color};">${avgSessionsPerDay} visitas/día</b> (últimos ${daysMeasured} días) — ${msg}
+          </div>
+        `;
+      }
       const funnelHtml = (totalViews || totalSessions) ? `
         <div style="margin-bottom:18px;padding:12px;border-radius:10px;border:1px dashed var(--foil-dim);">
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:8px;">📊 Resumen general</div>
@@ -4097,7 +4151,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         </div>
       ` : "";
 
-      body.innerHTML = funnelHtml + utmHtml + priceInsightHtml + trendingHtml +
+      body.innerHTML = quotaHtml + funnelHtml + utmHtml + priceInsightHtml + trendingHtml +
         categoryConversionHtml +
         section("👀 Se ven mucho pero nadie las agrega al carrito (candidatas a bajar precio o mejorar foto/descripción)", interestNoConversion, nameFor) +
         section("👁️ Más vistos", byType.view, nameFor) +
