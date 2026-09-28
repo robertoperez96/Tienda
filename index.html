@@ -2975,7 +2975,10 @@ document.getElementById("searchInput").addEventListener("input", e => {
   state.query = e.target.value; resetAndRender();
   clearTimeout(searchTrackTimer);
   const term = e.target.value.trim();
-  if (term.length >= 3) searchTrackTimer = setTimeout(() => trackEvent("search", term.toLowerCase()), 900);
+  if (term.length >= 3) searchTrackTimer = setTimeout(() => {
+    const hasResults = CARDS.some(matches);
+    trackEvent(hasResults ? "search" : "search_no_results", term.toLowerCase());
+  }, 900);
 });
 document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; resetAndRender(); });
 
@@ -3532,9 +3535,39 @@ if (!sessionStorage.getItem("vitrina_session_tracked")){
   if (ref.includes("wa.me") || ref.includes("whatsapp")) source = "whatsapp";
   else if (ref.includes("instagram")) source = "instagram";
   else if (ref.includes("facebook")) source = "facebook";
+  else if (ref.includes("tiktok")) source = "tiktok";
   else if (ref.includes("google")) source = "google";
   else if (ref) source = "otro-sitio";
   trackEvent("traffic_source", source);
+
+  // nuevo vs recurrente: una marca permanente en localStorage — la primera vez que un
+  // dispositivo entra queda "nuevo" para siempre en adelante, sin importar cuántas veces
+  // cierre y vuelva a abrir el navegador
+  const isReturningVisitor = localStorage.getItem("vitrina_visitor_seen") === "1";
+  trackEvent("visitor_type", isReturningVisitor ? "recurrente" : "nuevo");
+  if (!isReturningVisitor) localStorage.setItem("vitrina_visitor_seen", "1");
+
+  // en qué momento llega la gente — útil para saber mejor horario/día para publicar o pautar
+  const now = new Date();
+  const hour = now.getHours();
+  const timeBucket = hour < 6 ? "madrugada" : hour < 12 ? "mañana" : hour < 19 ? "tarde" : "noche";
+  trackEvent("time_of_day", timeBucket);
+  const dayNames = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  trackEvent("day_of_week", dayNames[now.getDay()]);
+
+  // Campañas UTM: cuando compartas un link con ?utm_source=instagram&utm_medium=paid&utm_campaign=nombre
+  // (o el que sea), aquí se guarda para poder ver cuántas visitas y cuántos "Apartar por WhatsApp"
+  // generó cada campaña — con eso y lo que gastaste en el anuncio, tú mismo puedes sacar el costo
+  // por resultado. Se guarda también en esta sesión para poder atribuir la conversión más abajo.
+  const params = new URLSearchParams(location.search);
+  const utmSource = params.get("utm_source");
+  const utmMedium = params.get("utm_medium");
+  const utmCampaign = params.get("utm_campaign");
+  if (utmSource || utmCampaign){
+    const campaignKey = `${utmSource || "-"} / ${utmMedium || "-"} / ${utmCampaign || "-"}`;
+    trackEvent("utm_campaign", campaignKey);
+    sessionStorage.setItem("vitrina_utm_campaign", campaignKey);
+  }
 }
 document.getElementById("whatsappBtn").addEventListener("click", () => {
   trackEvent("whatsapp_click", "carrito");
@@ -3543,6 +3576,8 @@ document.getElementById("whatsappBtn").addEventListener("click", () => {
   const total = entries.reduce((s,e)=>s+e.card.price*e.qty,0);
   const bucket = total < 300 ? "0-300" : total < 800 ? "300-800" : total < 1500 ? "800-1500" : total < 3000 ? "1500-3000" : "3000+";
   trackEvent("cart_value_bucket", bucket);
+  const attributedCampaign = sessionStorage.getItem("vitrina_utm_campaign");
+  if (attributedCampaign) trackEvent("utm_conversion", attributedCampaign);
 });
 
 const whatsappFloatBtn = document.getElementById("whatsappFloat");
@@ -3960,15 +3995,41 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       const totalWhatsapp = sumCounts(byType.whatsapp_click);
       const viewedIds = new Set((byType.view || []).map(e => e.key));
       const catalogCoverage = CARDS.length ? Math.round((viewedIds.size / CARDS.length) * 100) : 0;
-      const funnelHtml = totalViews ? `
+      // "sesiones" = visitas únicas al sitio: device_type y traffic_source ya se registran una
+      // sola vez por visita (no por cada carta que se ve), así que sumarlos da el total de
+      // visitas reales — no hace falta rastrear nada nuevo para esto.
+      const totalSessions = sumCounts(byType.device_type) || sumCounts(byType.traffic_source);
+      const funnelHtml = (totalViews || totalSessions) ? `
         <div style="margin-bottom:18px;padding:12px;border-radius:10px;border:1px dashed var(--foil-dim);">
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:8px;">📊 Resumen general</div>
+          ${totalSessions ? `<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🧭 Visitas totales al sitio</span><b>${totalSessions}</b></div>` : ""}
           <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>👁️ Vistas de producto</span><b>${totalViews}</b></div>
           <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🛒 Agregados al carrito</span><b>${totalAddCart} <span style="color:var(--slate);font-weight:400;">(${totalViews ? Math.round(totalAddCart / totalViews * 100) : 0}% de las vistas)</span></b></div>
           <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>💬 Clics en "Apartar por WhatsApp"</span><b>${totalWhatsapp} <span style="color:var(--slate);font-weight:400;">(${totalAddCart ? Math.round(totalWhatsapp / totalAddCart * 100) : 0}% de los que agregaron)</span></b></div>
+          ${totalSessions ? `<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>✅ Tasa de conversión general</span><b>${Math.round(totalWhatsapp / totalSessions * 100)}% <span style="color:var(--slate);font-weight:400;">(de cada 100 visitas, cuántas terminan pidiendo por WhatsApp)</span></b></div>` : ""}
           <div style="display:flex;justify-content:space-between;padding:8px 0 0;margin-top:4px;border-top:1px solid var(--line);"><span>📦 Cobertura del catálogo</span><b>${catalogCoverage}% <span style="color:var(--slate);font-weight:400;">(${viewedIds.size} de ${CARDS.length} piezas con al menos 1 vista)</span></b></div>
         </div>
       ` : "";
+
+      // ---- NUEVO: rendimiento por campaña UTM (para cuando publicites con links marcados) ----
+      const utmVisitsMap = {};
+      (byType.utm_campaign || []).forEach(e => { utmVisitsMap[e.key] = e.count; });
+      const utmConversionsMap = {};
+      (byType.utm_conversion || []).forEach(e => { utmConversionsMap[e.key] = e.count; });
+      const utmKeys = [...new Set([...Object.keys(utmVisitsMap), ...Object.keys(utmConversionsMap)])];
+      const utmList = utmKeys
+        .map(k => ({ key: k, visits: utmVisitsMap[k] || 0, conversions: utmConversionsMap[k] || 0 }))
+        .sort((a, b) => b.visits - a.visits);
+      const utmHtml = utmList.length ? `
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:6px;">🎯 Campañas (formato: fuente / medio / campaña) — visitas y pedidos por WhatsApp que generó cada link</div>
+          ${utmList.map(u => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);gap:8px;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${u.key}">${u.key}</span><b style="color:var(--foil-bright);flex-shrink:0;">${u.visits} vis · ${u.conversions} pedidos${u.visits ? ` (${Math.round(u.conversions / u.visits * 100)}%)` : ""}</b></div>`).join("")}
+        </div>
+      ` : `
+        <div style="margin-bottom:16px;font-size:12.5px;color:var(--cream-dim);">
+          🎯 Todavía no hay campañas con seguimiento. Cuando compartas un link para publicidad, agrégale al final <code>?utm_source=instagram&amp;utm_medium=paid&amp;utm_campaign=nombre-que-quieras</code> (cambia "instagram" y "nombre-que-quieras" según el anuncio) y aquí vas a poder ver cuántas visitas y pedidos generó cada uno.
+        </div>
+      `;
 
       // ---- NUEVO: piezas que se ven mucho pero nadie las agrega al carrito — candidatas a
       // revisar precio, fotos o descripción, porque el interés ya existe y no se concreta ----
@@ -4036,7 +4097,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         </div>
       ` : "";
 
-      body.innerHTML = funnelHtml + priceInsightHtml + trendingHtml +
+      body.innerHTML = funnelHtml + utmHtml + priceInsightHtml + trendingHtml +
         categoryConversionHtml +
         section("👀 Se ven mucho pero nadie las agrega al carrito (candidatas a bajar precio o mejorar foto/descripción)", interestNoConversion, nameFor) +
         section("👁️ Más vistos", byType.view, nameFor) +
@@ -4047,6 +4108,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         section("💰 Valor típico del carrito al pedir", byType.cart_value_bucket, bucketLabelFn) +
         section("📍 Método de entrega preferido", byType.delivery_choice, deliveryLabelFn) +
         section("🔍 Qué busca la gente", groupSimilarSearches(byType.search), k => `"${k}"`) +
+        section("😕 Búsquedas SIN resultado (oportunidad: piezas que te piden y no tienes)", groupSimilarSearches(byType.search_no_results), k => `"${k}"`) +
         section("💵 Rango de precio que buscan", byType.price_range_search, k => `$${k.replace("-"," a $")}`) +
         section("🏷️ Rareza más filtrada", byType.filter_rarity, k => k) +
         section("🩺 Condición más filtrada", byType.filter_condition, k => k) +
@@ -4054,6 +4116,9 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         section("📂 Secciones más visitadas", byType.category_view, k => ({cartas:"Catálogo",juguetes:"Coleccionables y Juguetes",acrilicos:"Acrílicos",pcjp:"Exclusivos Pokémon Center JP"}[k] || k)) +
         section("📱 Dispositivo", byType.device_type, k => k === "movil" ? "Celular" : "Escritorio") +
         section("🔗 De dónde llega la gente", byType.traffic_source, k => k) +
+        section("🆕 Nuevo vs recurrente", byType.visitor_type, k => k === "nuevo" ? "Primera visita" : "Ya había entrado antes") +
+        section("🕐 Hora del día en que llegan", byType.time_of_day, k => k) +
+        section("📅 Día de la semana en que llegan", byType.day_of_week, k => k) +
         section("🎁 Uso de cupones", byType.coupon_used, k => `${k} usado`);
 
       const applyBtn = document.getElementById("applyTrendingBtn");
