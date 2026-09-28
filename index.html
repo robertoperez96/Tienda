@@ -371,11 +371,11 @@
   .explorer-toggle:hover{filter:brightness(1.08);}
   .explorer-toggle:active{transform:translateY(1px);}
   .results-count{font-size:13px;color:var(--slate);font-family:var(--font-mono);white-space:nowrap;}
-  .catalog-layout{display:grid;grid-template-columns:240px 1fr;gap:26px;align-items:flex-start;}
+  .catalog-layout{display:grid;grid-template-columns:206px 1fr;gap:20px;align-items:flex-start;}
   @media (max-width:900px){.catalog-layout{grid-template-columns:1fr;}}
   .filter-backdrop{display:none;}
-  aside.filters{background:var(--ink-2);border:1px solid var(--line);border-radius:var(--radius-m);padding:18px;position:sticky;top:92px;max-height:calc(100vh - 112px);overflow-y:auto;}
-  .filter-group{padding:14px 0;border-bottom:1px solid var(--line);}
+  aside.filters{background:var(--ink-2);border:1px solid var(--line);border-radius:var(--radius-m);padding:14px;position:sticky;top:92px;max-height:calc(100vh - 112px);overflow-y:auto;}
+  .filter-group{padding:11px 0;border-bottom:1px solid var(--line);}
   .filter-group:first-child{padding-top:0;}
   .filter-group:last-child{border-bottom:none;padding-bottom:0;}
   .filter-group h4{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--slate);margin:0 0 10px;font-weight:600;}
@@ -387,12 +387,12 @@
   .filter-collapse:not([open]) summary{margin-bottom:0;}
   .filter-collapse summary:hover{color:var(--cream);}
   .chip-row{display:flex;flex-wrap:wrap;gap:6px;}
-  .chip{font-size:12.5px;padding:6px 10px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;color:var(--cream-dim);cursor:pointer;transition:all .12s ease;font-family:var(--font-body);display:inline-flex;align-items:center;gap:6px;}
+  .chip{font-size:11.5px;padding:5px 9px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;color:var(--cream-dim);cursor:pointer;transition:all .12s ease;font-family:var(--font-body);display:inline-flex;align-items:center;gap:6px;}
   .chip-icon{width:14px;height:14px;object-fit:contain;flex-shrink:0;filter:brightness(0) invert(1);opacity:.75;}
   .chip.active .chip-icon{opacity:1;}
   .chip:hover{border-color:var(--foil-dim);color:var(--cream);}
   .chip.active{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);font-weight:600;}
-  .check-row{display:flex;align-items:center;gap:9px;font-size:13.5px;padding:7px 9px;margin:0 -9px;border-radius:8px;cursor:pointer;color:var(--cream-dim);transition:background .12s ease,color .12s ease;}
+  .check-row{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 8px;margin:0 -8px;border-radius:8px;cursor:pointer;color:var(--cream-dim);transition:background .12s ease,color .12s ease;}
   .check-row input{accent-color:var(--foil);width:14px;height:14px;flex-shrink:0;}
   .check-row:hover{color:var(--cream);background:rgba(255,255,255,.04);}
   .check-row.row-checked{color:var(--foil-bright);background:rgba(201,162,39,.10);}
@@ -431,6 +431,48 @@
     .admin-edit-btn svg{width:10px;height:10px;}
   }
   @media (max-width:420px){.grid{grid-template-columns:1fr 1fr;}}
+
+  /* ---- "Ver como": modos de vista elegibles del catálogo principal de cartas ---- */
+  .view-mode-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 14px;}
+  .view-mode-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--slate);}
+  .view-mode-options{display:flex;gap:6px;flex-wrap:wrap;}
+  .view-mode-btn{font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;color:var(--cream-dim);cursor:pointer;font-family:var(--font-body);white-space:nowrap;}
+  .view-mode-btn:hover{border-color:var(--foil-dim);color:var(--cream);}
+  .view-mode-btn.active{background:var(--foil-dim);border-color:var(--foil);color:var(--foil-bright);font-weight:600;}
+  .view-mode-mobile{display:none;}
+  @media (max-width:900px){
+    .view-mode-desktop{display:none;}
+    .view-mode-mobile{display:flex;}
+  }
+
+  /* columnas por modo, en escritorio (>900px) */
+  body[data-view="grid-3"] #cardGrid{grid-template-columns:repeat(3,1fr);}
+  @media (min-width:901px){
+    body[data-view="binder-3x3"] .filter-toggle{display:flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--line-strong);color:var(--cream);border-radius:9px;padding:9px 14px;cursor:pointer;font-size:13.5px;font-weight:500;}
+    body[data-view="binder-3x3"] .catalog-layout{grid-template-columns:1fr;}
+    body[data-view="binder-3x3"] aside.filters{position:fixed;top:0;left:0;height:100dvh;width:min(320px,84vw);z-index:90;transform:translateX(-100%);transition:transform .25s ease;border-radius:0;overflow-y:auto;border-right:1px solid var(--line-strong);}
+    body[data-view="binder-3x3"] aside.filters.open{transform:translateX(0);}
+    body[data-view="binder-3x3"] .filter-close{display:flex;}
+    body[data-view="binder-3x3"] #filterBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:85;}
+    body[data-view="binder-3x3"] #filterBackdrop.open{display:block;}
+    /* la "página del binder": 3×3, cartas grandes, ocupando casi toda la pantalla — pensado
+       para exhibirse en una tablet de ~13" en vertical, aunque escala igual en cualquier ancho */
+    body[data-view="binder-3x3"] #cardGrid{grid-template-columns:repeat(3,1fr);gap:22px;max-width:1100px;margin:0 auto;}
+    body[data-view="binder-3x3"] .card-name{font-size:15px;}
+    body[data-view="binder-3x3"] .card-price{font-size:19px;}
+    body[data-view="binder-3x3"] .card-set{font-size:12px;}
+  }
+
+  /* columnas por modo, en celular/tablet angosta (≤900px) */
+  @media (max-width:900px){
+    body[data-view="mobile-1"] #cardGrid{grid-template-columns:1fr;}
+    body[data-view="mobile-1"] .card-name{font-size:15px;}
+    body[data-view="mobile-1"] .card-price{font-size:18px;}
+    body[data-view="mobile-2"] #cardGrid{grid-template-columns:repeat(2,1fr);}
+    body[data-view="mobile-3"] #cardGrid{grid-template-columns:repeat(3,1fr);gap:7px;}
+    body[data-view="mobile-3"] .card-name{font-size:10.5px;}
+    body[data-view="mobile-3"] .card-price{font-size:12.5px;}
+  }
   .card{background:var(--ink-3);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;position:relative;box-shadow:var(--shadow-card);opacity:0;transform:translateY(14px);transition:border-color .15s,transform .15s ease;}
   .card.in-view{animation:card-in .5s ease forwards;}
   @keyframes card-in{to{opacity:1;transform:translateY(0);}}
@@ -774,6 +816,11 @@
   .zoom-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
   @media (max-width:680px){ .zoom-modal{ grid-template-columns:1fr; } }
 
+  /* ---- vista ampliada de una sola foto (clic en la miniatura de "Inventario rápido") ---- */
+  #imagePreviewOverlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
+  #imagePreviewOverlay.open{display:flex;}
+  #imagePreviewOverlay img{max-width:min(92vw,520px);max-height:88vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);object-fit:contain;}
+
   /* ---- resumen de pedido (abre desde el link de WhatsApp) ---- */
   #orderBackdrop{z-index:105;}
   #setExplorerBackdrop{z-index:107;}
@@ -996,6 +1043,20 @@
         <span class="results-count" id="resultsCount">— piezas</span>
       </div>
 
+      <div class="view-mode-bar" id="viewModeBar">
+        <span class="view-mode-label">Ver como</span>
+        <div class="view-mode-options view-mode-desktop">
+          <button type="button" class="view-mode-btn" data-view="grid-4">▦ 4 por fila</button>
+          <button type="button" class="view-mode-btn" data-view="grid-3">▦ 3 por fila</button>
+          <button type="button" class="view-mode-btn" data-view="binder-3x3">📖 Binder 3×3</button>
+        </div>
+        <div class="view-mode-options view-mode-mobile">
+          <button type="button" class="view-mode-btn" data-view="mobile-1">▭ 1×1</button>
+          <button type="button" class="view-mode-btn" data-view="mobile-2">▦ 2×2</button>
+          <button type="button" class="view-mode-btn" data-view="mobile-3">▦ 3×3</button>
+        </div>
+      </div>
+
       <div class="catalog-layout">
         <div class="filter-backdrop" id="filterBackdrop"></div>
         <aside class="filters" id="filtersPanel">
@@ -1149,7 +1210,7 @@
     <div class="wrap">
       <div class="community-box">
         <div><h3>Entérate antes que nadie</h3><p>Restocks, precios especiales y piezas que ni llegan al catálogo se anuncian primero ahí.</p></div>
-        <a href="https://chat.whatsapp.com/" target="_blank" rel="noopener" class="btn btn-foil">💬 Unirme a la Comunidad</a>
+        <a href="https://chat.whatsapp.com/" target="_blank" rel="noopener" class="btn btn-foil" id="communityLink">💬 Unirme a la Comunidad</a>
       </div>
     </div>
   </section>
@@ -1190,6 +1251,7 @@
       <button type="button" class="pay-opt" id="adminTabPrices" style="flex:1;">💲 Precios</button>
       <button type="button" class="pay-opt" id="adminTabCoupons" style="flex:1;">🎟️ Cupones</button>
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
+      <button type="button" class="pay-opt" id="adminTabConfig" style="flex:1;">⚙️ Config</button>
     </div>
 
     <div id="adminAddForm">
@@ -1423,7 +1485,25 @@
 
     <div id="adminAnalyticsPanel" style="display:none;">
       <div class="order-head"><span class="eyebrow">Solo tú lo ves</span><h3>Qué le interesa a tu gente</h3></div>
+      <button type="button" id="analyticsResetBtn" style="background:none;border:1px solid var(--line-strong);color:var(--slate);border-radius:7px;padding:6px 10px;font-size:11px;cursor:pointer;margin:-6px 0 12px;">🗑️ Reiniciar analíticas (borra todo lo guardado hasta hoy)</button>
+      <p class="promo-status" id="analyticsResetStatus"></p>
       <div id="adminAnalyticsBody" style="font-size:13px;color:var(--cream-dim);">Cargando…</div>
+    </div>
+
+    <div id="adminConfigPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Sin tocar código</span><h3>Configuración del sitio</h3></div>
+      <div class="field" style="margin-bottom:8px;">
+        <span class="field-label">Número de WhatsApp del carrito</span>
+        <input type="text" id="configWhatsappPhone" placeholder="Ej. 528111707319 (con código de país, sin espacios ni +)" style="width:100%;">
+      </div>
+      <p style="font-size:11px;color:var(--slate);margin:0 0 14px;">Es el número al que llegan los "Apartar por WhatsApp" del carrito y el botón flotante. Dejarlo vacío y guardar lo regresa al que está escrito en el código.</p>
+      <div class="field" style="margin-bottom:8px;">
+        <span class="field-label">Enlace de tu Comunidad de WhatsApp</span>
+        <input type="text" id="configCommunityUrl" placeholder="Ej. https://chat.whatsapp.com/AbCdEfGhIjK" style="width:100%;">
+      </div>
+      <p style="font-size:11px;color:var(--slate);margin:0 0 14px;">Es a donde lleva el botón "💬 Unirme a la Comunidad" del sitio. En cuanto crees tu comunidad de WhatsApp, copia aquí su enlace de invitación — sin esto, el botón usa un enlace genérico que no lleva a ningún lado en concreto.</p>
+      <button type="button" class="btn btn-foil" id="configSaveBtn" style="width:100%;justify-content:center;">Guardar configuración</button>
+      <p class="promo-status" id="configSaveStatus"></p>
     </div>
   </div>
 </div>
@@ -1586,6 +1666,9 @@
   </div>
 </div>
 
+<!-- vista ampliada de una sola foto (usado en "Inventario rápido" del panel admin) -->
+<div id="imagePreviewOverlay"><img id="imagePreviewImg" src="" alt="Vista ampliada"></div>
+
 <script>
 /* cards-data.js pesa varios MB (trae fotos propias incrustadas) y GitHub Pages/los
    navegadores lo cachean de forma agresiva. Si esa descarga se interrumpe una sola vez
@@ -1620,7 +1703,7 @@ if (!window.CARDS || !window.CARDS.length) {
    Para agregar/editar piezas usa admin.html, NO edites este archivo.
    Solo cambia WHATSAPP_PHONE por tu número real.
    ===================================================================== */
-const WHATSAPP_PHONE = "528111707319"; // <-- tu número real
+let WHATSAPP_PHONE = "528111707319"; // <-- tu número real (puede cambiarse en vivo desde el panel admin → "⚙️ Config", sin tocar este archivo)
 const WORKER_URL = "https://pokebaul-backend.roberto-perezc96.workers.dev"; // Worker de PokéBaúl
 const MERCADOPAGO_ENABLED = false; // <-- ponlo en true cuando quieras activar el cobro real de nuevo
 const BANK_INFO = { // <-- reemplaza con tus datos reales para transferencia
@@ -1649,6 +1732,23 @@ const CHECK_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.
 const HEART_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-7.5-4.6-10-9.3C.5 8 2 4.5 5.5 4c2-.3 3.8.7 4.9 2.3l1.6 2.2 1.6-2.2C14.7 4.7 16.5 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.5 4.7-10 9.3-10 9.3z" fill="currentColor"/></svg>`;
 const EDIT_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4.5L15.5 5 19 8.5 8.5 19 4 20z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function isAdminSession(){ return !!sessionStorage.getItem("vitrina_admin_pass"); }
+// una vez que este dispositivo entró al panel admin (aunque haya sido hace días y ya haya
+// cerrado el navegador), se marca para siempre en localStorage — así tus propios clics en tu
+// laptop/celular dejan de contarse en las analíticas SOLO por haber entrado al panel una vez,
+// sin tener que visitar ningún link especial de "no contar" aparte.
+function isAdminDevice(){ return localStorage.getItem("vitrina_admin_device") === "1"; }
+function markAdminDevice(){ localStorage.setItem("vitrina_admin_device", "1"); }
+
+// vista ampliada de una sola foto (por ahora la usa "Inventario rápido" en el panel admin,
+// pero queda como función global por si más adelante se ocupa en otro lado)
+function openImagePreview(url){
+  if (!url) return;
+  document.getElementById("imagePreviewImg").src = url;
+  document.getElementById("imagePreviewOverlay").classList.add("open");
+}
+document.getElementById("imagePreviewOverlay").addEventListener("click", () => {
+  document.getElementById("imagePreviewOverlay").classList.remove("open");
+});
 
 // cupón aplicado en el carrito: { code, percent } | null — guardado en localStorage para que
 // sobreviva a recargar la página. Antes solo existía el cupón fijo "BIENVENIDO5" al 5%; esto
@@ -3327,6 +3427,30 @@ fetch(`${WORKER_URL}/edits`, { cache: "no-store" })
   })
   .catch(() => {});
 
+// configuración del sitio editable desde el panel ("⚙️ Config"): número de WhatsApp del
+// carrito y enlace de la Comunidad de WhatsApp — si no se ha guardado nada todavía, se quedan
+// los valores fijos de arriba/del HTML tal cual. Como esto llega por red, puede resolverse
+// después de que ya se armaron algunos links con el valor por default; por eso aquí también
+// se refrescan esos lugares en vez de solo guardar la variable.
+function applySiteSettings(settings){
+  if (settings.whatsappPhone) WHATSAPP_PHONE = settings.whatsappPhone;
+  if (settings.communityUrl){
+    const communityLink = document.getElementById("communityLink");
+    if (communityLink) communityLink.href = settings.communityUrl;
+  }
+  const floatBtn = document.getElementById("whatsappFloat");
+  if (floatBtn) floatBtn.href = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent("Hola, tengo una duda sobre un producto 🙂")}`;
+  if (typeof updateCartUI === "function") updateCartUI();
+  const orderWaBtn = document.getElementById("orderWhatsappBtn");
+  if (orderWaBtn && orderWaBtn.href && orderWaBtn.href.includes("wa.me/")){
+    orderWaBtn.href = orderWaBtn.href.replace(/wa\.me\/\d+/, `wa.me/${WHATSAPP_PHONE}`);
+  }
+}
+fetch(`${WORKER_URL}/settings`, { cache: "no-store" })
+  .then(r => r.json())
+  .then(data => applySiteSettings(data.settings || {}))
+  .catch(() => {});
+
 // logos de sets subidos a mano desde "Explorar por expansión" (KV "SET_LOGOS" del Worker) —
 // así se ven igual en cualquier dispositivo, no solo en el navegador donde se subieron
 fetch(`${WORKER_URL}/set-logos`, { cache: "no-store" })
@@ -3370,9 +3494,11 @@ fetch(`${WORKER_URL}/price-history`, { cache: "no-store" })
 // (laptop, celular), aunque no hayas entrado con la contraseña de admin en ese momento — antes
 // solo se excluían los clics mientras el panel de admin estaba abierto (isAdminSession), pero
 // Roberto también navega el sitio como si fuera cliente para probarlo, y esos clics SÍ se
-// estaban contando y sesgando las estadísticas. La marca queda guardada en localStorage (no en
-// sessionStorage), así que sobrevive aunque cierres el navegador — se activa UNA VEZ visitando
-// tu propio sitio con "?notrack=1" al final del link, desde cada dispositivo que quieras excluir.
+// estaban contando y sesgando las estadísticas. Ahora, con isAdminDevice() (ver más arriba,
+// junto a isAdminSession), basta con haber entrado al panel admin UNA VEZ desde ese dispositivo
+// para que quede excluido para siempre, sin nada más que hacer. "?notrack=1" se deja aquí nada
+// más como opción manual extra (por ejemplo, para excluir el celular de un familiar sin tener
+// que darle tu contraseña de admin), pero ya no hace falta usarlo para tus propios dispositivos.
 (function(){
   const params = new URLSearchParams(location.search);
   if (!params.has("notrack")) return;
@@ -3389,7 +3515,7 @@ function isDeviceExcludedFromTracking(){ return localStorage.getItem("vitrina_no
 function trackEvent(type, key){
   // no contamos tus propios clics de prueba, para no ensuciar los datos reales: ni mientras el
   // panel de admin está abierto, ni en un dispositivo que marcaste con "?notrack=1"
-  if (isAdminSession() || isDeviceExcludedFromTracking()) return;
+  if (isAdminSession() || isAdminDevice() || isDeviceExcludedFromTracking()) return;
   fetch(`${WORKER_URL}/track`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -3459,6 +3585,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("adminPricesPanel").style.display = tab === "prices" ? "block" : "none";
     document.getElementById("adminCouponsPanel").style.display = tab === "coupons" ? "block" : "none";
     document.getElementById("adminAnalyticsPanel").style.display = tab === "analytics" ? "block" : "none";
+    document.getElementById("adminTabConfig").classList.toggle("active", tab === "config");
+    document.getElementById("adminConfigPanel").style.display = tab === "config" ? "block" : "none";
   }
   document.getElementById("adminTabAdd").addEventListener("click", () => showAdminTab("add"));
   document.getElementById("adminTabEdit").addEventListener("click", () => { showAdminTab("edit"); resetEditSearch(); });
@@ -3466,6 +3594,77 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   document.getElementById("adminTabPrices").addEventListener("click", () => showAdminTab("prices"));
   document.getElementById("adminTabCoupons").addEventListener("click", () => { showAdminTab("coupons"); loadCoupons(); });
   document.getElementById("adminTabAnalytics").addEventListener("click", async () => { showAdminTab("analytics"); await loadAnalytics(); });
+  document.getElementById("adminTabConfig").addEventListener("click", () => { showAdminTab("config"); loadSiteConfig(); });
+
+  async function loadSiteConfig(){
+    const status = document.getElementById("configSaveStatus");
+    status.textContent = "";
+    try {
+      const res = await fetch(`${WORKER_URL}/settings`, { cache: "no-store" });
+      const data = await res.json();
+      const settings = data.settings || {};
+      document.getElementById("configWhatsappPhone").value = settings.whatsappPhone || "";
+      document.getElementById("configCommunityUrl").value = settings.communityUrl || "";
+    } catch {
+      status.textContent = "No se pudo cargar la configuración actual.";
+      status.style.color = "var(--ember-bright)";
+    }
+  }
+
+  document.getElementById("configSaveBtn").addEventListener("click", async () => {
+    const status = document.getElementById("configSaveStatus");
+    const btn = document.getElementById("configSaveBtn");
+    const whatsappPhone = document.getElementById("configWhatsappPhone").value.trim();
+    const communityUrl = document.getElementById("configCommunityUrl").value.trim();
+    btn.disabled = true;
+    status.style.color = "";
+    status.textContent = "Guardando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/save-settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), whatsappPhone, communityUrl })
+      });
+      const data = await res.json();
+      if (data.ok){
+        status.textContent = "✓ Guardado — ya se está usando en el sitio.";
+        status.style.color = "var(--ok)";
+        applySiteSettings(data.settings || {});
+      } else {
+        status.textContent = data.error || "No se pudo guardar.";
+        status.style.color = "var(--ember-bright)";
+      }
+    } catch {
+      status.textContent = "No se pudo conectar con el servidor.";
+      status.style.color = "var(--ember-bright)";
+    }
+    btn.disabled = false;
+  });
+
+  document.getElementById("analyticsResetBtn").addEventListener("click", async () => {
+    if (!confirm("¿Seguro que quieres borrar TODAS las analíticas guardadas hasta hoy? No se puede deshacer — empiezas de cero.")) return;
+    const status = document.getElementById("analyticsResetStatus");
+    const btn = document.getElementById("analyticsResetBtn");
+    btn.disabled = true;
+    status.textContent = "Borrando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/reset-analytics`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass") })
+      });
+      const data = await res.json();
+      if (data.ok){
+        status.textContent = "✓ Listo — analíticas reiniciadas. Como ya entraste al panel admin desde este dispositivo, tus clics de aquí ya no se cuentan; entra al panel una vez desde tus otros dispositivos (cel, laptop, etc.) y quedan igual de excluidos para siempre, sin necesitar ningún link especial.";
+        await loadAnalytics();
+      } else {
+        status.textContent = data.error || "No se pudo reiniciar.";
+      }
+    } catch {
+      status.textContent = "No se pudo conectar con el servidor.";
+    }
+    btn.disabled = false;
+  });
 
   /* ---- editar producto existente ---- */
   let editingId = null;
@@ -3751,6 +3950,65 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
 
       const deliveryLabelFn = k => DELIVERY_LABELS[k] || k;
       const bucketLabelFn = k => `$${k}`;
+      const categoryLabelFn = k => ({ pokemon: "Cartas Pokémon", pcjp: "Exclusivos Pokémon Center JP", toy: "Juguetes/Coleccionables", acrylic: "Acrílicos" }[k] || k);
+
+      // ---- NUEVO: resumen general (embudo vista→carrito→WhatsApp + cobertura del catálogo) —
+      // usa los mismos eventos que ya se guardaban, no necesita rastrear nada extra ----
+      const sumCounts = (list) => (list || []).reduce((s, e) => s + e.count, 0);
+      const totalViews = sumCounts(byType.view);
+      const totalAddCart = sumCounts(byType.add_cart);
+      const totalWhatsapp = sumCounts(byType.whatsapp_click);
+      const viewedIds = new Set((byType.view || []).map(e => e.key));
+      const catalogCoverage = CARDS.length ? Math.round((viewedIds.size / CARDS.length) * 100) : 0;
+      const funnelHtml = totalViews ? `
+        <div style="margin-bottom:18px;padding:12px;border-radius:10px;border:1px dashed var(--foil-dim);">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:8px;">📊 Resumen general</div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>👁️ Vistas de producto</span><b>${totalViews}</b></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🛒 Agregados al carrito</span><b>${totalAddCart} <span style="color:var(--slate);font-weight:400;">(${totalViews ? Math.round(totalAddCart / totalViews * 100) : 0}% de las vistas)</span></b></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span>💬 Clics en "Apartar por WhatsApp"</span><b>${totalWhatsapp} <span style="color:var(--slate);font-weight:400;">(${totalAddCart ? Math.round(totalWhatsapp / totalAddCart * 100) : 0}% de los que agregaron)</span></b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0 0;margin-top:4px;border-top:1px solid var(--line);"><span>📦 Cobertura del catálogo</span><b>${catalogCoverage}% <span style="color:var(--slate);font-weight:400;">(${viewedIds.size} de ${CARDS.length} piezas con al menos 1 vista)</span></b></div>
+        </div>
+      ` : "";
+
+      // ---- NUEVO: piezas que se ven mucho pero nadie las agrega al carrito — candidatas a
+      // revisar precio, fotos o descripción, porque el interés ya existe y no se concreta ----
+      const addCartMap = {};
+      (byType.add_cart || []).forEach(e => { addCartMap[e.key] = e.count; });
+      const interestNoConversion = (byType.view || [])
+        .filter(e => e.count >= 3 && !addCartMap[e.key] && CARDS.some(c => String(c.id) === String(e.key)))
+        .sort((a, b) => b.count - a.count);
+
+      // ---- NUEVO: conversión vista→carrito por sección del catálogo ----
+      const categoryStats = {};
+      (byType.view || []).forEach(e => {
+        const card = CARDS.find(c => String(c.id) === String(e.key));
+        if (!card) return;
+        (categoryStats[card.category] = categoryStats[card.category] || { views: 0, carts: 0 }).views += e.count;
+      });
+      (byType.add_cart || []).forEach(e => {
+        const card = CARDS.find(c => String(c.id) === String(e.key));
+        if (!card) return;
+        (categoryStats[card.category] = categoryStats[card.category] || { views: 0, carts: 0 }).carts += e.count;
+      });
+      const categoryConversionList = Object.entries(categoryStats)
+        .map(([cat, s]) => ({ key: cat, pct: s.views ? Math.round((s.carts / s.views) * 100) : 0, views: s.views, carts: s.carts }))
+        .sort((a, b) => b.pct - a.pct);
+      const categoryConversionHtml = categoryConversionList.length ? `
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);margin-bottom:6px;">📈 Conversión vista→carrito por sección</div>
+          ${categoryConversionList.map(c => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);"><span>${categoryLabelFn(c.key)}</span><b style="color:var(--foil-bright);">${c.pct}% <span style="color:var(--slate);font-weight:400;font-size:11px;">(${c.carts}/${c.views})</span></b></div>`).join("")}
+        </div>
+      ` : "";
+
+      // ---- NUEVO: precio promedio de lo que llama la atención vs. el catálogo completo ----
+      const viewedCardsUnique = [...viewedIds].map(id => CARDS.find(c => String(c.id) === String(id))).filter(Boolean);
+      const avgViewedPrice = viewedCardsUnique.length ? Math.round(viewedCardsUnique.reduce((s, c) => s + (Number(c.price) || 0), 0) / viewedCardsUnique.length) : 0;
+      const avgCatalogPrice = CARDS.length ? Math.round(CARDS.reduce((s, c) => s + (Number(c.price) || 0), 0) / CARDS.length) : 0;
+      const priceInsightHtml = (viewedCardsUnique.length && avgCatalogPrice) ? `
+        <div style="margin-bottom:16px;font-size:12.5px;color:var(--cream-dim);">
+          💵 Lo que la gente ve tiene un precio promedio de <b style="color:var(--foil-bright);">$${avgViewedPrice} MXN</b>, contra un promedio de <b>$${avgCatalogPrice} MXN</b> en todo tu catálogo${avgViewedPrice < avgCatalogPrice ? " — le está llamando más la atención lo más económico." : avgViewedPrice > avgCatalogPrice ? " — le está llamando más la atención lo de precio más alto." : "."}
+        </div>
+      ` : "";
 
       // puntaje combinado para sugerir qué marcar como "🔥 Muy buscada": vistas + el doble por agregar al carrito + 1.5x por guardar
       const scoreMap = {};
@@ -3778,7 +4036,9 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         </div>
       ` : "";
 
-      body.innerHTML = trendingHtml +
+      body.innerHTML = funnelHtml + priceInsightHtml + trendingHtml +
+        categoryConversionHtml +
+        section("👀 Se ven mucho pero nadie las agrega al carrito (candidatas a bajar precio o mejorar foto/descripción)", interestNoConversion, nameFor) +
         section("👁️ Más vistos", byType.view, nameFor) +
         section("🛒 Más agregados al carrito", byType.add_cart, nameFor) +
         section("♡ Más guardados para después", byType.wishlist_add, nameFor) +
@@ -3853,6 +4113,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     // no la verificamos aquí (eso lo hace el Worker en cada acción) —
     // solo la guardamos para esta sesión y seguimos al formulario
     sessionStorage.setItem("vitrina_admin_pass", pass);
+    markAdminDevice();
     loginStep.style.display = "none";
     addStep.style.display = "block";
     refreshAllViews();
@@ -4204,7 +4465,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       return `
       <div class="bulk-card-row" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);">
         <input type="checkbox" class="bulk-check" data-i="${i}" ${owned ? "disabled" : ""} style="width:17px;height:17px;flex-shrink:0;">
-        <div class="bulk-thumb" data-i="${i}" style="width:32px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center;${card.image ? `background-image:url('${card.image}')` : `background:${TYPE_COLORS.incoloro}`}"></div>
+        <div class="bulk-thumb" data-i="${i}" title="${card.image ? "Ver foto más grande" : ""}" style="width:46px;height:64px;border-radius:6px;flex-shrink:0;background-size:cover;background-position:center;${card.image ? `background-image:url('${card.image}');cursor:zoom-in;` : `background:${TYPE_COLORS.incoloro}`}"></div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${card.name}</div>
           <div style="font-size:11px;color:var(--slate);">${card.rarity || "—"} · ${card.number}/${card.set.printedTotal || "?"}${owned ? ' · <span style="color:var(--foil-bright);">✓ ya en tu catálogo</span>' : ''}</div>
@@ -4214,8 +4475,14 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
             <button type="button" class="bulk-img-link" data-i="${i}" style="background:none;border:none;padding:0;color:var(--slate);font-size:10.5px;cursor:pointer;text-decoration:underline;">🔗 Pegar link</button>
           </div>
           <div class="bulk-inputs" data-i="${i}" style="display:none;gap:8px;margin-top:6px;">
-            <input type="number" class="bulk-price" data-i="${i}" placeholder="Precio MXN" value="${suggested || ''}" style="flex:1;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
-            <input type="number" class="bulk-stock" data-i="${i}" placeholder="Stock" value="1" style="width:70px;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
+            <div style="flex:1;min-width:0;">
+              <span class="field-label" style="margin-bottom:2px;">Precio MXN</span>
+              <input type="number" class="bulk-price" data-i="${i}" placeholder="Precio MXN" value="${suggested || ''}" style="width:100%;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
+            </div>
+            <div style="width:78px;flex-shrink:0;">
+              <span class="field-label" style="margin-bottom:2px;">Stock</span>
+              <input type="number" class="bulk-stock" data-i="${i}" placeholder="1" value="1" min="0" style="width:100%;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
+            </div>
           </div>
           <div class="bulk-ref-line" data-i="${i}" style="font-size:10px;color:var(--slate);margin-top:2px;">${usd
             ? `ref. TCGplayer: ~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ' (tipo de cambio de respaldo, no el del día)'}`
@@ -4223,6 +4490,12 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         </div>
       </div>`;
     }).join("");
+    list.querySelectorAll(".bulk-thumb").forEach(thumb => {
+      thumb.addEventListener("click", () => {
+        const card = bulkFoundCards[Number(thumb.dataset.i)];
+        if (card?.image) openImagePreview(card.image);
+      });
+    });
     list.querySelectorAll(".bulk-check").forEach(chk => {
       chk.addEventListener("change", () => {
         list.querySelector(`.bulk-inputs[data-i="${chk.dataset.i}"]`).style.display = chk.checked ? "flex" : "none";
@@ -4257,7 +4530,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   function setBulkCardImage(i, url){
     bulkFoundCards[i].image = url;
     const thumb = document.querySelector(`.bulk-thumb[data-i="${i}"]`);
-    if (thumb){ thumb.style.background = ""; thumb.style.backgroundImage = `url('${url}')`; thumb.style.backgroundSize = "cover"; thumb.style.backgroundPosition = "center"; }
+    if (thumb){ thumb.style.background = ""; thumb.style.backgroundImage = `url('${url}')`; thumb.style.backgroundSize = "cover"; thumb.style.backgroundPosition = "center"; thumb.style.cursor = "zoom-in"; thumb.title = "Ver foto más grande"; }
     const uploadBtn = document.querySelector(`.bulk-img-upload[data-i="${i}"]`);
     if (uploadBtn) uploadBtn.textContent = "📎 Cambiar foto";
   }
@@ -4742,7 +5015,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       const id = Number(btn.dataset.id);
       const qty = Number(btn.dataset.qty);
       let pass = sessionStorage.getItem("vitrina_admin_pass");
-      if (!pass){ pass = prompt("Contraseña de admin para marcar vendido:"); if (!pass) return; sessionStorage.setItem("vitrina_admin_pass", pass); }
+      if (!pass){ pass = prompt("Contraseña de admin para marcar vendido:"); if (!pass) return; sessionStorage.setItem("vitrina_admin_pass", pass); markAdminDevice(); }
       const card = CARDS.find(c => c.id === id);
       const newStock = Math.max(0, (card?.stock || 0) - qty);
       btn.textContent = "Guardando…";
@@ -4785,6 +5058,49 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   };
   document.getElementById("orderClose").addEventListener("click", closeOrder);
   document.getElementById("orderBackdrop").addEventListener("click", closeOrder);
+})();
+
+/* ---- "Ver como": vista del catálogo principal — 4/3 por fila o "binder" en escritorio;
+   1×1/2×2/3×3 en celular/tablet angosta. Recuerda una preferencia distinta para cada
+   contexto (no tiene sentido, por ejemplo, que "Binder 3×3" se aplique en un celular angosto) ---- */
+(function(){
+  const DESKTOP_DEFAULT = "grid-4";
+  const MOBILE_DEFAULT = "mobile-2";
+  const DESKTOP_VIEWS = ["grid-4", "grid-3", "binder-3x3"];
+  const MOBILE_VIEWS = ["mobile-1", "mobile-2", "mobile-3"];
+  let desktopView = localStorage.getItem("vitrina_view_desktop") || DESKTOP_DEFAULT;
+  let mobileView = localStorage.getItem("vitrina_view_mobile") || MOBILE_DEFAULT;
+  if (!DESKTOP_VIEWS.includes(desktopView)) desktopView = DESKTOP_DEFAULT;
+  if (!MOBILE_VIEWS.includes(mobileView)) mobileView = MOBILE_DEFAULT;
+
+  function isMobileViewport(){ return window.matchMedia("(max-width:900px)").matches; }
+
+  function applyViewMode(){
+    const active = isMobileViewport() ? mobileView : desktopView;
+    document.body.dataset.view = active;
+    document.querySelectorAll(".view-mode-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.view === active);
+    });
+  }
+
+  document.querySelectorAll(".view-mode-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const view = btn.dataset.view;
+      if (DESKTOP_VIEWS.includes(view)){ desktopView = view; localStorage.setItem("vitrina_view_desktop", view); }
+      else { mobileView = view; localStorage.setItem("vitrina_view_mobile", view); }
+      applyViewMode();
+    });
+  });
+
+  // si gira la tablet o cambia el ancho de la ventana, vuelve a aplicar la preferencia que
+  // corresponda a ese contexto (escritorio vs. celular/tablet angosta)
+  let viewResizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(viewResizeTimer);
+    viewResizeTimer = setTimeout(applyViewMode, 200);
+  });
+
+  applyViewMode();
 })();
 
 buildFilterUI();
