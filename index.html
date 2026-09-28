@@ -529,6 +529,8 @@
   .price-suggest-btn:disabled{opacity:.5;cursor:default;}
   .price-suggest-hint{font-size:11px;color:var(--slate);line-height:1.4;}
   .price-suggest-hint a{color:var(--foil-bright);}
+  .price-suggest-hint.warn{color:var(--ember-bright);font-weight:700;}
+  .price-suggest-hint.warn a{color:var(--ember-bright);text-decoration:underline;}
   .promo-code{
     display:inline-block;font-family:var(--font-mono);font-size:20px;font-weight:600;
     letter-spacing:.06em;color:var(--foil-bright);background:var(--foil-dim);
@@ -1185,6 +1187,7 @@
       <button type="button" class="pay-opt active" id="adminTabAdd" style="flex:1;">➕ Agregar</button>
       <button type="button" class="pay-opt" id="adminTabEdit" style="flex:1;">✏️ Editar</button>
       <button type="button" class="pay-opt" id="adminTabBulk" style="flex:1;">📋 Inventario rápido</button>
+      <button type="button" class="pay-opt" id="adminTabPrices" style="flex:1;">💲 Precios</button>
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
     </div>
 
@@ -1322,16 +1325,42 @@
     <div id="adminBulkPanel" style="display:none;">
       <div class="order-head"><span class="eyebrow">Marca lo que ya tienes</span><h3>Inventario rápido por expansión</h3></div>
       <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 14px;">Busca todas las cartas de una expansión, tilda las que ya tienes físicamente, ponles precio y stock (te sugerimos un precio de referencia de TCGplayer) y se agregan todas juntas — sin tener que crearlas una por una.</p>
-      <div class="row" style="margin-bottom:10px;">
-        <input type="text" id="bulkSetName" placeholder="Nombre de la expansión (en inglés, como la conoce TCGplayer)" value="30th Celebration" style="flex:1;">
+      <div class="pay-options" id="bulkLangFilter" style="margin-bottom:10px;">
+        <button type="button" class="pay-opt active" data-lang="all">Todas</button>
+        <button type="button" class="pay-opt" data-lang="en">Inglés</button>
+        <button type="button" class="pay-opt" data-lang="jp">Japonés</button>
+        <button type="button" class="pay-opt" data-lang="cn">Chino</button>
+      </div>
+      <div class="field" style="margin-bottom:6px;">
+        <span class="field-label">Expansión (de más nueva a más antigua)</span>
+        <select id="bulkSetSelect" style="width:100%;">
+          <option value="">— elige una expansión —</option>
+        </select>
+      </div>
+      <p style="font-size:11px;color:var(--slate);margin:0 0 8px;">¿No está en la lista? <button type="button" id="bulkSetManualToggle" style="background:none;border:none;padding:0;color:var(--foil-bright);text-decoration:underline;cursor:pointer;font-size:11px;">escribe el nombre a mano</button></p>
+      <div id="bulkSetManualWrap" style="display:none;margin-bottom:10px;">
+        <input type="text" id="bulkSetName" placeholder="Nombre de la expansión (en inglés, como la conoce TCGplayer)" style="width:100%;">
       </div>
       <button type="button" class="btn btn-foil" id="bulkSearchBtn" style="width:100%;justify-content:center;margin-bottom:6px;">Buscar cartas de esta expansión</button>
-      <p style="font-size:11px;color:var(--slate);margin:0 0 14px;">Si el nombre exacto no da resultados (los sets recién anunciados a veces tardan en aparecer en la base de datos pública), prueba variantes como "30th Anniversary", "30th Celebration" o pide ayuda para confirmar el nombre exacto.</p>
+      <button type="button" class="btn btn-ghost" id="bulkRefreshPricesBtn" style="width:100%;justify-content:center;margin-bottom:6px;">🔄 Buscar / actualizar precios sugeridos</button>
+      <p style="font-size:11px;color:var(--slate);margin:0 0 14px;">Si el nombre exacto no da resultados (los sets recién anunciados a veces tardan en aparecer en la base de datos pública), prueba con otra variante o escríbelo a mano.</p>
       <p class="promo-status" id="bulkSearchStatus"></p>
       <div id="bulkCardsList"></div>
       <div id="bulkSaveBar" style="display:none;position:sticky;bottom:0;background:var(--ink-2);padding:12px 0 4px;margin-top:6px;border-top:1px solid var(--line-strong);">
         <button type="button" class="btn btn-foil" id="bulkSaveBtn" style="width:100%;justify-content:center;">Agregar seleccionadas (<span id="bulkSelectedCount">0</span>)</button>
         <p class="promo-status" id="bulkSaveStatus"></p>
+      </div>
+    </div>
+
+    <div id="adminPricesPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">No te quedes atrás</span><h3>Revisar precios contra TCGplayer</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 14px;">Revisa, entre las cartas Pokémon que ya tienes publicadas, cuáles tienen un precio de referencia de TCGplayer más alto que el que traes marcado — para subirlas todas de un jalón en vez de ir una por una. Puede tardar un momento porque revisa expansión por expansión.</p>
+      <button type="button" class="btn btn-foil" id="pricesScanBtn" style="width:100%;justify-content:center;margin-bottom:6px;">Buscar cartas con precio desactualizado</button>
+      <p class="promo-status" id="pricesScanStatus"></p>
+      <div id="pricesList"></div>
+      <div id="pricesSaveBar" style="display:none;position:sticky;bottom:0;background:var(--ink-2);padding:12px 0 4px;margin-top:6px;border-top:1px solid var(--line-strong);">
+        <button type="button" class="btn btn-foil" id="pricesSaveBtn" style="width:100%;justify-content:center;">Actualizar seleccionadas (<span id="pricesSelectedCount">0</span>)</button>
+        <p class="promo-status" id="pricesSaveStatus"></p>
       </div>
     </div>
 
@@ -1625,6 +1654,66 @@ const MANUAL_SET_LANG = {
   "gem pack vol. 3": "cn",
   "gem pack vol. 4": "cn",
 };
+
+// Lista curada de expansiones JAPONESAS y CHINAS para el selector de "Inventario rápido" (panel
+// admin) — la api.pokemontcg.io pública casi no indexa estas, así que las mantenemos a mano.
+// Fuente: Bulbapedia (lista de expansiones JCC japonesas) y cobertura de la comunidad sobre la
+// serie "Gem Pack" china. Las inglesas NO van aquí — esas se arman solas desde SET_META (la API
+// pública sí las tiene todas). Se puede seguir ampliando conforme salgan sets nuevos o si pides
+// que agregue alguno más viejo que todavía no esté.
+const CURATED_EXPANSIONS = [
+  // ---- Japonés: era Scarlet & Violet + serie MEGA (2023 en adelante), más nueva primero ----
+  { name: "Storm Emeralda", lang: "jp", releaseDate: "2026-07-31" },
+  { name: "Abyss Eye", lang: "jp", releaseDate: "2026-05-22" },
+  { name: "Ninja Spinner", lang: "jp", releaseDate: "2026-03-13" },
+  { name: "Nihil Zero", lang: "jp", releaseDate: "2026-01-23" },
+  { name: "Mega Dream ex", lang: "jp", releaseDate: "2025-11-28" },
+  { name: "Inferno X", lang: "jp", releaseDate: "2025-09-26" },
+  { name: "McDonald's Promo (2025)", lang: "jp", releaseDate: "2025-08-09" },
+  { name: "Mega Brave", lang: "jp", releaseDate: "2025-08-01" },
+  { name: "Mega Symphonia", lang: "jp", releaseDate: "2025-08-01" },
+  { name: "Black Bolt", lang: "jp", releaseDate: "2025-06-06" },
+  { name: "White Flare", lang: "jp", releaseDate: "2025-06-06" },
+  { name: "Glory of Team Rocket", lang: "jp", releaseDate: "2025-04-18" },
+  { name: "Battle Partners", lang: "jp", releaseDate: "2025-01-24" },
+  { name: "Super Electric Breaker", lang: "jp", releaseDate: "2024-10-18" },
+  { name: "Stellar Miracle", lang: "jp", releaseDate: "2024-07-19" },
+  { name: "Transformation Mask", lang: "jp", releaseDate: "2024-04-26" },
+  { name: "Wild Force", lang: "jp", releaseDate: "2024-01-26" },
+  { name: "Cyber Judge", lang: "jp", releaseDate: "2024-01-26" },
+  { name: "Ancient Roar", lang: "jp", releaseDate: "2023-10-27" },
+  { name: "Future Flash", lang: "jp", releaseDate: "2023-10-27" },
+  { name: "Ruler of the Black Flame", lang: "jp", releaseDate: "2023-07-28" },
+  { name: "Snow Hazard", lang: "jp", releaseDate: "2023-04-14" },
+  { name: "Clay Burst", lang: "jp", releaseDate: "2023-04-14" },
+  { name: "Scarlet ex", lang: "jp", releaseDate: "2023-01-20" },
+  { name: "Violet ex", lang: "jp", releaseDate: "2023-01-20" },
+  // ---- Japonés: era Sword & Shield (2019–2022), ya más viejas pero útiles para stock antiguo ----
+  { name: "Paradigm Trigger", lang: "jp", releaseDate: "2022-10-21" },
+  { name: "Lost Abyss", lang: "jp", releaseDate: "2022-07-15" },
+  { name: "Time Gazer", lang: "jp", releaseDate: "2022-04-08" },
+  { name: "Space Juggler", lang: "jp", releaseDate: "2022-04-08" },
+  { name: "Star Birth", lang: "jp", releaseDate: "2022-01-14" },
+  { name: "Fusion Arts", lang: "jp", releaseDate: "2021-09-24" },
+  { name: "Skyscraping Perfection", lang: "jp", releaseDate: "2021-07-09" },
+  { name: "Blue Sky Stream", lang: "jp", releaseDate: "2021-07-09" },
+  { name: "Silver Lance", lang: "jp", releaseDate: "2021-04-23" },
+  { name: "Jet-Black Spirit", lang: "jp", releaseDate: "2021-04-23" },
+  { name: "Single Strike Master", lang: "jp", releaseDate: "2021-01-22" },
+  { name: "Rapid Strike Master", lang: "jp", releaseDate: "2021-01-22" },
+  { name: "Amazing Volt Tackle", lang: "jp", releaseDate: "2020-09-18" },
+  { name: "Infinity Zone", lang: "jp", releaseDate: "2020-06-05" },
+  { name: "Rebellion Crash", lang: "jp", releaseDate: "2020-03-06" },
+  { name: "Sword", lang: "jp", releaseDate: "2019-12-06" },
+  { name: "Shield", lang: "jp", releaseDate: "2019-12-06" },
+  // ---- Chino (simplificado): serie "Gem Pack", más nueva primero ----
+  { name: "Gem Pack Vol. 5", lang: "cn", releaseDate: "2026-04-01" }, // fecha aproximada (solo se confirmó "abril 2026")
+  { name: "Gem Pack Vol. 4", lang: "cn", releaseDate: "2026-02-06" },
+  { name: "Gem Pack Vol. 3", lang: "cn", releaseDate: "2025-09-26" },
+  { name: "Collect 151 Hope", lang: "cn", releaseDate: "2025-04-15" },
+  { name: "Gem Pack Vol. 2", lang: "cn", releaseDate: "2025-05-16" },
+  { name: "Gem Pack Vol. 1", lang: "cn", releaseDate: "2025-01-17" }, // fecha aproximada (solo se confirmó "enero 2025")
+];
 
 // NOTA: LANG_INFO y serverSetLogos/setExplorerLangFilter también tienen que declararse aquí
 // (antes de applySetData/buildSetExplorer) por la misma razón que MANUAL_SET_DATES arriba: con
@@ -3215,15 +3304,18 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("adminTabAdd").classList.toggle("active", tab === "add");
     document.getElementById("adminTabEdit").classList.toggle("active", tab === "edit");
     document.getElementById("adminTabBulk").classList.toggle("active", tab === "bulk");
+    document.getElementById("adminTabPrices").classList.toggle("active", tab === "prices");
     document.getElementById("adminTabAnalytics").classList.toggle("active", tab === "analytics");
     document.getElementById("adminAddForm").style.display = tab === "add" ? "block" : "none";
     document.getElementById("adminEditPanel").style.display = tab === "edit" ? "block" : "none";
     document.getElementById("adminBulkPanel").style.display = tab === "bulk" ? "block" : "none";
+    document.getElementById("adminPricesPanel").style.display = tab === "prices" ? "block" : "none";
     document.getElementById("adminAnalyticsPanel").style.display = tab === "analytics" ? "block" : "none";
   }
   document.getElementById("adminTabAdd").addEventListener("click", () => showAdminTab("add"));
   document.getElementById("adminTabEdit").addEventListener("click", () => { showAdminTab("edit"); resetEditSearch(); });
-  document.getElementById("adminTabBulk").addEventListener("click", () => showAdminTab("bulk"));
+  document.getElementById("adminTabBulk").addEventListener("click", () => { showAdminTab("bulk"); populateBulkSetSelect(); });
+  document.getElementById("adminTabPrices").addEventListener("click", () => showAdminTab("prices"));
   document.getElementById("adminTabAnalytics").addEventListener("click", async () => { showAdminTab("analytics"); await loadAnalytics(); });
 
   /* ---- editar producto existente ---- */
@@ -3796,16 +3888,32 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       if (!match && name) match = cards.find(c => c.name.toLowerCase() === name.toLowerCase());
       if (!match && name) match = cards.find(c => c.name.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(c.name.toLowerCase()));
       const usd = match ? bestPrice(match.tcgplayer) : null;
+      hint.className = "price-suggest-hint";
       if (usd){
         const mxn = Math.round(usd * bulkFxRate);
-        document.getElementById(ids.price).value = mxn;
-        hint.innerHTML = `💲 Sugerido: <b>$${mxn} MXN</b> (TCGplayer ~$${usd.toFixed(2)} USD${bulkFxLoaded ? "" : ", tipo de cambio de respaldo"}) · ${ebayLink} para comparar`;
+        if (mode === "add"){
+          // en Agregar no hay un precio "actual" que proteger — es un producto nuevo, así que
+          // sí conviene llenárselo de una vez, como ya hacía antes
+          document.getElementById(ids.price).value = mxn;
+          hint.innerHTML = `💲 Sugerido: <b>$${mxn} MXN</b> (TCGplayer ~$${usd.toFixed(2)} USD${bulkFxLoaded ? "" : ", tipo de cambio de respaldo"}) · ${ebayLink} para comparar`;
+        } else {
+          // en Editar (producto ya posteado) NUNCA se pisa el precio solo — Roberto pidió
+          // solo un aviso para no quedarse atrás, y que él decida si lo sube o lo deja
+          const currentPrice = Number(document.getElementById(ids.price).value) || 0;
+          if (mxn > currentPrice){
+            hint.className = "price-suggest-hint warn";
+            hint.innerHTML = `⚠️ El precio sugerido es <b>mayor</b> al que tienes marcado: $${mxn} MXN vs tu precio de $${currentPrice} MXN (TCGplayer ~$${usd.toFixed(2)} USD${bulkFxLoaded ? "" : ", tipo de cambio de respaldo"}). No se cambió solo — súbelo tú si quieres, o ${ebayLink} para comparar.`;
+          } else {
+            hint.innerHTML = `💲 Precio de referencia TCGplayer: ~$${mxn} MXN — tu precio marcado de $${currentPrice} MXN ya está igual o por arriba, vas bien. ${ebayLink} para comparar`;
+          }
+        }
       } else if (cards.length && !match) {
         hint.innerHTML = `No encontré esa carta exacta dentro de "${setName}" — revisa el nombre/número, o ${ebayLink} para comparar manualmente.`;
       } else {
         hint.innerHTML = `Sin precio de referencia todavía en TCGplayer (normal en piezas muy nuevas, o si el nombre de la expansión no coincide exacto con TCGplayer). Puedes ${ebayLink} para comparar precios manualmente.`;
       }
     } catch (err) {
+      hint.className = "price-suggest-hint";
       hint.innerHTML = `No se pudo consultar el precio de referencia ahora. Puedes ${ebayLink} para comparar manualmente.`;
     } finally {
       btn.disabled = false;
@@ -3844,7 +3952,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
             <input type="number" class="bulk-price" data-i="${i}" placeholder="Precio MXN" value="${suggested || ''}" style="flex:1;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
             <input type="number" class="bulk-stock" data-i="${i}" placeholder="Stock" value="1" style="width:70px;padding:6px 8px;font-size:12.5px;border-radius:6px;border:1px solid var(--line-strong);background:var(--ink);color:var(--cream);">
           </div>
-          <div style="font-size:10px;color:var(--slate);margin-top:2px;">${usd
+          <div class="bulk-ref-line" data-i="${i}" style="font-size:10px;color:var(--slate);margin-top:2px;">${usd
             ? `ref. TCGplayer: ~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ' (tipo de cambio de respaldo, no el del día)'}`
             : `sin precio de referencia todavía (normal en piezas muy nuevas) · <a href="${ebaySearchUrl(card.name, card.set.name)}" target="_blank" rel="noopener" style="color:var(--foil-bright);">buscar en eBay</a>`}</div>
         </div>
@@ -3895,10 +4003,59 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("bulkSelectedCount").textContent = checked.length;
   }
 
-  document.getElementById("bulkSearchBtn").addEventListener("click", async () => {
+  // ---- Selector de expansión: lista (idioma + orden de más nueva a más antigua) en vez de escribirla a mano ----
+  // combina las expansiones inglesas (ya vienen de la API pública, en SET_META) con la lista
+  // curada de japonesas/chinas (CURATED_EXPANSIONS) — así no dependemos de que Roberto adivine
+  // el nombre exacto tal cual lo conoce TCGplayer.
+  let bulkLangFilterState = "all";
+  function allKnownExpansions(){
+    const enSets = Object.values(SET_META)
+      .filter(m => m && m.name)
+      .map(m => ({ name: m.name, lang: "en", releaseDate: m.releaseDate || "" }));
+    return [...enSets, ...CURATED_EXPANSIONS];
+  }
+  function populateBulkSetSelect(){
+    const select = document.getElementById("bulkSetSelect");
+    const prev = select.value;
+    let items = allKnownExpansions();
+    if (bulkLangFilterState !== "all") items = items.filter(it => it.lang === bulkLangFilterState);
+    // más reciente primero; las que no tienen fecha confirmada se van al final
+    items.sort((a,b) => (b.releaseDate || "0000").localeCompare(a.releaseDate || "0000"));
+    const langTag = { en: "🇬🇧", jp: "🇯🇵", cn: "🇨🇳" };
+    select.innerHTML = `<option value="">— elige una expansión —</option>` + items.map(it =>
+      `<option value="${it.name.replace(/"/g,'&quot;')}">${langTag[it.lang] || ""} ${it.name}${it.releaseDate ? ` · ${it.releaseDate.slice(0,7)}` : ""}</option>`
+    ).join("");
+    if (items.some(it => it.name === prev)) select.value = prev;
+  }
+  document.querySelectorAll('#bulkLangFilter .pay-opt').forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll('#bulkLangFilter .pay-opt').forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      bulkLangFilterState = btn.dataset.lang;
+      populateBulkSetSelect();
+    });
+  });
+  document.getElementById("bulkSetManualToggle").addEventListener("click", () => {
+    const wrap = document.getElementById("bulkSetManualWrap");
+    const showing = wrap.style.display !== "none";
+    wrap.style.display = showing ? "none" : "block";
+    document.getElementById("bulkSetManualToggle").textContent = showing ? "escribe el nombre a mano" : "ocultar y usar la lista";
+    if (!showing) document.getElementById("bulkSetSelect").value = "";
+  });
+  document.getElementById("bulkSetSelect").addEventListener("change", () => {
+    const val = document.getElementById("bulkSetSelect").value;
+    if (!val) return;
+    document.getElementById("bulkSetName").value = val;
+    document.getElementById("bulkSetManualWrap").style.display = "none";
+    document.getElementById("bulkSetManualToggle").textContent = "escribe el nombre a mano";
+    runBulkSearch();
+  });
+  populateBulkSetSelect(); // primera pasada (solo curadas; las inglesas de SET_META llegan y se re-arman en applySetData())
+
+  async function runBulkSearch(){
     const setName = document.getElementById("bulkSetName").value.trim();
     const status = document.getElementById("bulkSearchStatus");
-    if (!setName){ status.textContent = "Escribe el nombre de la expansión."; return; }
+    if (!setName){ status.textContent = "Elige una expansión de la lista, o escribe el nombre a mano."; return; }
     status.textContent = "Buscando…";
     document.getElementById("bulkCardsList").innerHTML = "";
     document.getElementById("bulkSaveBar").style.display = "none";
@@ -3924,6 +4081,53 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       }
     } catch (err) {
       status.textContent = "No se pudo conectar con el servidor.";
+    }
+  }
+  document.getElementById("bulkSearchBtn").addEventListener("click", runBulkSearch);
+
+  // botón aparte para "ya until busqué, pero no me sugirió precio" — vuelve a consultar
+  // /cards-by-set (sin caché de navegador) y solo actualiza el precio de referencia de cada
+  // fila; si el campo de precio de una fila ya estaba vacío se lo llena, pero si ya tenías algo
+  // escrito NO se lo pisa (mismo cuidado que con el cambio de foto).
+  document.getElementById("bulkRefreshPricesBtn").addEventListener("click", async () => {
+    const setName = document.getElementById("bulkSetName").value.trim();
+    const status = document.getElementById("bulkSearchStatus");
+    if (!setName){ status.textContent = "Elige una expansión de la lista, o escribe el nombre a mano."; return; }
+    if (!bulkFoundCards.length){ await runBulkSearch(); return; }
+    status.textContent = "Buscando precios sugeridos…";
+    try {
+      if (!bulkFxLoaded){
+        try {
+          const fxRes = await fetch(`${WORKER_URL}/fx-rate`, { cache: "no-store" });
+          const fxData = await fxRes.json();
+          if (fxData.rate){ bulkFxRate = fxData.rate; bulkFxLoaded = true; }
+        } catch {}
+      }
+      const res = await fetch(`${WORKER_URL}/cards-by-set?set=${encodeURIComponent(setName)}`, { cache: "no-store" });
+      const data = await res.json();
+      const fresh = data.cards || [];
+      let updated = 0;
+      bulkFoundCards.forEach((card, i) => {
+        const match = fresh.find(fc => parseInt(fc.number, 10) === parseInt(card.number, 10))
+          || fresh.find(fc => fc.name.toLowerCase() === card.name.toLowerCase());
+        if (match && match.tcgplayer){
+          card.tcgplayer = match.tcgplayer;
+          const usd = bestPrice(card.tcgplayer);
+          if (usd){
+            updated++;
+            const suggested = Math.round(usd * bulkFxRate);
+            const priceInput = document.querySelector(`.bulk-price[data-i="${i}"]`);
+            if (priceInput && !priceInput.value) priceInput.value = suggested;
+            const refLine = document.querySelector(`.bulk-ref-line[data-i="${i}"]`);
+            if (refLine) refLine.textContent = `ref. TCGplayer: ~$${usd.toFixed(2)} USD${bulkFxLoaded ? '' : ' (tipo de cambio de respaldo, no el del día)'}`;
+          }
+        }
+      });
+      status.textContent = updated
+        ? `✓ Se encontraron/actualizaron ${updated} precio(s) de referencia.`
+        : "Seguimos sin encontrar precios de TCGplayer para estas cartas (normal si la expansión es muy nueva y todavía no tiene historial de ventas).";
+    } catch (err) {
+      status.textContent = "No se pudo actualizar los precios ahora.";
     }
   });
 
@@ -3977,6 +4181,123 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       openEditForm(id);
     }
   };
+
+  /* ---- "💲 Precios": revisa TODO el catálogo Pokémon contra TCGplayer y ofrece subir de un
+     jalón las cartas cuyo precio marcado quedó por debajo del de referencia ---- */
+  let pricesFound = []; // {id, name, set, num, current, suggested, usd}
+
+  function renderPricesList(){
+    const list = document.getElementById("pricesList");
+    if (!pricesFound.length){ list.innerHTML = ""; updatePricesSaveBar(); return; }
+    list.innerHTML = pricesFound.map((item, i) => `
+      <div class="prices-row" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);">
+        <input type="checkbox" class="prices-check" data-i="${i}" checked style="width:17px;height:17px;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name}</div>
+          <div style="font-size:11px;color:var(--slate);">${item.set || "—"} · ${item.num || "?"}</div>
+          <div style="font-size:12px;margin-top:2px;">Marcado: $${item.current} MXN → <b style="color:var(--foil-bright);">sugerido: $${item.suggested} MXN</b> <span style="color:var(--slate);">(+$${item.suggested - item.current})</span></div>
+        </div>
+      </div>`).join("");
+    list.querySelectorAll(".prices-check").forEach(chk => chk.addEventListener("change", updatePricesSaveBar));
+    updatePricesSaveBar();
+  }
+
+  function updatePricesSaveBar(){
+    const checked = [...document.querySelectorAll(".prices-check:checked")];
+    document.getElementById("pricesSaveBar").style.display = checked.length ? "block" : "none";
+    document.getElementById("pricesSelectedCount").textContent = checked.length;
+  }
+
+  document.getElementById("pricesScanBtn").addEventListener("click", async () => {
+    const status = document.getElementById("pricesScanStatus");
+    const btn = document.getElementById("pricesScanBtn");
+    btn.disabled = true;
+    document.getElementById("pricesList").innerHTML = "";
+    document.getElementById("pricesSaveBar").style.display = "none";
+    pricesFound = [];
+    const candidates = CARDS.filter(c => c.category === "pokemon" && c.kind !== "sellado" && c.set && Number(c.price) > 0 && !c.deleted);
+    if (!candidates.length){ status.textContent = "No hay cartas Pokémon en tu catálogo para revisar."; btn.disabled = false; return; }
+    if (!bulkFxLoaded){
+      try {
+        const fxRes = await fetch(`${WORKER_URL}/fx-rate`, { cache: "no-store" });
+        const fxData = await fxRes.json();
+        if (fxData.rate){ bulkFxRate = fxData.rate; bulkFxLoaded = true; }
+      } catch {}
+    }
+    const bySet = {};
+    candidates.forEach(c => { const k = c.set.toLowerCase(); (bySet[k] = bySet[k] || []).push(c); });
+    const setKeys = Object.keys(bySet);
+    let checkedSets = 0;
+    for (const setKey of setKeys){
+      checkedSets++;
+      status.textContent = `Revisando expansión ${checkedSets} de ${setKeys.length}: ${bySet[setKey][0].set}…`;
+      try {
+        const res = await fetch(`${WORKER_URL}/cards-by-set?set=${encodeURIComponent(bySet[setKey][0].set)}`, { cache: "no-store" });
+        const data = await res.json();
+        const apiCards = data.cards || [];
+        bySet[setKey].forEach(card => {
+          const num = Number(card.num) || 0;
+          let match = apiCards.find(ac => parseInt(ac.number, 10) === num);
+          if (!match) match = apiCards.find(ac => ac.name.toLowerCase() === (card.name || "").toLowerCase());
+          const usd = match ? bestPrice(match.tcgplayer) : null;
+          if (usd){
+            const suggested = Math.round(usd * bulkFxRate);
+            if (suggested > Number(card.price)){
+              pricesFound.push({ id: card.id, name: card.name, set: card.set, num: card.num, current: Number(card.price), suggested, usd });
+            }
+          }
+        });
+      } catch { /* seguimos con el resto de las expansiones aunque una falle */ }
+    }
+    btn.disabled = false;
+    if (!pricesFound.length){
+      status.textContent = "Listo — no encontré ninguna carta con precio de TCGplayer más alto que el tuyo. Vas bien.";
+    } else {
+      // las que más se quedaron atrás primero
+      pricesFound.sort((a,b) => (b.suggested - b.current) - (a.suggested - a.current));
+      status.textContent = `${pricesFound.length} carta(s) con precio sugerido más alto que el marcado. Revisa y quita las que no quieras subir.`;
+      renderPricesList();
+    }
+  });
+
+  document.getElementById("pricesSaveBtn").addEventListener("click", async () => {
+    const checks = [...document.querySelectorAll(".prices-check:checked")];
+    const status = document.getElementById("pricesSaveStatus");
+    const btn = document.getElementById("pricesSaveBtn");
+    if (!checks.length) return;
+    btn.disabled = true;
+    let done = 0, failed = 0;
+    for (const chk of checks){
+      const i = Number(chk.dataset.i);
+      const item = pricesFound[i];
+      status.textContent = `Actualizando ${done + 1} de ${checks.length}: ${item.name}…`;
+      try {
+        const res = await fetch(`${WORKER_URL}/admin/edit-product`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(item.id), changes: { price: item.suggested } })
+        });
+        const data = await res.json();
+        if (data.ok){
+          const card = CARDS.find(c => String(c.id) === String(item.id));
+          if (card) card.price = item.suggested;
+          fetch(`${WORKER_URL}/admin/log-price`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(item.id), price: item.suggested })
+          }).catch(() => {});
+          done++;
+        } else { failed++; }
+      } catch { failed++; }
+    }
+    refreshAllViews();
+    pricesFound = pricesFound.filter((_, i) => !checks.some(chk => Number(chk.dataset.i) === i));
+    renderPricesList();
+    btn.disabled = false;
+    document.getElementById("pricesScanStatus").textContent = failed
+      ? `✓ ${done} actualizadas — ${failed} con error.`
+      : `✓ ${done} actualizadas.`;
+  });
 })();
 
 /* ---- abre una pieza específica si el link trae ?producto=ID (compartido por alguien) ---- */
