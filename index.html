@@ -984,7 +984,7 @@
 <div class="announce">
   <div class="ticker-track">
     <span class="ticker-item"><span class="dot"></span>Envíos a todo México</span>
-    <span class="ticker-item"><span class="dot"></span>Entregas MTY: punto medio o Y Griega</span>
+    <span class="ticker-item"><span class="dot"></span>Entregas MTY: punto medio, Y Griega o Buzón</span>
     <span class="ticker-item"><span class="dot"></span><b>Separa por WhatsApp</b></span>
     <span class="ticker-item"><span class="dot"></span><b>Paga: transferencia, tarjeta o efectivo</b></span>
   </div>
@@ -1807,6 +1807,7 @@
       <div class="pay-options" id="deliveryOptions">
         <button type="button" class="pay-opt active" data-delivery="punto-medio">📍 Punto medio</button>
         <button type="button" class="pay-opt" data-delivery="y-griega">📍 Y Griega</button>
+        <button type="button" class="pay-opt" data-delivery="buzon">✉️ Buzón</button>
         <button type="button" class="pay-opt" data-delivery="envio">📦 Envío a domicilio</button>
       </div>
 
@@ -1987,7 +1988,7 @@ const state = {
   wishlist: new Set(JSON.parse(localStorage.getItem("vitrina_wishlist") || "[]"))
 };
 function saveWishlist(){ localStorage.setItem("vitrina_wishlist", JSON.stringify([...state.wishlist])); }
-const DELIVERY_LABELS = { "punto-medio": "Recolección en punto medio", "y-griega": "Recolección en Y Griega", "envio": "Envío a domicilio" };
+const DELIVERY_LABELS = { "punto-medio": "Recolección en punto medio", "y-griega": "Recolección en Y Griega", "buzon": "Entrega en Buzón", "envio": "Envío a domicilio" };
 
 const money = n => "$" + n.toLocaleString("es-MX");
 function unique(key){ return [...new Set(CARDS.map(c => c[key]).filter(Boolean))]; }
