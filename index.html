@@ -306,20 +306,20 @@
   .catalog-head{margin-bottom:18px;}
   section.toys{padding:20px 0 8px;border-top:1px solid var(--line);margin-top:20px;}
   .toys-head{margin-bottom:16px;}
-  .acrylic-promo-banner{
+  .promo-banner{
     display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:18px 22px;
     border-radius:16px;position:relative;overflow:hidden;
     background:linear-gradient(120deg,rgba(201,162,39,.12),rgba(201,162,39,.03) 60%),var(--ink-2);
     border:1px solid var(--foil-dim);
   }
-  .acrylic-promo-banner::before{
+  .promo-banner::before{
     content:"";position:absolute;top:-40%;right:-10%;width:220px;height:220px;border-radius:999px;
     background:radial-gradient(circle,rgba(232,199,102,.18),transparent 70%);pointer-events:none;
   }
   .apb-icon{font-size:34px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(201,162,39,.4));}
   .apb-title{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--foil-bright);margin-bottom:3px;}
   .apb-sub{font-size:12.5px;color:var(--cream-dim);line-height:1.5;}
-  @media (max-width:640px){ .acrylic-promo-banner{padding:14px 16px;gap:12px;} .apb-icon{font-size:26px;} .apb-title{font-size:14.5px;} .apb-sub{font-size:11.5px;} }
+  @media (max-width:640px){ .promo-banner{padding:14px 16px;gap:12px;} .apb-icon{font-size:26px;} .apb-title{font-size:14.5px;} .apb-sub{font-size:11.5px;} }
 
   .anniversary-banner{padding:20px 0 4px;}
   .ab-inner{
@@ -674,8 +674,11 @@
   .card-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   .tag{font-size:10.5px;padding:2px 7px;border-radius:5px;background:var(--ink-4);color:var(--cream-dim);border:1px solid var(--line);}
   .trend-tag{background:rgba(76,139,107,.15);color:var(--ok);border-color:rgba(76,139,107,.4);font-weight:600;}
+  .offer-tag{background:rgba(181,72,42,.15);color:var(--ember-bright);border-color:rgba(181,72,42,.4);font-weight:600;}
   .card-price-row{display:flex;align-items:baseline;justify-content:space-between;}
+  .card-price-group{display:flex;align-items:baseline;gap:6px;min-width:0;}
   .card-price{font-family:var(--font-mono);font-weight:600;font-size:16px;color:var(--foil-bright);}
+  .card-price-was{font-family:var(--font-mono);font-size:11.5px;color:var(--slate);text-decoration:line-through;white-space:nowrap;}
   .card-cond{font-size:11px;color:var(--slate);}
   .qty-stepper{display:flex;align-items:center;justify-content:space-between;margin-top:10px;background:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:4px 4px;}
   .qty-stepper button{background:var(--ink-4);border:none;color:var(--cream);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;}
@@ -801,6 +804,11 @@
   .drawer-item .price{font-family:var(--font-mono);color:var(--foil-bright);font-size:13.5px;white-space:nowrap;}
   .drawer-item .remove{background:none;border:none;color:var(--slate);cursor:pointer;padding:4px;}
   .drawer-item .remove:hover{color:var(--ember-bright);}
+  .drawer-qty-stepper{display:inline-flex;align-items:center;gap:8px;margin-top:6px;background:var(--ink);border:1px solid var(--line-strong);border-radius:7px;padding:2px 5px;}
+  .drawer-qty-stepper button{background:var(--ink-4);border:none;color:var(--cream);width:20px;height:20px;border-radius:5px;cursor:pointer;font-size:13px;line-height:1;}
+  .drawer-qty-stepper button:hover:not(:disabled){background:var(--foil-dim);color:var(--foil-bright);}
+  .drawer-qty-stepper button:disabled{opacity:.35;cursor:default;}
+  .drawer-qty-stepper span{font-family:var(--font-mono);font-size:11.5px;min-width:14px;text-align:center;}
   .drawer-empty{padding:40px 0;text-align:center;color:var(--slate);font-size:13.5px;}
   .drawer-foot{padding:14px 20px 18px;border-top:1px solid var(--line);flex-shrink:0;}
   .drawer-total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;font-size:13.5px;}
@@ -909,6 +917,8 @@
   .zoom-info h3{font-family:var(--font-display);font-weight:560;font-size:24px;margin:0 0 12px;}
   .zoom-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
   .zoom-price{font-family:var(--font-mono);font-weight:600;font-size:26px;color:var(--foil-bright);}
+  .zoom-price-was{font-family:var(--font-mono);font-weight:500;font-size:15px;color:var(--slate);text-decoration:line-through;margin-right:4px;}
+  .offer-badge{background:rgba(181,72,42,.85);color:var(--cream);border:1px solid var(--ember);}
   .zoom-stock{font-size:12.5px;color:var(--ok);margin-top:6px;}
   .zoom-stock.sold{color:var(--ember-bright);}
 
@@ -998,7 +1008,7 @@
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-7.5-4.6-10-9.3C.5 8 2 4.5 5.5 4c2-.3 3.8.7 4.9 2.3l1.6 2.2 1.6-2.2C14.7 4.7 16.5 3.7 18.5 4c3.5.5 5 4 3.5 7.2-2.5 4.7-10 9.3-10 9.3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
         <span class="cart-count" id="wishCount" style="display:none;">0</span>
       </button>
-      <button class="icon-btn cart-pill" id="cartToggle" aria-label="Ver selección">
+      <button class="icon-btn cart-pill" id="cartToggle" aria-label="Ver carrito">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h2l1.6 9.6a2 2 0 002 1.7h7.4a2 2 0 002-1.6L20 9H7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.2" fill="currentColor"/><circle cx="17" cy="20" r="1.2" fill="currentColor"/></svg>
         <span class="cart-count" id="cartCount" style="display:none;">0</span>
       </button>
@@ -1077,6 +1087,13 @@
   <section class="catalog" id="catalogo">
     <div class="wrap">
       <div class="catalog-head"><span class="eyebrow">Catálogo</span><h2>Piezas disponibles</h2></div>
+      <div class="promo-banner" id="promoBanner-pokemon" style="display:none;">
+        <div class="apb-icon">🎁</div>
+        <div class="apb-text">
+          <div class="apb-title"></div>
+          <div class="apb-sub"></div>
+        </div>
+      </div>
 
       <div class="kind-tabs" id="kindTabs">
         <button class="kind-tab active" data-kind="all">Todo</button>
@@ -1147,6 +1164,13 @@
         Volver al catálogo de cartas
       </a>
       <div class="toys-head"><span class="eyebrow">Colección especial</span><h2><span class="jp-flag" style="display:inline-flex;vertical-align:middle;margin-right:8px;"><svg viewBox="0 0 30 20" width="26" height="17"><rect width="30" height="20" rx="2" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg></span>Exclusivos Pokémon Center JP</h2></div>
+      <div class="promo-banner" id="promoBanner-pcjp" style="display:none;">
+        <div class="apb-icon">🎁</div>
+        <div class="apb-text">
+          <div class="apb-title"></div>
+          <div class="apb-sub"></div>
+        </div>
+      </div>
       <div class="toolbar" style="margin-bottom:18px;">
         <div class="search-field">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -1172,11 +1196,11 @@
         Volver al catálogo de cartas
       </a>
       <div class="toys-head"><span class="eyebrow">Colección especial</span><h2>Acrílicos</h2></div>
-      <div class="acrylic-promo-banner">
+      <div class="promo-banner" id="promoBanner-acrylic" style="display:none;">
         <div class="apb-icon">🎁</div>
         <div class="apb-text">
-          <div class="apb-title">10% de descuento extra en acrílicos</div>
-          <div class="apb-sub">Al comprar <b>$500 o más</b> en otros productos de la tienda, cualquier acrílico que agregues lleva 10% menos — se aplica solo con armar tu carrito, sin código.</div>
+          <div class="apb-title"></div>
+          <div class="apb-sub"></div>
         </div>
       </div>
       <div class="toolbar" style="margin-bottom:18px;">
@@ -1204,6 +1228,13 @@
         Volver al catálogo de cartas
       </a>
       <div class="toys-head"><span class="eyebrow">Colección especial</span><h2>Coleccionables y Juguetes</h2></div>
+      <div class="promo-banner" id="promoBanner-toy" style="display:none;">
+        <div class="apb-icon">🎁</div>
+        <div class="apb-text">
+          <div class="apb-title"></div>
+          <div class="apb-sub"></div>
+        </div>
+      </div>
       <div class="toolbar" style="margin-bottom:18px;">
         <div class="search-field">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -1259,7 +1290,7 @@
   <section class="faq" id="faq">
     <div class="wrap">
       <div class="faq-head"><span class="eyebrow">Dudas rápidas</span><h2>Preguntas frecuentes</h2></div>
-      <details class="faq-item" open><summary>¿Cómo pago mi pedido?</summary><p>Separas tu selección por WhatsApp y pagas por transferencia, tarjeta o efectivo, con entrega en persona.</p></details>
+      <details class="faq-item" open><summary>¿Cómo pago mi pedido?</summary><p>Apartas tu carrito por WhatsApp y pagas por transferencia, tarjeta o efectivo, con entrega en persona.</p></details>
       <details class="faq-item"><summary>¿Cómo sé el estado real de la carta?</summary><p>Cada pieza indica su condición (M, NM, LP, MP o HP) según la escala estándar de grading. Si tienes dudas, pide fotos por WhatsApp antes de confirmar.</p></details>
       <details class="faq-item"><summary>¿Hacen envíos a toda la República?</summary><p>Sí. Enviamos a todo México con paquetería asegurada. El costo se confirma junto con tu apartado por WhatsApp.</p></details>
       <details class="faq-item"><summary>¿Puedo recoger en persona?</summary><p>Sí, coordina punto y horario de entrega directamente por WhatsApp al confirmar tu pedido.</p></details>
@@ -1309,6 +1340,7 @@
       <button type="button" class="pay-opt active" id="adminTabAdd" style="flex:1;">➕ Agregar</button>
       <button type="button" class="pay-opt" id="adminTabEdit" style="flex:1;">✏️ Editar</button>
       <button type="button" class="pay-opt" id="adminTabBulk" style="flex:1;">📋 Inventario rápido</button>
+      <button type="button" class="pay-opt" id="adminTabCsv" style="flex:1;">📥 Importar CSV</button>
       <button type="button" class="pay-opt" id="adminTabPrices" style="flex:1;">💲 Precios</button>
       <button type="button" class="pay-opt" id="adminTabCoupons" style="flex:1;">🎟️ Cupones</button>
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
@@ -1370,13 +1402,17 @@
         <div class="field-mini"><span class="field-label">Precio (MXN)</span><input type="number" id="adminPrice" placeholder="Precio (MXN)" style="width:100%;"></div>
         <div class="field-mini"><span class="field-label">Stock</span><input type="number" id="adminStock" placeholder="Stock" value="1" style="width:100%;"></div>
       </div>
+      <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
+        <div class="field-mini"><span class="field-label">Precio anterior (opcional)</span><input type="number" id="adminOriginalPrice" placeholder="Ej. 300" style="width:100%;"></div>
+      </div>
+      <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Oferta" en el catálogo y su ficha.</p>
       <div class="price-suggest-row">
         <button type="button" class="price-suggest-btn" id="adminSuggestPriceBtn">💲 Sugerir precio</button>
         <span class="price-suggest-hint" id="adminSuggestPriceHint"></span>
       </div>
       <div id="adminImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;margin-top:6px;"></div>
       <button type="button" class="btn btn-ghost" id="adminUploadBtn" style="width:100%;margin-bottom:8px;">📎 Agregar foto(s)</button>
-      <input type="file" id="adminFileInput" accept="image/*" multiple style="display:none;">
+      <input type="file" id="adminFileInput" accept="image/*,.heic,.heif" multiple style="display:none;">
       <input type="text" id="adminPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
       <p style="font-size:10.5px;color:var(--slate);margin-top:4px;">La primera foto es la principal (la del catálogo). Las demás forman una galería que se ve al expandir la imagen.</p>
       <button type="button" class="price-suggest-btn" id="adminAiIdentifyBtn" style="width:100%;justify-content:center;margin-top:10px;">🤖 Identificar con IA (llena los campos de arriba solo)</button>
@@ -1437,6 +1473,10 @@
           <div class="field-mini"><span class="field-label">Precio (MXN)</span><input type="number" id="editPrice" placeholder="Precio (MXN)" style="width:100%;"></div>
           <div class="field-mini"><span class="field-label">Stock</span><input type="number" id="editStock" placeholder="Stock" style="width:100%;"></div>
         </div>
+        <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
+          <div class="field-mini"><span class="field-label">Precio anterior (opcional)</span><input type="number" id="editOriginalPrice" placeholder="Ej. 300" style="width:100%;"></div>
+        </div>
+        <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Oferta" en el catálogo y su ficha.</p>
         <div class="price-suggest-row">
           <button type="button" class="price-suggest-btn" id="editSuggestPriceBtn">💲 Sugerir precio</button>
           <span class="price-suggest-hint" id="editSuggestPriceHint"></span>
@@ -1470,7 +1510,7 @@
         </datalist>
         <div id="editImgGallery" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
         <button type="button" class="btn btn-ghost" id="editUploadBtn" style="width:100%;margin-bottom:8px;">📎 Agregar foto(s)</button>
-        <input type="file" id="editFileInput" accept="image/*" multiple style="display:none;">
+        <input type="file" id="editFileInput" accept="image/*,.heic,.heif" multiple style="display:none;">
         <input type="text" id="editPasteInput" placeholder="O pega una imagen (Ctrl+V) o un link" style="width:100%;">
         <p style="font-size:10.5px;color:var(--slate);margin-top:4px;">La primera foto es la principal. Las demás forman una galería.</p>
         <button type="button" class="price-suggest-btn" id="editAiIdentifyBtn" style="width:100%;justify-content:center;margin-top:10px;">🤖 Volver a identificar con IA</button>
@@ -1529,6 +1569,17 @@
       </div>
     </div>
 
+    <div id="adminCsvPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Collectr</span><h3>Importar / actualizar desde CSV</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 14px;">Sube el export de tu app de Collectr: agrega de un jalón las piezas que no tengas todavía y actualiza el stock de las que ya están publicadas. La <b>rareza</b> siempre se sincroniza con el CSV. El <b>precio nunca baja solo</b>: se actualiza únicamente si el CSV resulta mayor al que ya tienes (o si marcas "forzar" abajo). Nada de esto toca archivos ni necesita que subas nada a GitHub — queda guardado en tu sitio al instante.</p>
+      <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
+      <button type="button" class="btn btn-ghost" id="csvImportBtn" style="width:100%;justify-content:center;margin-bottom:8px;">Elegir CSV de Collectr</button>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--cream-dim);margin-bottom:10px;">
+        <input type="checkbox" id="forceCsvPrice" style="width:16px;height:16px;"> ⚠️ Forzar precio EXACTO del CSV (permite que baje) — úsalo solo para corregir errores
+      </label>
+      <p class="promo-status" id="csvImportStatus"></p>
+    </div>
+
     <div id="adminPricesPanel" style="display:none;">
       <div class="order-head"><span class="eyebrow">No te quedes atrás</span><h3>Revisar precios contra TCGplayer</h3></div>
       <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 14px;">Revisa, entre las cartas Pokémon que ya tienes publicadas, cuáles tienen un precio de referencia de TCGplayer más alto que el que traes marcado — para subirlas todas de un jalón en vez de ir una por una. Puede tardar un momento porque revisa expansión por expansión.</p>
@@ -1539,6 +1590,16 @@
         <button type="button" class="btn btn-foil" id="pricesSaveBtn" style="width:100%;justify-content:center;">Actualizar seleccionadas (<span id="pricesSelectedCount">0</span>)</button>
         <p class="promo-status" id="pricesSaveStatus"></p>
       </div>
+
+      <div class="order-head" style="margin-top:26px;"><span class="eyebrow">Automático</span><h3>Reglas de precio</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 14px;">Crea reglas para subir precios de un jalón en todo tu inventario (ej. "toda carta Holo rara de $50 a $150 pásala a $200"). Igual que arriba, nunca bajan el precio de una pieza, y respetan el 🔒 de las piezas con precio fijo.</p>
+      <div id="priceRulesList"></div>
+      <button type="button" class="btn btn-ghost" id="addPriceRuleBtn" style="width:100%;justify-content:center;margin:8px 0;">+ Agregar regla</button>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn btn-ghost" id="previewRulesBtn" style="flex:1;justify-content:center;">Vista previa</button>
+        <button type="button" class="btn btn-foil" id="savePriceRulesBtn" style="flex:1;justify-content:center;">Guardar reglas</button>
+      </div>
+      <p class="promo-status" id="priceRulesStatus"></p>
     </div>
 
     <div id="adminCouponsPanel" style="display:none;">
@@ -1576,6 +1637,60 @@
         <input type="text" id="configCommunityUrl" placeholder="Ej. https://chat.whatsapp.com/AbCdEfGhIjK" style="width:100%;">
       </div>
       <p style="font-size:11px;color:var(--slate);margin:0 0 14px;">Es a donde lleva el botón "💬 Unirme a la Comunidad" del sitio. En cuanto crees tu comunidad de WhatsApp, copia aquí su enlace de invitación — sin esto, el botón usa un enlace genérico que no lleva a ningún lado en concreto.</p>
+
+      <div class="order-head" style="margin-top:26px;"><span class="eyebrow">Siempre protegido</span><h3>Respaldos</h3></div>
+      <p style="font-size:11px;color:var(--slate);margin:-6px 0 12px;">Cada día, solo, sin que nadie tenga que acordarse, se guarda una copia completa de tu catálogo, ediciones, stock, historial de precios, logos de set y cupones. Se quedan los últimos 15 días y las copias más viejas se borran solas. Si algo se borra por error, aquí puedes traerlo de vuelta.</p>
+      <button type="button" class="btn btn-ghost" id="backupNowBtn" style="width:100%;justify-content:center;margin-bottom:8px;">Respaldar ahora mismo</button>
+      <p class="promo-status" id="backupStatus"></p>
+      <div id="backupsList" style="font-size:12.5px;"></div>
+
+      <div class="order-head" style="margin-top:26px;"><span class="eyebrow">Marketing</span><h3>Banners de oferta por categoría</h3></div>
+      <p style="font-size:11px;color:var(--slate);margin:-6px 0 14px;">El mismo tipo de aviso que ves en Acrílicos ("🎁 10% de descuento extra…"), pero uno para cada categoría, con el ícono y el texto que tú quieras. Actívalo solo en las que tengan promoción vigente — se ve arriba del catálogo de esa categoría, en cel y en compu.</p>
+
+      <div class="banner-editor" data-cat="pokemon" style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line);">
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--cream-dim);">
+          <input type="checkbox" class="banner-enabled" style="width:16px;height:16px;"> Mostrar en <b>Cartas</b>
+        </label>
+        <div class="row" style="display:flex;gap:8px;margin-bottom:8px;">
+          <div class="field-mini" style="width:64px;flex-shrink:0;"><span class="field-label">Ícono</span><input type="text" class="banner-icon" maxlength="4" placeholder="🎁" style="width:100%;text-align:center;"></div>
+          <div class="field-mini" style="flex:1;"><span class="field-label">Título</span><input type="text" class="banner-title" placeholder="Ej. 10% de descuento en cartas seleccionadas" style="width:100%;"></div>
+        </div>
+        <div class="field"><span class="field-label">Descripción</span><textarea class="banner-text" placeholder="Detalles de la promoción…" style="width:100%;min-height:50px;resize:vertical;background:var(--ink);border:1px solid var(--line-strong);border-radius:8px;color:var(--cream);padding:9px 11px;font:inherit;"></textarea></div>
+      </div>
+
+      <div class="banner-editor" data-cat="pcjp" style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line);">
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--cream-dim);">
+          <input type="checkbox" class="banner-enabled" style="width:16px;height:16px;"> Mostrar en <b>Exclusivos Pokémon Center JP</b>
+        </label>
+        <div class="row" style="display:flex;gap:8px;margin-bottom:8px;">
+          <div class="field-mini" style="width:64px;flex-shrink:0;"><span class="field-label">Ícono</span><input type="text" class="banner-icon" maxlength="4" placeholder="🎁" style="width:100%;text-align:center;"></div>
+          <div class="field-mini" style="flex:1;"><span class="field-label">Título</span><input type="text" class="banner-title" placeholder="Ej. Envío gratis en exclusivos JP" style="width:100%;"></div>
+        </div>
+        <div class="field"><span class="field-label">Descripción</span><textarea class="banner-text" placeholder="Detalles de la promoción…" style="width:100%;min-height:50px;resize:vertical;background:var(--ink);border:1px solid var(--line-strong);border-radius:8px;color:var(--cream);padding:9px 11px;font:inherit;"></textarea></div>
+      </div>
+
+      <div class="banner-editor" data-cat="toy" style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line);">
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--cream-dim);">
+          <input type="checkbox" class="banner-enabled" style="width:16px;height:16px;"> Mostrar en <b>Juguetes / Coleccionables</b>
+        </label>
+        <div class="row" style="display:flex;gap:8px;margin-bottom:8px;">
+          <div class="field-mini" style="width:64px;flex-shrink:0;"><span class="field-label">Ícono</span><input type="text" class="banner-icon" maxlength="4" placeholder="🎁" style="width:100%;text-align:center;"></div>
+          <div class="field-mini" style="flex:1;"><span class="field-label">Título</span><input type="text" class="banner-title" placeholder="Ej. 2x1 en llaveros seleccionados" style="width:100%;"></div>
+        </div>
+        <div class="field"><span class="field-label">Descripción</span><textarea class="banner-text" placeholder="Detalles de la promoción…" style="width:100%;min-height:50px;resize:vertical;background:var(--ink);border:1px solid var(--line-strong);border-radius:8px;color:var(--cream);padding:9px 11px;font:inherit;"></textarea></div>
+      </div>
+
+      <div class="banner-editor" data-cat="acrylic" style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line);">
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--cream-dim);">
+          <input type="checkbox" class="banner-enabled" style="width:16px;height:16px;"> Mostrar en <b>Acrílicos</b>
+        </label>
+        <div class="row" style="display:flex;gap:8px;margin-bottom:8px;">
+          <div class="field-mini" style="width:64px;flex-shrink:0;"><span class="field-label">Ícono</span><input type="text" class="banner-icon" maxlength="4" placeholder="🎁" style="width:100%;text-align:center;"></div>
+          <div class="field-mini" style="flex:1;"><span class="field-label">Título</span><input type="text" class="banner-title" placeholder="Ej. 10% de descuento extra en acrílicos" style="width:100%;"></div>
+        </div>
+        <div class="field"><span class="field-label">Descripción</span><textarea class="banner-text" placeholder="Detalles de la promoción…" style="width:100%;min-height:50px;resize:vertical;background:var(--ink);border:1px solid var(--line-strong);border-radius:8px;color:var(--cream);padding:9px 11px;font:inherit;"></textarea></div>
+      </div>
+
       <button type="button" class="btn btn-foil" id="configSaveBtn" style="width:100%;justify-content:center;">Guardar configuración</button>
       <p class="promo-status" id="configSaveStatus"></p>
     </div>
@@ -1584,7 +1699,7 @@
 
 <div class="cart-bar" id="cartBar">
   <div class="cart-bar-info"><b id="cartBarCount">0</b> piezas · Total aprox. <b id="cartBarTotal">$0</b></div>
-  <button class="btn btn-foil" id="openDrawerBtn">Ver selección</button>
+  <button class="btn btn-foil" id="openDrawerBtn">Ver carrito</button>
 </div>
 
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
@@ -1668,7 +1783,7 @@
   <button class="zoom-close icon-btn" id="orderClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <div class="order-head">
     <span class="eyebrow">Resumen de pedido</span>
-    <h3>Estas son las piezas seleccionadas</h3>
+    <h3>Estas son las piezas de tu carrito</h3>
   </div>
   <div class="order-list" id="orderList"></div>
   <div class="order-totals" id="orderTotals"></div>
@@ -1684,7 +1799,7 @@
 </div>
 
 <div class="drawer" id="drawer">
-  <div class="drawer-head"><h3>Tu selección</h3><button class="icon-btn" id="drawerClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
+  <div class="drawer-head"><h3>Tu carrito</h3><button class="icon-btn" id="drawerClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
   <div class="drawer-scroll" id="drawerScroll">
     <div id="drawerList"></div>
     <div class="pay-methods">
@@ -1714,7 +1829,7 @@
           <button type="button" class="pay-opt" data-pay="card">💳 Tarjeta / MercadoPago</button>
         </div>
         <div class="pay-panel" id="payPanelWhatsapp">
-          <p style="margin:0;">Apartas tu selección por WhatsApp, coordinamos el pago por <b>transferencia o efectivo</b>, y la entrega es <b>en persona</b> (o envío, según acordemos).</p>
+          <p style="margin:0;">Apartas tu carrito por WhatsApp, coordinamos el pago por <b>transferencia o efectivo</b>, y la entrega es <b>en persona</b> (o envío, según acordemos).</p>
         </div>
         <div class="pay-panel" id="payPanelTransfer" style="display:none;"></div>
         <div class="pay-panel" id="payPanelCard" style="display:none;">
@@ -1799,6 +1914,15 @@ const BANK_INFO = { // <-- reemplaza con tus datos reales para transferencia
   titular: "Nombre del titular"
 };
 const CARDS = window.CARDS || [];
+
+// "sellado" (pokémon) y los productos de las otras categorías (acrílico, juguete, exclusivo JP)
+// se venden por STOCK/cantidad — puedes tener 2, 3, etc. — a diferencia de una carta suelta
+// (kind==="single"), que es siempre una sola pieza física única. Cualquier lugar del sitio que
+// decida "¿este producto admite +/- cantidad?" debe usar esta misma función, para que el
+// comportamiento sea idéntico en todas las categorías (antes solo "sellado" tenía el stepper,
+// y acrílicos/juguetes/JP se quedaban con un botón de un solo clic que no dejaba pedir más de 1).
+function isQtyKind(kind){ return kind === "sellado" || kind === "toy" || kind === "acrylic" || kind === "pcjp"; }
+function isOnOffer(card){ return Number(card.originalPrice) > Number(card.price); }
 
 const TYPE_COLORS = {
   fuego:"linear-gradient(150deg,#3a1f18,#5a2a1c 55%,#7a3420)",
@@ -2441,12 +2565,12 @@ function renderCard(card){
     <div class="card-info">
       <div class="card-set"><span>${card.set}</span>${card.num ? `<span>${card.code}${String(card.num).padStart(3,"0")}/${card.total}</span>` : ""}</div>
       <p class="card-name">${card.name}</p>
-      <div class="card-meta">${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}<span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}</div>
-      <div class="card-price-row"><span class="card-price">${money(card.price)}</span><span class="card-cond">${card.condition}</span></div>
-      ${card.kind==="sellado" ? `
+      <div class="card-meta">${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}<span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}${isOnOffer(card) ? '<span class="tag offer-tag">🏷️ Oferta</span>' : ''}</div>
+      <div class="card-price-row"><span class="card-price-group">${isOnOffer(card) ? `<span class="card-price-was">${money(card.originalPrice)}</span>` : ''}<span class="card-price">${money(card.price)}</span></span><span class="card-cond">${card.condition}</span></div>
+      ${isQtyKind(card.kind) ? `
       <div class="qty-stepper">
         <button class="qty-minus" aria-label="Quitar uno" ${soldOut?'disabled':''}>−</button>
-        <span>${qty} en tu selección</span>
+        <span>${qty} en tu carrito</span>
         <button class="qty-plus" aria-label="Agregar uno" ${soldOut?'disabled':''}>+</button>
       </div>` : `
       <button type="button" class="add-to-cart-btn ${qty>0 ? 'in-cart' : ''}" ${soldOut?'disabled':''}>${soldOut ? 'Agotado' : (qty>0 ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> En tu carrito' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 6h2l1.6 9.6a2 2 0 002 1.7h7.4a2 2 0 002-1.6L20 9H7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.3" fill="currentColor"/><circle cx="17" cy="20" r="1.3" fill="currentColor"/></svg> Agregar')}</button>`}
@@ -2459,7 +2583,7 @@ function renderCard(card){
     saveCart(); refreshCardInPlace(card.id); updateCartUI();
     if (opts?.closeZoom) closeZoom();
   };
-  if (card.kind === "sellado"){
+  if (isQtyKind(card.kind)){
     el.querySelector(".qty-plus").addEventListener("click", ev => {
       ev.stopPropagation();
       if (soldOut) return;
@@ -2579,7 +2703,7 @@ function openZoom(card){
   renderZoomArt();
 
   const soldOut = card.stock <= 0;
-  document.getElementById("zoomBadges").innerHTML = `${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}${card.hot && !soldOut ? '<span class="badge-hot">🔥 Muy buscada</span>' : ''}`;
+  document.getElementById("zoomBadges").innerHTML = `${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}${card.hot && !soldOut ? '<span class="badge-hot">🔥 Muy buscada</span>' : ''}${isOnOffer(card) ? '<span class="badge offer-badge">🏷️ OFERTA</span>' : ''}`;
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
   document.getElementById("zoomName").textContent = card.name;
   const langInfo = getLangInfo(card);
@@ -2594,16 +2718,18 @@ function openZoom(card){
       descEl.style.display = "none";
     }
   }
-  document.getElementById("zoomPrice").textContent = money(card.price);
+  document.getElementById("zoomPrice").innerHTML = isOnOffer(card)
+    ? `<span class="zoom-price-was">${money(card.originalPrice)}</span> ${money(card.price)}`
+    : money(card.price);
   const stockEl = document.getElementById("zoomStock");
-  stockEl.textContent = soldOut ? "Agotado" : (card.kind==="sellado" ? `Disponible: ${card.stock}` : (card.stock===1 ? "Última pieza disponible" : "Disponible"));
+  stockEl.textContent = soldOut ? "Agotado" : (isQtyKind(card.kind) ? `Disponible: ${card.stock}` : (card.stock===1 ? "Última pieza disponible" : "Disponible"));
   stockEl.className = "zoom-stock" + (soldOut ? " sold" : "");
   const addBtn = document.getElementById("zoomAddBtn");
   addBtn.disabled = soldOut;
   addBtn.textContent = soldOut ? "Agotado" : "Agregar al carrito";
   addBtn.onclick = () => {
     if (soldOut) return;
-    if (card.kind === "sellado"){
+    if (isQtyKind(card.kind)){
       const cur = state.selected[card.id] || 0;
       if (cur < card.stock){ state.selected[card.id] = cur+1; saveCart(); refreshCardInPlace(card.id); updateCartUI(); showToast(`<b>${card.name}</b> agregado`); }
     } else {
@@ -2853,14 +2979,35 @@ function updateCartUI(){
       const row = document.createElement("div");
       row.className = "drawer-item";
       const bg = card.image ? `background-image:url('${card.image}')` : `background:${TYPE_COLORS[card.type]}`;
+      const qtyCapable = isQtyKind(card.kind);
       row.innerHTML = `
         <div class="art" style="${bg}"></div>
-        <div class="grow"><div class="name">${card.name}${qty>1?` ×${qty}`:''}</div><div class="sub">${card.set} · ${card.condition}</div></div>
+        <div class="grow">
+          <div class="name">${card.name}${(!qtyCapable && qty>1)?` ×${qty}`:''}</div>
+          <div class="sub">${card.set} · ${card.condition}</div>
+          ${qtyCapable ? `
+          <div class="drawer-qty-stepper">
+            <button class="drawer-qty-minus" aria-label="Quitar uno">−</button>
+            <span>${qty}</span>
+            <button class="drawer-qty-plus" aria-label="Agregar uno"${qty>=card.stock?' disabled':''}>+</button>
+          </div>` : ''}
+        </div>
         <div class="price">${money(card.price*qty)}</div>
         <button class="remove" aria-label="Quitar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       `;
       row.querySelector(".art").addEventListener("click", () => openZoom(card));
       row.querySelector(".remove").addEventListener("click", () => { delete state.selected[card.id]; saveCart(); refreshCardInPlace(card.id); updateCartUI(); });
+      if (qtyCapable){
+        row.querySelector(".drawer-qty-plus").addEventListener("click", () => {
+          const cur = state.selected[card.id] || 0;
+          if (cur < card.stock){ state.selected[card.id] = cur + 1; saveCart(); refreshCardInPlace(card.id); updateCartUI(); }
+        });
+        row.querySelector(".drawer-qty-minus").addEventListener("click", () => {
+          const cur = state.selected[card.id] || 0;
+          if (cur <= 1) delete state.selected[card.id]; else state.selected[card.id] = cur - 1;
+          saveCart(); refreshCardInPlace(card.id); updateCartUI();
+        });
+      }
       drawerList.appendChild(row);
     });
   }
@@ -3232,7 +3379,7 @@ function renderWishlist(){
       const card = CARDS.find(c => c.id === id);
       if (!card || card.stock <= 0) return;
       const cur = state.selected[id] || 0;
-      if (card.kind === "sellado" || card.kind === "toy" || card.kind === "acrylic" || card.kind === "pcjp"){
+      if (isQtyKind(card.kind)){
         if (cur < card.stock) state.selected[id] = cur + 1;
       } else if (cur === 0){
         state.selected[id] = 1;
@@ -3533,6 +3680,39 @@ fetch(`${WORKER_URL}/edits`, { cache: "no-store" })
 // los valores fijos de arriba/del HTML tal cual. Como esto llega por red, puede resolverse
 // después de que ya se armaron algunos links con el valor por default; por eso aquí también
 // se refrescan esos lugares en vez de solo guardar la variable.
+// banners de oferta editables por categoría (mismo tipo de aviso que ya existía fijo en
+// Acrílicos — "🎁 10% de descuento extra…" — pero ahora uno por categoría, con el texto que
+// Roberto quiera, editable desde "⚙️ Config" sin tocar código). El de acrílicos arranca
+// activado con el texto de siempre para no perder la promo ya vigente; los otros tres arrancan
+// apagados hasta que se configuren.
+const DEFAULT_CATEGORY_BANNERS = {
+  pokemon: { enabled: false, icon: "🎁", title: "", text: "" },
+  pcjp: { enabled: false, icon: "🎁", title: "", text: "" },
+  toy: { enabled: false, icon: "🎁", title: "", text: "" },
+  acrylic: { enabled: true, icon: "🎁", title: "10% de descuento extra en acrílicos", text: "Al comprar $500 o más en otros productos de la tienda, cualquier acrílico que agregues lleva 10% menos — se aplica solo con armar tu carrito, sin código." }
+};
+let currentCategoryBanners = DEFAULT_CATEGORY_BANNERS;
+function applyCategoryBanners(categoryBanners){
+  const banners = {};
+  Object.keys(DEFAULT_CATEGORY_BANNERS).forEach(key => {
+    banners[key] = Object.assign({}, DEFAULT_CATEGORY_BANNERS[key], (categoryBanners && categoryBanners[key]) || {});
+  });
+  currentCategoryBanners = banners;
+  Object.entries(banners).forEach(([key, b]) => {
+    const el = document.getElementById(`promoBanner-${key}`);
+    if (!el) return;
+    if (b.enabled && (b.title || b.text)){
+      el.style.display = "flex";
+      el.querySelector(".apb-icon").textContent = b.icon || "🎁";
+      el.querySelector(".apb-title").textContent = b.title || "";
+      el.querySelector(".apb-sub").textContent = b.text || "";
+    } else {
+      el.style.display = "none";
+    }
+  });
+}
+applyCategoryBanners(); // pinta los valores por default de inmediato; /settings los reemplaza si ya se guardó algo
+
 function applySiteSettings(settings){
   if (settings.whatsappPhone) WHATSAPP_PHONE = settings.whatsappPhone;
   if (settings.communityUrl){
@@ -3546,6 +3726,7 @@ function applySiteSettings(settings){
   if (orderWaBtn && orderWaBtn.href && orderWaBtn.href.includes("wa.me/")){
     orderWaBtn.href = orderWaBtn.href.replace(/wa\.me\/\d+/, `wa.me/${WHATSAPP_PHONE}`);
   }
+  applyCategoryBanners(settings.categoryBanners);
 }
 fetch(`${WORKER_URL}/settings`, { cache: "no-store" })
   .then(r => r.json())
@@ -3715,6 +3896,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("adminAddForm").style.display = tab === "add" ? "block" : "none";
     document.getElementById("adminEditPanel").style.display = tab === "edit" ? "block" : "none";
     document.getElementById("adminBulkPanel").style.display = tab === "bulk" ? "block" : "none";
+    document.getElementById("adminTabCsv").classList.toggle("active", tab === "csv");
+    document.getElementById("adminCsvPanel").style.display = tab === "csv" ? "block" : "none";
     document.getElementById("adminPricesPanel").style.display = tab === "prices" ? "block" : "none";
     document.getElementById("adminCouponsPanel").style.display = tab === "coupons" ? "block" : "none";
     document.getElementById("adminAnalyticsPanel").style.display = tab === "analytics" ? "block" : "none";
@@ -3725,10 +3908,35 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   document.getElementById("adminTabAdd").addEventListener("click", () => showAdminTab("add"));
   document.getElementById("adminTabEdit").addEventListener("click", () => { showAdminTab("edit"); resetEditSearch(); });
   document.getElementById("adminTabBulk").addEventListener("click", () => { showAdminTab("bulk"); populateBulkSetSelect(); });
-  document.getElementById("adminTabPrices").addEventListener("click", () => showAdminTab("prices"));
+  document.getElementById("adminTabCsv").addEventListener("click", () => showAdminTab("csv"));
+  document.getElementById("adminTabPrices").addEventListener("click", () => { showAdminTab("prices"); loadPriceRules(); });
   document.getElementById("adminTabCoupons").addEventListener("click", () => { showAdminTab("coupons"); loadCoupons(); });
   document.getElementById("adminTabAnalytics").addEventListener("click", async () => { showAdminTab("analytics"); await loadAnalytics(); });
   document.getElementById("adminTabConfig").addEventListener("click", () => { showAdminTab("config"); loadSiteConfig(); });
+
+  function populateBannerEditors(categoryBanners){
+    const banners = Object.assign({}, DEFAULT_CATEGORY_BANNERS);
+    if (categoryBanners) Object.keys(banners).forEach(key => { if (categoryBanners[key]) banners[key] = Object.assign({}, banners[key], categoryBanners[key]); });
+    document.querySelectorAll(".banner-editor").forEach(block => {
+      const b = banners[block.dataset.cat] || {};
+      block.querySelector(".banner-enabled").checked = !!b.enabled;
+      block.querySelector(".banner-icon").value = b.icon || "🎁";
+      block.querySelector(".banner-title").value = b.title || "";
+      block.querySelector(".banner-text").value = b.text || "";
+    });
+  }
+  function readBannerEditors(){
+    const out = {};
+    document.querySelectorAll(".banner-editor").forEach(block => {
+      out[block.dataset.cat] = {
+        enabled: block.querySelector(".banner-enabled").checked,
+        icon: block.querySelector(".banner-icon").value.trim() || "🎁",
+        title: block.querySelector(".banner-title").value.trim(),
+        text: block.querySelector(".banner-text").value.trim()
+      };
+    });
+    return out;
+  }
 
   async function loadSiteConfig(){
     const status = document.getElementById("configSaveStatus");
@@ -3739,10 +3947,72 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       const settings = data.settings || {};
       document.getElementById("configWhatsappPhone").value = settings.whatsappPhone || "";
       document.getElementById("configCommunityUrl").value = settings.communityUrl || "";
+      populateBannerEditors(settings.categoryBanners);
     } catch {
       status.textContent = "No se pudo cargar la configuración actual.";
       status.style.color = "var(--ember-bright)";
     }
+    loadBackups();
+  }
+
+  /* ---- "Respaldos": backend ya vive en el Worker (KV BACKUPS + Cron Trigger diario), aquí
+     solo se muestra la lista y se ofrece disparar uno manual o restaurar uno anterior ---- */
+  async function loadBackups(){
+    const box = document.getElementById("backupsList");
+    box.innerHTML = "Cargando…";
+    try {
+      const pass = sessionStorage.getItem("vitrina_admin_pass");
+      const res = await fetch(`${WORKER_URL}/admin/backups?password=${encodeURIComponent(pass)}`, { cache: "no-store" });
+      const data = await res.json();
+      const backups = data.backups || [];
+      if (!backups.length){
+        box.innerHTML = `<p style="color:var(--slate);">Todavía no hay respaldos guardados. Dale a "Respaldar ahora mismo" para crear el primero (después se seguirán guardando solos, todos los días).</p>`;
+        return;
+      }
+      box.innerHTML = backups.map(b => `
+        <div class="backup-row" data-date="${b.date}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);">
+          <span>${b.date}</span>
+          <button type="button" class="restore-backup-btn" data-date="${b.date}" style="background:none;color:var(--foil-bright);text-decoration:underline;font-size:12px;">Restaurar</button>
+        </div>`).join("");
+      box.querySelectorAll(".restore-backup-btn").forEach(btn => btn.addEventListener("click", () => restoreBackup(btn.dataset.date)));
+    } catch {
+      box.innerHTML = `<p style="color:var(--ember-bright);">No se pudo cargar la lista de respaldos.</p>`;
+    }
+  }
+
+  document.getElementById("backupNowBtn").addEventListener("click", async () => {
+    const status = document.getElementById("backupStatus");
+    const btn = document.getElementById("backupNowBtn");
+    btn.disabled = true;
+    status.textContent = "Respaldando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/backup-now`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass") })
+      });
+      const data = await res.json();
+      if (data.ok){ status.textContent = `✓ Respaldo del ${data.date} guardado.`; status.style.color = "var(--ok)"; loadBackups(); }
+      else { status.textContent = data.error || "No se pudo respaldar."; status.style.color = "var(--ember-bright)"; }
+    } catch { status.textContent = "No se pudo conectar con el servidor."; status.style.color = "var(--ember-bright)"; }
+    btn.disabled = false;
+  });
+
+  async function restoreBackup(date){
+    if (!confirm(`¿Restaurar el respaldo del ${date}? Esto trae de vuelta tu catálogo, ediciones, stock, precios y logos tal como estaban ese día (no borra productos nuevos creados después). Se guarda automáticamente una copia de tu estado actual antes, por si acaso.`)) return;
+    const status = document.getElementById("backupStatus");
+    status.textContent = `Restaurando desde ${date}…`;
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/restore-backup`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), date })
+      });
+      const data = await res.json();
+      if (data.ok){
+        status.textContent = `✓ Restaurado desde ${date}. Recarga la página para ver todo actualizado.`;
+        status.style.color = "var(--ok)";
+        loadBackups();
+      } else { status.textContent = data.error || "No se pudo restaurar."; status.style.color = "var(--ember-bright)"; }
+    } catch { status.textContent = "No se pudo conectar con el servidor."; status.style.color = "var(--ember-bright)"; }
   }
 
   document.getElementById("configSaveBtn").addEventListener("click", async () => {
@@ -3750,6 +4020,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     const btn = document.getElementById("configSaveBtn");
     const whatsappPhone = document.getElementById("configWhatsappPhone").value.trim();
     const communityUrl = document.getElementById("configCommunityUrl").value.trim();
+    const categoryBanners = readBannerEditors();
     btn.disabled = true;
     status.style.color = "";
     status.textContent = "Guardando…";
@@ -3757,7 +4028,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       const res = await fetch(`${WORKER_URL}/admin/save-settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), whatsappPhone, communityUrl })
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), whatsappPhone, communityUrl, categoryBanners })
       });
       const data = await res.json();
       if (data.ok){
@@ -3905,6 +4176,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("editTotal").value = card.total || "";
     document.getElementById("editPrice").value = card.price;
     document.getElementById("editStock").value = card.stock;
+    document.getElementById("editOriginalPrice").value = card.originalPrice || "";
     document.getElementById("editRarity").value = card.rarity || "";
     document.getElementById("editLanguage").value = ["Inglés","Japonés","Chino"].includes(card.language) ? card.language : "Inglés";
     document.getElementById("editCondition").value = card.condition || "";
@@ -3957,6 +4229,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       total: Number(document.getElementById("editTotal").value) || 0,
       price: Number(document.getElementById("editPrice").value),
       stock: Number(document.getElementById("editStock").value),
+      originalPrice: Number(document.getElementById("editOriginalPrice").value) || 0,
       rarity: document.getElementById("editRarity").value.trim(),
       language: document.getElementById("editLanguage").value,
       condition: document.getElementById("editCondition").value.trim(),
@@ -4348,25 +4621,81 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     adminImages.push(dataUrl);
     renderAdminGallery();
   }
-  function compressAdminImage(file, callback){
-    const reader = new FileReader();
-    reader.onload = () => {
+  // los iPhone (con "Ajustes > Cámara > Formatos" en "Alta eficiencia", que es lo normal de
+  // fábrica) toman las fotos en HEIC/HEIF — un formato que casi ningún navegador sabe mostrar
+  // en una <img> normal, así que subirlas se quedaba pegado sin avisar nada. Lo detectamos por
+  // tipo/extensión (o si el navegador simplemente no pudo decodificarla) y la convertimos a JPEG
+  // en el propio navegador antes de seguir con el proceso normal de siempre.
+  function isHeicFile(file){
+    const type = (file.type || "").toLowerCase();
+    const name = (file.name || "").toLowerCase();
+    return type.includes("heic") || type.includes("heif") || name.endsWith(".heic") || name.endsWith(".heif");
+  }
+  let heic2anyLoadPromise = null;
+  function loadHeic2Any(){
+    if (window.heic2any) return Promise.resolve(window.heic2any);
+    if (heic2anyLoadPromise) return heic2anyLoadPromise;
+    heic2anyLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
+      script.onload = () => resolve(window.heic2any);
+      script.onerror = () => { heic2anyLoadPromise = null; reject(new Error("No se pudo cargar el conversor de HEIC")); };
+      document.head.appendChild(script);
+    });
+    return heic2anyLoadPromise;
+  }
+  async function convertHeicToJpegBlob(file){
+    const heic2any = await loadHeic2Any();
+    const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
+    return Array.isArray(result) ? result[0] : result;
+  }
+  function readFileAsDataUrl(fileOrBlob){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error || new Error("No se pudo leer el archivo"));
+      reader.readAsDataURL(fileOrBlob);
+    });
+  }
+  function loadImageEl(src){
+    return new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        const maxDim = 700;
-        if (width > maxDim || height > maxDim){
-          if (width > height){ height = Math.round(height*maxDim/width); width = maxDim; }
-          else { width = Math.round(width*maxDim/height); height = maxDim; }
-        }
-        const canvas = document.createElement("canvas");
-        canvas.width = width; canvas.height = height;
-        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-        callback(canvas.toDataURL("image/jpeg", 0.82));
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("No se pudo decodificar la imagen"));
+      img.src = src;
+    });
+  }
+  async function compressAdminImage(file, callback, onError){
+    try {
+      let working = file;
+      if (isHeicFile(file)) working = await convertHeicToJpegBlob(file);
+      let img;
+      try {
+        img = await loadImageEl(await readFileAsDataUrl(working));
+      } catch (decodeErr) {
+        // el navegador no pudo con esta foto y no la habíamos marcado como HEIC por tipo/nombre
+        // (pasa con algunos Android/iPhone que no ponen el MIME correcto) — como último intento,
+        // probamos igual la conversión HEIC antes de rendirnos
+        if (working === file){
+          working = await convertHeicToJpegBlob(file);
+          img = await loadImageEl(await readFileAsDataUrl(working));
+        } else throw decodeErr;
+      }
+      let { width, height } = img;
+      const maxDim = 700;
+      if (width > maxDim || height > maxDim){
+        if (width > height){ height = Math.round(height*maxDim/width); width = maxDim; }
+        else { width = Math.round(width*maxDim/height); height = maxDim; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      callback(canvas.toDataURL("image/jpeg", 0.82));
+    } catch (err) {
+      console.error("compressAdminImage:", err);
+      if (onError) onError(err);
+      else showToast('⚠️ No se pudo procesar esa foto. Si es de iPhone (HEIC), prueba cambiando Ajustes → Cámara → Formatos a "Más compatible".');
+    }
   }
 
   // vuelve transparente el fondo blanco/casi blanco de una imagen — ahora es una función
@@ -4402,6 +4731,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       category: document.getElementById("adminCategory").value,
       kind: document.getElementById("adminCategory").value === "pokemon" ? document.getElementById("adminKind").value : document.getElementById("adminCategory").value,
       name, price, stock: Number(document.getElementById("adminStock").value) || 1,
+      originalPrice: Number(document.getElementById("adminOriginalPrice").value) || 0,
       description: document.getElementById("adminDescription").value.trim(),
       set: document.getElementById("adminSet").value.trim(),
       num: Number(document.getElementById("adminNum").value) || 0,
@@ -4440,6 +4770,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         document.getElementById("adminCondition").value = "";
         document.getElementById("adminPrice").value = "";
         document.getElementById("adminStock").value = "1";
+        document.getElementById("adminOriginalPrice").value = "";
         document.getElementById("adminFeatured").checked = false;
         document.getElementById("adminHot").checked = false;
         adminImages = [];
@@ -4730,7 +5061,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         ev.stopPropagation();
         const i = Number(btn.dataset.i);
         const input = document.createElement("input");
-        input.type = "file"; input.accept = "image/*";
+        input.type = "file"; input.accept = "image/*,.heic,.heif";
         input.onchange = () => {
           const file = input.files[0];
           if (!file) return;
@@ -5033,6 +5364,171 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     }
   };
 
+  /* ---- "📥 Importar CSV": mismo formato que exportan las apps de colección tipo Collectr.
+     Compara contra CARDS (no contra ningún archivo) por nombre+set+número, agrega lo nuevo y
+     actualiza stock/rareza/precio de lo que ya existe — todo vía los endpoints "bulk" del
+     Worker, en UNA sola llamada por tipo de cambio en vez de una por pieza. ---- */
+  function parseCsv(text){
+    const rows = [];
+    let row = [], field = "", inQuotes = false;
+    for (let i=0;i<text.length;i++){
+      const ch = text[i];
+      if (inQuotes){
+        if (ch === '"'){ if (text[i+1] === '"'){ field += '"'; i++; } else inQuotes = false; }
+        else field += ch;
+      } else {
+        if (ch === '"') inQuotes = true;
+        else if (ch === ','){ row.push(field); field = ""; }
+        else if (ch === '\n' || ch === '\r'){
+          if (field !== "" || row.length){ row.push(field); rows.push(row); row = []; field = ""; }
+          if (ch === '\r' && text[i+1] === '\n') i++;
+        } else field += ch;
+      }
+    }
+    if (field !== "" || row.length){ row.push(field); rows.push(row); }
+    if (!rows.length) return [];
+    const headers = rows[0];
+    return rows.slice(1).filter(r => r.length > 1).map(r => {
+      const obj = {};
+      headers.forEach((h,i) => obj[h.trim()] = (r[i] || "").trim());
+      return obj;
+    });
+  }
+  function cleanRowName(name){ return (name || "").replace(/\s*\([^)]*\)\s*$/, "").trim(); }
+  function catalogKey(name, set, num){ return `${cleanRowName(name)}|${set||""}|${num||0}`.toLowerCase(); }
+
+  document.getElementById("csvImportBtn").addEventListener("click", () => document.getElementById("csvFileInput").click());
+  document.getElementById("csvFileInput").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const status = document.getElementById("csvImportStatus");
+    const btn = document.getElementById("csvImportBtn");
+    const reader = new FileReader();
+    reader.onload = async () => {
+      btn.disabled = true;
+      status.textContent = "Leyendo CSV…";
+      try {
+        const rows = parseCsv(reader.result);
+        const forcePrice = document.getElementById("forceCsvPrice").checked;
+        const existingKeys = new Map(CARDS.filter(c => !c.deleted).map(c => [catalogKey(c.name, c.set, c.num), c]));
+        const toAdd = [], toEdit = [];
+        let skipped = 0;
+
+        rows.forEach(r => {
+          const name = (r["Product Name"] || "").trim();
+          if (!name) return;
+          const setName = (r["Set"] || "").trim();
+          const cardNumRaw = (r["Card Number"] || "").trim();
+          let num = 0, total = 0;
+          if (cardNumRaw.includes("/")){
+            const [a,b] = cardNumRaw.split("/");
+            num = parseInt(a.replace(/\D/g,"")) || 0;
+            total = parseInt(b.replace(/\D/g,"")) || 0;
+          } else if (cardNumRaw){ num = parseInt(cardNumRaw.replace(/\D/g,"")) || 0; }
+          const key = catalogKey(name, setName, num);
+          const stockVal = Math.round(parseFloat(r["Quantity"]) || 1);
+          const priceKey = Object.keys(r).find(k => k.startsWith("Market Price"));
+          const priceRaw = (priceKey ? r[priceKey] : "").replace(/,/g,"").replace(/"/g,"");
+          let price = Math.round(parseFloat(priceRaw)) || 1;
+          if (price <= 0) price = 1;
+          const csvRarity = (r["Rarity"] || "").trim();
+
+          const existing = existingKeys.get(key);
+          if (existing){
+            const changes = {};
+            if (Number(existing.stock) !== stockVal) changes.stock = stockVal;
+            if (csvRarity && existing.rarity !== csvRarity) changes.rarity = csvRarity;
+            if (!existing.priceLocked){
+              if (forcePrice){ if (Number(existing.price) !== price) changes.price = price; }
+              else if (price > Number(existing.price)) changes.price = price;
+            }
+            if (Object.keys(changes).length) toEdit.push({ id: existing.id, changes, _card: existing });
+            else skipped++;
+            return;
+          }
+          let language = "Inglés";
+          if (name.includes("(JP)")) language = "Japonés";
+          else if (name.includes("(CN)")) language = "Chino";
+          toAdd.push({
+            name: cleanRowName(name), set: setName, num, total,
+            rarity: csvRarity || (cardNumRaw ? "Rare" : "Sellado"), condition: "Nuevo", language,
+            category: "pokemon", kind: cardNumRaw ? "single" : "sellado",
+            price, priceSource: "csv", stock: stockVal, priceLocked: false
+          });
+        });
+
+        if (!toAdd.length && !toEdit.length){
+          status.textContent = `Listo: nada que hacer, ${skipped} pieza(s) ya estaban igual.`;
+          btn.disabled = false;
+          e.target.value = "";
+          return;
+        }
+
+        // busca automáticamente la foto de las piezas nuevas que sean cartas sueltas (num > 0),
+        // agrupando por expansión para no pedir una por una — así las cartas de bulk que llegan
+        // por CSV no se quedan sin imagen esperando a que alguien las fotografíe a mano
+        const newSingles = toAdd.filter(p => p.num > 0 && p.set && !p.image);
+        if (newSingles.length){
+          status.textContent = `Buscando fotos para ${newSingles.length} carta(s) nueva(s)…`;
+          const bySet = {};
+          newSingles.forEach(p => { const k = p.set.toLowerCase(); (bySet[k] = bySet[k] || []).push(p); });
+          for (const setKey of Object.keys(bySet)){
+            try {
+              const res = await fetch(`${WORKER_URL}/cards-by-set?set=${encodeURIComponent(bySet[setKey][0].set)}`, { cache: "no-store" });
+              const data = await res.json();
+              const apiCards = data.cards || [];
+              bySet[setKey].forEach(p => {
+                const match = apiCards.find(ac => parseInt(ac.number, 10) === p.num)
+                  || apiCards.find(ac => ac.name.toLowerCase() === p.name.toLowerCase());
+                if (match && match.image){ p.image = match.image; p.images = [match.image]; }
+              });
+            } catch { /* sin foto automática para esa expansión, se puede asignar a mano después */ }
+          }
+        }
+
+        let added = 0, updated = 0, failed = 0;
+        if (toAdd.length){
+          status.textContent = `Agregando ${toAdd.length} pieza(s) nueva(s)…`;
+          try {
+            const res = await fetch(`${WORKER_URL}/admin/bulk-add-products`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), products: toAdd })
+            });
+            const data = await res.json();
+            if (data.ok){ data.products.forEach(p => CARDS.push(p)); added = data.products.length; }
+            else failed += toAdd.length;
+          } catch { failed += toAdd.length; }
+        }
+        if (toEdit.length){
+          status.textContent = `Actualizando ${toEdit.length} pieza(s) existente(s)…`;
+          try {
+            const res = await fetch(`${WORKER_URL}/admin/bulk-edit-products`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), edits: toEdit.map(t => ({ id: t.id, changes: t.changes })) })
+            });
+            const data = await res.json();
+            if (data.ok){
+              toEdit.forEach(t => Object.assign(t._card, t.changes));
+              updated = data.results.length;
+            } else failed += toEdit.length;
+          } catch { failed += toEdit.length; }
+        }
+        refreshAllViews();
+        localStorage.setItem("vitrina_admin_csv_updated", new Date().toISOString());
+        const noPhoto = newSingles.filter(p => !p.image).length;
+        const photoNote = noPhoto ? ` ${noPhoto} nueva(s) quedaron sin foto (no se encontraron en la base de datos) — asígnasela desde "✏️ Editar".` : "";
+        status.textContent = (failed
+          ? `✓ ${added} agregada(s), ${updated} actualizada(s) — ${failed} con error. ${skipped} ya estaban igual.`
+          : `✓ ${added} agregada(s), ${updated} actualizada(s), ${skipped} ya estaban igual — ya están en tu sitio.`) + photoNote;
+      } catch (err) {
+        status.textContent = "Ese archivo no se pudo leer como CSV.";
+      }
+      btn.disabled = false;
+      e.target.value = "";
+    };
+    reader.readAsText(file);
+  });
+
   /* ---- "💲 Precios": revisa TODO el catálogo Pokémon contra TCGplayer y ofrece subir de un
      jalón las cartas cuyo precio marcado quedó por debajo del de referencia ---- */
   let pricesFound = []; // {id, name, set, num, current, suggested, usd}
@@ -5040,7 +5536,13 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   function renderPricesList(){
     const list = document.getElementById("pricesList");
     if (!pricesFound.length){ list.innerHTML = ""; updatePricesSaveBar(); return; }
-    list.innerHTML = pricesFound.map((item, i) => `
+    const selectAllRow = pricesFound.length > 1
+      ? `<div style="display:flex;gap:14px;padding:6px 0;font-size:12px;">
+          <button type="button" id="pricesSelectAllBtn" style="background:none;color:var(--foil-bright);text-decoration:underline;">Seleccionar todas (${pricesFound.length})</button>
+          <button type="button" id="pricesSelectNoneBtn" style="background:none;color:var(--slate);text-decoration:underline;">Ninguna</button>
+        </div>`
+      : "";
+    list.innerHTML = selectAllRow + pricesFound.map((item, i) => `
       <div class="prices-row" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);">
         <input type="checkbox" class="prices-check" data-i="${i}" checked style="width:17px;height:17px;flex-shrink:0;">
         <div style="flex:1;min-width:0;">
@@ -5050,6 +5552,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         </div>
       </div>`).join("");
     list.querySelectorAll(".prices-check").forEach(chk => chk.addEventListener("change", updatePricesSaveBar));
+    document.getElementById("pricesSelectAllBtn")?.addEventListener("click", () => { list.querySelectorAll(".prices-check").forEach(c => c.checked = true); updatePricesSaveBar(); });
+    document.getElementById("pricesSelectNoneBtn")?.addEventListener("click", () => { list.querySelectorAll(".prices-check").forEach(c => c.checked = false); updatePricesSaveBar(); });
     updatePricesSaveBar();
   }
 
@@ -5117,30 +5621,30 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     const btn = document.getElementById("pricesSaveBtn");
     if (!checks.length) return;
     btn.disabled = true;
+    status.textContent = `Actualizando ${checks.length} pieza(s)…`;
+    const items = checks.map(chk => pricesFound[Number(chk.dataset.i)]);
     let done = 0, failed = 0;
-    for (const chk of checks){
-      const i = Number(chk.dataset.i);
-      const item = pricesFound[i];
-      status.textContent = `Actualizando ${done + 1} de ${checks.length}: ${item.name}…`;
-      try {
-        const res = await fetch(`${WORKER_URL}/admin/edit-product`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(item.id), changes: { price: item.suggested } })
-        });
-        const data = await res.json();
-        if (data.ok){
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/bulk-edit-products`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: sessionStorage.getItem("vitrina_admin_pass"),
+          edits: items.map(item => ({ id: String(item.id), changes: { price: item.suggested } }))
+        })
+      });
+      const data = await res.json();
+      if (data.ok){
+        items.forEach(item => {
           const card = CARDS.find(c => String(c.id) === String(item.id));
           if (card) card.price = item.suggested;
           fetch(`${WORKER_URL}/admin/log-price`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: String(item.id), price: item.suggested })
           }).catch(() => {});
-          done++;
-        } else { failed++; }
-      } catch { failed++; }
-    }
+        });
+        done = data.results.length;
+      } else failed = items.length;
+    } catch { failed = items.length; }
     refreshAllViews();
     pricesFound = pricesFound.filter((_, i) => !checks.some(chk => Number(chk.dataset.i) === i));
     renderPricesList();
@@ -5148,6 +5652,100 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("pricesScanStatus").textContent = failed
       ? `✓ ${done} actualizadas — ${failed} con error.`
       : `✓ ${done} actualizadas.`;
+  });
+
+  /* ---- "Reglas de precio": mismo motor que admin.html (rango/rareza/nombre -> precio
+     objetivo, nunca baja precio, respeta 🔒), pero guardado en Settings (vive en el sitio,
+     no en un navegador) y aplicado en lote sobre TODO el inventario con un clic ---- */
+  let currentPriceRules = [];
+
+  function renderPriceRulesEditor(){
+    const box = document.getElementById("priceRulesList");
+    if (!currentPriceRules.length){ box.innerHTML = `<p style="font-size:12px;color:var(--slate);">Todavía no tienes reglas.</p>`; return; }
+    box.innerHTML = currentPriceRules.map((rule, i) => `
+      <div class="price-rule-row" data-i="${i}" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);">
+        <select class="rule-type" data-i="${i}" style="flex:1;min-width:110px;">
+          <option value="range" ${rule.type==="range"?"selected":""}>Rango de precio</option>
+          <option value="rarity" ${rule.type==="rarity"?"selected":""}>Rareza contiene</option>
+          <option value="name" ${rule.type==="name"?"selected":""}>Nombre contiene</option>
+        </select>
+        ${rule.type === "range" ? `
+          <input type="number" class="rule-min" data-i="${i}" value="${rule.min}" placeholder="Desde $" style="width:80px;">
+          <input type="number" class="rule-max" data-i="${i}" value="${rule.max}" placeholder="Hasta $" style="width:80px;">
+        ` : `
+          <input type="text" class="rule-rarity" data-i="${i}" value="${rule.rarity||""}" placeholder="${rule.type==="rarity"?"Ej. Holo":"Ej. Charizard"}" style="flex:1;min-width:90px;">
+          <input type="number" class="rule-max" data-i="${i}" value="${rule.max}" placeholder="Tope actual $" style="width:90px;">
+        `}
+        <input type="number" class="rule-target" data-i="${i}" value="${rule.target}" placeholder="Precio final $" style="width:90px;">
+        <button type="button" class="del-rule-btn" data-i="${i}" style="background:none;color:var(--ember-bright);text-decoration:underline;font-size:12px;">Eliminar</button>
+      </div>`).join("");
+    box.querySelectorAll(".rule-type").forEach(el => el.addEventListener("change", e => { currentPriceRules[Number(e.target.dataset.i)].type = e.target.value; renderPriceRulesEditor(); }));
+    box.querySelectorAll(".rule-min").forEach(el => el.addEventListener("input", e => { currentPriceRules[Number(e.target.dataset.i)].min = Number(e.target.value)||0; }));
+    box.querySelectorAll(".rule-max").forEach(el => el.addEventListener("input", e => { currentPriceRules[Number(e.target.dataset.i)].max = Number(e.target.value)||0; }));
+    box.querySelectorAll(".rule-rarity").forEach(el => el.addEventListener("input", e => { currentPriceRules[Number(e.target.dataset.i)].rarity = e.target.value; }));
+    box.querySelectorAll(".rule-target").forEach(el => el.addEventListener("input", e => { currentPriceRules[Number(e.target.dataset.i)].target = Number(e.target.value)||0; }));
+    box.querySelectorAll(".del-rule-btn").forEach(el => el.addEventListener("click", e => { currentPriceRules.splice(Number(e.target.dataset.i),1); renderPriceRulesEditor(); }));
+  }
+
+  async function loadPriceRules(){
+    try {
+      const res = await fetch(`${WORKER_URL}/settings`, { cache: "no-store" });
+      const data = await res.json();
+      currentPriceRules = Array.isArray(data.settings?.priceRules) ? data.settings.priceRules : [];
+    } catch { currentPriceRules = currentPriceRules || []; }
+    renderPriceRulesEditor();
+  }
+
+  document.getElementById("addPriceRuleBtn").addEventListener("click", () => {
+    currentPriceRules.push({ type: "range", min: 0, max: 0, rarity: "", target: 0 });
+    renderPriceRulesEditor();
+  });
+
+  document.getElementById("savePriceRulesBtn").addEventListener("click", async () => {
+    const status = document.getElementById("priceRulesStatus");
+    status.textContent = "Guardando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/save-settings`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), priceRules: currentPriceRules })
+      });
+      const data = await res.json();
+      if (data.ok){ status.textContent = "✓ Reglas guardadas."; status.style.color = "var(--ok)"; }
+      else { status.textContent = data.error || "No se pudo guardar."; status.style.color = "var(--ember-bright)"; }
+    } catch { status.textContent = "No se pudo conectar con el servidor."; status.style.color = "var(--ember-bright)"; }
+  });
+
+  document.getElementById("previewRulesBtn").addEventListener("click", () => {
+    const status = document.getElementById("pricesScanStatus");
+    document.getElementById("pricesList").innerHTML = "";
+    document.getElementById("pricesSaveBar").style.display = "none";
+    pricesFound = [];
+    const eligible = currentPriceRules.filter(r => r.target > 0);
+    if (!eligible.length){ document.getElementById("priceRulesStatus").textContent = "Agrega al menos una regla con precio final."; return; }
+    CARDS.filter(c => !c.deleted && !c.priceLocked && c.kind !== "sellado").forEach(item => {
+      const price = Number(item.price) || 0;
+      let target = 0;
+      for (const rule of eligible){
+        if (rule.type === "range"){
+          if (price >= rule.min && price <= rule.max && rule.target > price) target = Math.max(target, rule.target);
+        } else if (rule.type === "rarity"){
+          const text = (rule.rarity||"").toLowerCase();
+          if (text && (item.rarity||"").toLowerCase().includes(text) && price < rule.max && rule.target > price) target = Math.max(target, rule.target);
+        } else if (rule.type === "name"){
+          const text = (rule.rarity||"").toLowerCase();
+          if (text && (item.name||"").toLowerCase().includes(text) && price < rule.max && rule.target > price) target = Math.max(target, rule.target);
+        }
+      }
+      if (target > price) pricesFound.push({ id: item.id, name: item.name, set: item.set, num: item.num, current: price, suggested: target, source: "regla" });
+    });
+    document.getElementById("priceRulesStatus").textContent = pricesFound.length
+      ? `${pricesFound.length} pieza(s) coinciden con tus reglas — revísalas abajo, en "Revisar precios".`
+      : "Ninguna pieza de tu inventario coincide con esas reglas todavía.";
+    if (pricesFound.length){
+      pricesFound.sort((a,b) => (b.suggested-b.current) - (a.suggested-a.current));
+      status.textContent = `${pricesFound.length} pieza(s) según tus reglas de precio. Revisa y quita las que no quieras subir.`;
+      renderPricesList();
+    }
   });
 
   /* ---- "🎟️ Cupones": crear/editar código + %, activar/desactivar y borrar, sin tocar código ---- */
