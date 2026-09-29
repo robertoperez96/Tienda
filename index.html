@@ -1405,7 +1405,7 @@
       <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
         <div class="field-mini"><span class="field-label">Precio anterior (opcional)</span><input type="number" id="adminOriginalPrice" placeholder="Ej. 300" style="width:100%;"></div>
       </div>
-      <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Oferta" en el catálogo y su ficha.</p>
+      <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Descuento" en el catálogo y su ficha.</p>
       <div class="price-suggest-row">
         <button type="button" class="price-suggest-btn" id="adminSuggestPriceBtn">💲 Sugerir precio</button>
         <span class="price-suggest-hint" id="adminSuggestPriceHint"></span>
@@ -1476,7 +1476,7 @@
         <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
           <div class="field-mini"><span class="field-label">Precio anterior (opcional)</span><input type="number" id="editOriginalPrice" placeholder="Ej. 300" style="width:100%;"></div>
         </div>
-        <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Oferta" en el catálogo y su ficha.</p>
+        <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Descuento" en el catálogo y su ficha.</p>
         <div class="price-suggest-row">
           <button type="button" class="price-suggest-btn" id="editSuggestPriceBtn">💲 Sugerir precio</button>
           <span class="price-suggest-hint" id="editSuggestPriceHint"></span>
@@ -2566,7 +2566,7 @@ function renderCard(card){
     <div class="card-info">
       <div class="card-set"><span>${card.set}</span>${card.num ? `<span>${card.code}${String(card.num).padStart(3,"0")}/${card.total}</span>` : ""}</div>
       <p class="card-name">${card.name}</p>
-      <div class="card-meta">${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}<span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}${isOnOffer(card) ? '<span class="tag offer-tag">🏷️ Oferta</span>' : ''}</div>
+      <div class="card-meta">${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}<span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}${isOnOffer(card) ? '<span class="tag offer-tag">🏷️ Descuento</span>' : ''}</div>
       <div class="card-price-row"><span class="card-price-group">${isOnOffer(card) ? `<span class="card-price-was">${money(card.originalPrice)}</span>` : ''}<span class="card-price">${money(card.price)}</span></span><span class="card-cond">${card.condition}</span></div>
       ${isQtyKind(card.kind) ? `
       <div class="qty-stepper">
@@ -2704,7 +2704,7 @@ function openZoom(card){
   renderZoomArt();
 
   const soldOut = card.stock <= 0;
-  document.getElementById("zoomBadges").innerHTML = `${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}${card.hot && !soldOut ? '<span class="badge-hot">🔥 Muy buscada</span>' : ''}${isOnOffer(card) ? '<span class="badge offer-badge">🏷️ OFERTA</span>' : ''}`;
+  document.getElementById("zoomBadges").innerHTML = `${card.isNew && !soldOut ? '<span class="badge left">NUEVO</span>' : ''}${card.hot && !soldOut ? '<span class="badge-hot">🔥 Muy buscada</span>' : ''}${isOnOffer(card) ? '<span class="badge offer-badge">🏷️ DESCUENTO</span>' : ''}`;
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
   document.getElementById("zoomName").textContent = card.name;
   const langInfo = getLangInfo(card);
