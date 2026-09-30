@@ -582,6 +582,52 @@
   .promo-status{font-size:12px;color:var(--ember-bright);margin:8px 0 0;min-height:14px;}
   .field-label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--slate);text-transform:uppercase;margin:0 0 4px 2px;}
   .field-mini{flex:1;min-width:0;}
+  .cat-wrap{max-height:60vh;overflow:auto;border:1px solid var(--line);border-radius:10px;}
+  .cat-table{border-collapse:separate;border-spacing:0;font-size:12px;min-width:1180px;width:100%;}
+  .cat-table th{position:sticky;top:0;z-index:3;background:var(--ink);color:var(--slate);font-weight:600;text-align:left;padding:7px 6px;border-bottom:1px solid var(--line-strong);white-space:nowrap;font-size:11px;}
+  .cat-table td{padding:3px 4px;border-bottom:1px solid var(--line);background:var(--ink-2);vertical-align:middle;}
+  .cat-table .sticky-l{position:sticky;left:0;z-index:2;}
+  .cat-table th.sticky-l{z-index:4;}
+  .cat-table .sticky-l2{position:sticky;left:34px;z-index:2;box-shadow:6px 0 8px -6px rgba(0,0,0,.5);}
+  .cat-table th.sticky-l2{z-index:4;}
+  .cat-table input:not([type=checkbox]), .cat-table select{width:100%;min-width:0;background:transparent;border:1px solid transparent;color:var(--cream);border-radius:5px;padding:5px 5px;font-size:12px;}
+  .cat-table input:not([type=checkbox]):hover, .cat-table select:hover{border-color:var(--line-strong);}
+  .cat-table input:not([type=checkbox]):focus, .cat-table select:focus{border-color:var(--foil);background:var(--ink);outline:none;}
+  .cat-table select option{background:var(--ink);}
+  .cat-table td.dirty input, .cat-table td.dirty select{background:rgba(232,199,102,.14);border-color:var(--foil-dim);}
+  .cat-table tr.sel td{background:#1a2030;}
+  .cat-thumb{width:30px;height:42px;object-fit:cover;border-radius:3px;background:var(--ink);display:block;}
+  .cat-more{display:block;width:100%;padding:10px;background:none;border:none;color:var(--foil-bright);font-size:12.5px;cursor:pointer;text-decoration:underline;}
+  /* brillo holográfico simulado (las fotos de la API no traen brillo) */
+  .holo-wrap{position:relative;z-index:1;display:inline-flex;max-width:100%;max-height:100%;border-radius:8px;overflow:hidden;isolation:isolate;filter:drop-shadow(0 10px 20px rgba(0,0,0,.55));}
+  .holo-wrap img.real{width:auto;height:auto;max-width:100%;max-height:100%;filter:none;border-radius:8px;display:block;}
+  .holo-wrap.zoom{max-height:56vh;border-radius:12px;filter:drop-shadow(0 20px 44px rgba(0,0,0,.55));}
+  .holo-wrap.zoom img{box-shadow:none;border-radius:12px;display:block;}
+  .holo-wrap::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:linear-gradient(115deg,transparent 22%,rgba(255,105,210,.7) 34%,rgba(110,225,255,.7) 43%,rgba(255,244,140,.7) 52%,rgba(130,255,185,.65) 61%,rgba(190,140,255,.6) 69%,transparent 80%);
+    background-size:300% 300%;mix-blend-mode:color-dodge;opacity:.16;animation:holo-sweep 9s ease-in-out infinite;}
+  /* reverse holo: además del barrido, un destello fino en todo el cartón */
+  .holo-wrap.reverse::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;border-radius:inherit;
+    background:repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0 1px,transparent 1px 7px),repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0 1px,transparent 1px 9px);
+    mix-blend-mode:overlay;}
+  @keyframes holo-sweep{0%{background-position:100% 100%;}50%{background-position:0% 0%;}100%{background-position:100% 100%;}}
+  @media (prefers-reduced-motion:reduce){.holo-wrap::after{animation:none;background-position:50% 50%;}}
+  body.no-holo-fx .holo-wrap::after, body.no-holo-fx .holo-wrap::before{display:none;}
+  .tag.holo-tag{background:linear-gradient(100deg,rgba(255,105,210,.18),rgba(110,225,255,.18),rgba(255,244,140,.18));color:var(--cream);}
+  .rel-list{max-height:56vh;overflow-y:auto;border:1px solid var(--line);border-radius:10px;}
+  .rel-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--ink-2);}
+  .rel-row:last-child{border-bottom:none;}
+  .rel-handle{cursor:grab;color:var(--slate);font-size:18px;line-height:1;padding:4px 2px;touch-action:none;user-select:none;}
+  .rel-row.rel-ghost{opacity:.35;}
+  .rel-row.rel-chosen{background:var(--ink);box-shadow:inset 3px 0 0 var(--foil-bright);}
+  .rel-pos{width:52px;flex:none;text-align:center;padding:5px 4px;font-size:13px;}
+  .rel-thumb{width:34px;height:46px;flex:none;object-fit:cover;border-radius:4px;background:var(--ink);}
+  .rel-info{flex:1;min-width:0;}
+  .rel-name{font-size:13px;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rel-meta{font-size:11px;color:var(--slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rel-arrows{display:flex;flex-direction:column;gap:2px;flex:none;}
+  .rel-arrows button{background:none;border:1px solid var(--line-strong);color:var(--cream-dim);border-radius:5px;font-size:10px;line-height:1;padding:3px 6px;cursor:pointer;}
+  .rel-arrows button:disabled{opacity:.3;cursor:default;}
   .price-suggest-row{display:flex;gap:8px;align-items:center;margin:6px 0 2px;}
   .price-suggest-btn{background:none;border:1px solid var(--foil-dim);color:var(--foil-bright);border-radius:7px;padding:6px 10px;font-size:11.5px;cursor:pointer;white-space:nowrap;}
   .price-suggest-btn:hover{background:var(--foil-dim);}
@@ -1110,9 +1156,9 @@
           <input type="text" id="searchInput" placeholder="Buscar por nombre, set o número…">
         </div>
         <select class="sort-select" id="sortSelect">
-          <option value="relevance">Ordenar: relevancia</option>
+          <option value="relevance" selected>Ordenar: relevancia</option>
           <option value="price-asc">Precio: menor a mayor</option>
-          <option value="price-desc" selected>Precio: mayor a menor</option>
+          <option value="price-desc">Precio: mayor a menor</option>
           <option value="name-asc">Nombre: A–Z</option>
           <option value="new">Recién llegadas</option>
           <option value="release-desc">Fecha de salida: más nueva a más vieja</option>
@@ -1339,13 +1385,17 @@
     <div class="pay-options" style="margin-bottom:16px;">
       <button type="button" class="pay-opt active" id="adminTabAdd" style="flex:1;">➕ Agregar</button>
       <button type="button" class="pay-opt" id="adminTabEdit" style="flex:1;">✏️ Editar</button>
+      <button type="button" class="pay-opt" id="adminTabCatalog" style="flex:1;">🗂️ Catálogo</button>
       <button type="button" class="pay-opt" id="adminTabBulk" style="flex:1;">📋 Inventario rápido</button>
       <button type="button" class="pay-opt" id="adminTabCsv" style="flex:1;">📥 Importar CSV</button>
       <button type="button" class="pay-opt" id="adminTabPrices" style="flex:1;">💲 Precios</button>
+      <button type="button" class="pay-opt" id="adminTabOrder" style="flex:1;">↕️ Orden</button>
+      <button type="button" class="pay-opt" id="adminTabHolo" style="flex:1;">✨ Holo</button>
       <button type="button" class="pay-opt" id="adminTabCoupons" style="flex:1;">🎟️ Cupones</button>
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
       <button type="button" class="pay-opt" id="adminTabConfig" style="flex:1;">⚙️ Config</button>
     </div>
+    <p style="font-size:10px;color:var(--slate);margin:-8px 0 12px;text-align:right;">Versión del panel: 30 sep 2026 · orden, holo y catálogo editable</p>
     <button type="button" id="adminLogoutBtn" style="background:none;border:none;padding:0;color:var(--slate);font-size:11px;cursor:pointer;text-decoration:underline;margin:-10px 0 16px;display:block;">🚪 Cerrar sesión de admin</button>
 
     <div id="adminAddForm">
@@ -1385,6 +1435,7 @@
         </div>
         <div class="row" id="adminRarityRow" style="display:flex;gap:8px;margin-bottom:10px;">
           <div class="field-mini"><span class="field-label">Rareza</span><input type="text" id="adminRarity" placeholder="ej. Holo Rare" list="rarityOptions" style="width:100%;"></div>
+          <div class="field-mini"><span class="field-label">Acabado</span><select id="adminFinish" style="width:100%;"><option value="">Normal</option><option value="holo">✨ Holo</option><option value="reverse">✨ Reverse Holo</option></select></div>
         </div>
       </div>
       <div class="row" style="display:flex;gap:8px;margin-bottom:10px;">
@@ -1404,8 +1455,9 @@
       </div>
       <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
         <div class="field-mini"><span class="field-label">Precio anterior (opcional)</span><input type="number" id="adminOriginalPrice" placeholder="Ej. 300" style="width:100%;"></div>
+        <div class="field-mini"><span class="field-label">Lugar en relevancia (opcional)</span><input type="number" min="1" id="adminRelevancePos" placeholder="Según su precio" style="width:100%;"></div>
       </div>
-      <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Descuento" en el catálogo y su ficha.</p>
+      <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Descuento" en el catálogo y su ficha. En "Lugar en relevancia", 1 = sale primero en su sección; vacío = se acomoda solo según su precio. El orden completo lo arrastras en la pestaña ↕️ Orden.</p>
       <div class="price-suggest-row">
         <button type="button" class="price-suggest-btn" id="adminSuggestPriceBtn">💲 Sugerir precio</button>
         <span class="price-suggest-hint" id="adminSuggestPriceHint"></span>
@@ -1475,14 +1527,16 @@
         </div>
         <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
           <div class="field-mini"><span class="field-label">Precio anterior (opcional)</span><input type="number" id="editOriginalPrice" placeholder="Ej. 300" style="width:100%;"></div>
+          <div class="field-mini"><span class="field-label">Lugar en relevancia</span><input type="number" min="1" id="editRelevancePos" style="width:100%;"></div>
         </div>
-        <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Descuento" en el catálogo y su ficha.</p>
+        <p style="font-size:10.5px;color:var(--slate);margin:-2px 0 8px;">Si pones un precio anterior mayor al de arriba, se muestra tachado y la pieza se marca como "🏷️ Descuento" en el catálogo y su ficha. En "Lugar en relevancia", 1 = sale primero en su sección; vacío = se acomoda solo según su precio. El orden completo lo arrastras en la pestaña ↕️ Orden.</p>
         <div class="price-suggest-row">
           <button type="button" class="price-suggest-btn" id="editSuggestPriceBtn">💲 Sugerir precio</button>
           <span class="price-suggest-hint" id="editSuggestPriceHint"></span>
         </div>
         <div class="row" style="display:flex;gap:8px;margin-bottom:10px;margin-top:6px;">
           <div class="field-mini"><span class="field-label">Rareza</span><input type="text" id="editRarity" placeholder="ej. Holo Rare" list="rarityOptions" style="width:100%;"></div>
+          <div class="field-mini"><span class="field-label">Acabado</span><select id="editFinish" style="width:100%;"><option value="">Normal</option><option value="holo">✨ Holo</option><option value="reverse">✨ Reverse Holo</option></select></div>
           <div class="field-mini">
             <span class="field-label">Idioma</span>
             <select id="editLanguage" style="width:100%;">
@@ -1578,6 +1632,88 @@
         <input type="checkbox" id="forceCsvPrice" style="width:16px;height:16px;"> ⚠️ Forzar precio EXACTO del CSV (permite que baje) — úsalo solo para corregir errores
       </label>
       <p class="promo-status" id="csvImportStatus"></p>
+    </div>
+
+    <div id="adminOrderPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Tu vitrina, a tu gusto</span><h3>Orden por relevancia</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 12px;">Así se ve tu tienda por default para todos. Arrastra desde ⠿, usa las flechas o escribe el número de lugar. Lo que no hayas acomodado va según su precio, de mayor a menor. Los clientes siguen pudiendo cambiar a precio, nombre, etc.</p>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <select id="orderCategory" style="flex:1;min-width:150px;">
+          <option value="pokemon">🃏 Cartas y sellado</option>
+          <option value="pcjp">🇯🇵 Exclusivos JP</option>
+          <option value="acrylic">🖼️ Acrílicos</option>
+          <option value="toy">🧸 Juguetes</option>
+        </select>
+        <input type="text" id="orderSearch" placeholder="Buscar para encontrarla rápido…" style="flex:2;min-width:160px;">
+      </div>
+      <p id="orderSearchNote" style="display:none;font-size:11px;color:var(--slate);margin:-4px 0 8px;">Con búsqueda activa solo puedes cambiar el número de lugar; para arrastrar, borra la búsqueda.</p>
+      <div id="orderList" class="rel-list"></div>
+      <div style="position:sticky;bottom:0;background:var(--ink-2);padding:12px 0 4px;margin-top:8px;border-top:1px solid var(--line-strong);display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-foil" id="orderSaveBtn" style="flex:2;justify-content:center;">Guardar orden</button>
+        <button type="button" class="btn btn-ghost" id="orderResetBtn" style="flex:1;justify-content:center;">Volver a ordenar por precio</button>
+      </div>
+      <p class="promo-status" id="orderStatus"></p>
+    </div>
+
+    <div id="adminCatalogPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Todo tu inventario</span><h3>Catálogo editable</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 12px;">Edita cualquier dato directo en la tabla, como hoja de cálculo. Las celdas que cambies se marcan en dorado y nada se publica hasta que le das "Guardar cambios". Para cambiar muchas de un jalón, márcalas con la casilla y usa "Aplicar a seleccionadas".</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <input type="text" id="catSearch" placeholder="Buscar nombre, expansión o número…" style="flex:2;min-width:170px;">
+        <select id="catCategory" style="flex:1;min-width:130px;">
+          <option value="all">Todo</option>
+          <option value="single">🃏 Cartas sueltas</option>
+          <option value="sellado">📦 Sellado</option>
+          <option value="pcjp">🇯🇵 Exclusivos JP</option>
+          <option value="acrylic">🖼️ Acrílicos</option>
+          <option value="toy">🧸 Juguetes</option>
+        </select>
+        <select id="catQuick" style="flex:1;min-width:130px;">
+          <option value="all">Sin filtro extra</option>
+          <option value="nofinish">Cartas sin holo</option>
+          <option value="noimage">Sin foto</option>
+          <option value="soldout">Agotadas</option>
+          <option value="dirty">Solo con cambios sin guardar</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;">
+        <span id="catSelInfo" style="font-size:12px;color:var(--cream-dim);">0 seleccionadas</span>
+        <select id="catBulkField" style="flex:1;min-width:120px;">
+          <option value="finish">Acabado</option>
+          <option value="rarity">Rareza</option>
+          <option value="condition">Condición</option>
+          <option value="language">Idioma</option>
+          <option value="price">Precio</option>
+          <option value="stock">Stock</option>
+          <option value="set">Expansión</option>
+        </select>
+        <span id="catBulkValueWrap" style="flex:1;min-width:120px;display:flex;"></span>
+        <button type="button" class="btn btn-ghost" id="catBulkApply" style="flex:none;">Aplicar a seleccionadas</button>
+      </div>
+      <div class="cat-wrap" id="catWrap"></div>
+      <div style="position:sticky;bottom:0;background:var(--ink-2);padding:12px 0 4px;margin-top:8px;border-top:1px solid var(--line-strong);display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="btn btn-foil" id="catSaveBtn" style="flex:2;justify-content:center;">Guardar cambios (<span id="catDirtyCount">0</span>)</button>
+        <button type="button" class="btn btn-ghost" id="catDiscardBtn" style="flex:1;justify-content:center;">Descartar</button>
+      </div>
+      <p class="promo-status" id="catStatus"></p>
+    </div>
+
+    <div id="adminHoloPanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Corrección en bloque</span><h3>Marcar cartas como holo</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 12px;">Busca TODAS tus cartas sueltas que no tienen acabado holo y las corrige de un jalón. Common, Uncommon y variantes con patrón (Poké Ball, Energy Symbol…) quedan como Reverse Holo, que es la única versión holo que existe para ellas; ex, Ultra Rare, Illustration Rare, etc. quedan como Holo. Puedes cambiar cualquiera antes de guardar.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;">
+        <div><div style="font-size:13px;color:var(--cream);">Brillo holo sobre las fotos</div><div style="font-size:11px;color:var(--slate);">Muy sutil. Aplica para todos tus clientes.</div></div>
+        <button type="button" class="pay-opt" id="holoFxToggle" style="flex:none;min-width:110px;">Cargando…</button>
+      </div>
+      <p id="holoCheckLine" style="font-size:12.5px;margin:0 0 10px;padding:9px 12px;border-radius:10px;background:var(--ink);"></p>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--cream-dim);margin-bottom:10px;cursor:pointer;"><input type="checkbox" id="holoUpdatePrice" checked> También subir el precio al de la versión holo en TCGplayer (nunca lo baja, respeta 🔒)</label>
+      <button type="button" class="btn btn-foil" id="holoScanBtn" style="width:100%;justify-content:center;margin-bottom:6px;">Buscar cartas marcadas como normales</button>
+      <p class="promo-status" id="holoScanStatus"></p>
+      <div id="holoList"></div>
+      <div id="holoSaveBar" style="display:none;position:sticky;bottom:0;background:var(--ink-2);padding:12px 0 4px;margin-top:6px;border-top:1px solid var(--line-strong);">
+        <button type="button" class="btn btn-foil" id="holoSaveBtn" style="width:100%;justify-content:center;">Corregir seleccionadas (<span id="holoSelectedCount">0</span>)</button>
+        <p class="promo-status" id="holoSaveStatus"></p>
+      </div>
     </div>
 
     <div id="adminPricesPanel" style="display:none;">
@@ -1924,6 +2060,18 @@ const CARDS = window.CARDS || [];
 // y acrílicos/juguetes/JP se quedaban con un botón de un solo clic que no dejaba pedir más de 1).
 function isQtyKind(kind){ return kind === "sellado" || kind === "toy" || kind === "acrylic" || kind === "pcjp"; }
 function isOnOffer(card){ return Number(card.originalPrice) > Number(card.price); }
+// acabado de la carta: "" (normal), "holo" o "reverse" (Reverse Holo). Las fotos de la API son
+// escaneos planos iguales para normal y reverse holo, así que el brillo se simula con CSS
+// (.holo-wrap) encima de la foto, en la tarjeta y en el zoom.
+const FINISH_LABELS = { holo: "Holo", reverse: "Reverse Holo" };
+function finishLabel(card){ return FINISH_LABELS[card && card.finish] || ""; }
+function normalizeFinish(value){
+  const v = String(value || "").toLowerCase();
+  if (v.includes("reverse")) return "reverse";
+  if (v.includes("holo") || v.includes("foil")) return "holo";
+  return "";
+}
+function holoTag(card){ return finishLabel(card) ? `<span class="tag holo-tag">✨ ${finishLabel(card)}</span>` : ""; }
 
 const TYPE_COLORS = {
   fuego:"linear-gradient(150deg,#3a1f18,#5a2a1c 55%,#7a3420)",
@@ -1981,7 +2129,7 @@ function saveAppliedCoupon(coupon){
 
 const state = {
   query:"", kind:"all", sets:new Set(), rarities:new Set(), conditions:new Set(), languages:new Set(),
-  priceMin:null, priceMax:null, sort:"price-desc",
+  priceMin:null, priceMax:null, sort:"relevance",
   selected: JSON.parse(localStorage.getItem("vitrina_cart_v2") || "{}"), // {id: qty}
   appliedCoupon: loadAppliedCoupon(), // {code, percent} | null
   delivery: localStorage.getItem("vitrina_delivery") || "punto-medio",
@@ -2495,7 +2643,7 @@ function matches(card){
   if (card.category === "toy" || card.category === "acrylic" || card.category === "pcjp") return false;
   const q = state.query.trim().toLowerCase();
   if (state.kind !== "all" && card.kind !== state.kind) return false;
-  if (q && !(`${card.name} ${card.set} ${card.code}${card.num}`.toLowerCase().includes(q))) return false;
+  if (q && !(`${card.name} ${card.set} ${card.code}${card.num} ${finishLabel(card)}`.toLowerCase().includes(q))) return false;
   if (state.sets.size && !state.sets.has(card.set)) return false;
   if (state.rarities.size && !state.rarities.has(card.rarity)) return false;
   if (state.conditions.size && !state.conditions.has(card.condition)) return false;
@@ -2510,8 +2658,103 @@ function matches(card){
 function getCardReleaseDate(card){
   return findSetMeta(card.set || "")?.releaseDate || "";
 }
+/* ---- Orden por relevancia (lo acomoda Roberto a mano desde el panel, pestaña "↕️ Orden") ----
+   Se guarda UNA sola lista de ids en SETTINGS ("relevanceOrder") y se usa en todas las
+   secciones y con cualquier filtro: cada sección/filtro solo muestra su subconjunto,
+   respetando el orden relativo de esa lista. Mientras no se haya acomodado nada, o para
+   piezas nuevas que todavía no están en la lista, el orden es por precio de mayor a menor:
+   cada pieza nueva se mete justo después de la pieza de su sección que le sigue en precio,
+   así cae en un lugar lógico sin romper lo que ya se acomodó a mano. */
+let RELEVANCE_ORDER = [];
+function relevanceCategory(c){
+  return ["pcjp","toy","acrylic"].includes(c && c.category) ? c.category : "pokemon";
+}
+function relevanceEffectiveOrder(){
+  const byId = new Map(CARDS.map(c => [String(c.id), c]));
+  const order = [];
+  const seen = new Set();
+  RELEVANCE_ORDER.forEach(raw => {
+    const id = String(raw);
+    if (byId.has(id) && !seen.has(id)){ order.push(id); seen.add(id); }
+  });
+  const rest = CARDS.filter(c => !seen.has(String(c.id)))
+    .sort((a,b) => (Number(b.price)||0) - (Number(a.price)||0));
+  rest.forEach(c => {
+    const p = Number(c.price) || 0;
+    const cat = relevanceCategory(c);
+    // la pieza de su misma sección que le "antecede" por precio (la más barata que cuesta
+    // igual o más que ella): la nueva se mete justo después de esa, donde sea que Roberto
+    // la haya acomodado. Si es la más cara de su sección, va antes de la primera de la sección.
+    let anchor = -1, anchorPrice = Infinity;
+    order.forEach((id, i) => {
+      const other = byId.get(id);
+      if (relevanceCategory(other) !== cat) return;
+      const op = Number(other.price) || 0;
+      if (op >= p && op <= anchorPrice){ anchor = i; anchorPrice = op; }
+    });
+    let idx;
+    if (anchor !== -1) idx = anchor + 1;
+    else {
+      idx = order.findIndex(id => relevanceCategory(byId.get(id)) === cat);
+      if (idx === -1) idx = order.length;
+    }
+    order.splice(idx, 0, String(c.id));
+  });
+  return order;
+}
+function sortByRelevance(list){
+  const rank = new Map(relevanceEffectiveOrder().map((id,i) => [id,i]));
+  return list.sort((a,b) => (rank.get(String(a.id)) ?? 1e9) - (rank.get(String(b.id)) ?? 1e9));
+}
+// reacomoda un subconjunto (ej. solo acrílicos) dentro de la lista completa, reusando los
+// mismos lugares que ese subconjunto ya ocupaba — así mover algo dentro de una sección no
+// desordena las demás secciones
+function applySubsetOrder(order, subsetIds){
+  const members = new Set(subsetIds);
+  const slots = [];
+  order.forEach((id,i) => { if (members.has(id)) slots.push(i); });
+  const out = order.slice();
+  slots.forEach((slot,k) => { out[slot] = subsetIds[k]; });
+  return out;
+}
+// posición (1 = primero) de una pieza dentro de su sección
+function relevancePositionOf(card){
+  const cat = relevanceCategory(card);
+  const byId = new Map(CARDS.map(c => [String(c.id), c]));
+  const subset = relevanceEffectiveOrder().filter(id => relevanceCategory(byId.get(id)) === cat);
+  return subset.indexOf(String(card.id)) + 1;
+}
+function orderWithCardAtPosition(cardId, position){
+  const id = String(cardId);
+  const byId = new Map(CARDS.map(c => [String(c.id), c]));
+  const card = byId.get(id);
+  const order = relevanceEffectiveOrder();
+  if (!card) return order;
+  const cat = relevanceCategory(card);
+  const subset = order.filter(x => relevanceCategory(byId.get(x)) === cat && x !== id);
+  const target = Math.max(0, Math.min(subset.length, (Number(position)||1) - 1));
+  subset.splice(target, 0, id);
+  return applySubsetOrder(order, subset);
+}
+async function saveRelevanceOrder(ids){
+  const res = await fetch(`${WORKER_URL}/admin/save-settings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), relevanceOrder: ids })
+  });
+  const data = await res.json();
+  if (!data.ok) return { ok: false, error: data.error || "No se pudo guardar el orden.", status: res.status };
+  if (!Array.isArray(data.settings && data.settings.relevanceOrder)){
+    return { ok: false, error: "El Worker todavía no tiene la actualización del orden — pega el worker.js nuevo en Cloudflare y dale Deploy." };
+  }
+  RELEVANCE_ORDER = data.settings.relevanceOrder;
+  if (typeof refreshAllViews === "function") refreshAllViews();
+  return { ok: true };
+}
+
 function sortCards(list){
   switch(state.sort){
+    case "relevance": return sortByRelevance(list);
     case "price-asc": return list.sort((a,b)=>a.price-b.price);
     case "price-desc": return list.sort((a,b)=>b.price-a.price);
     case "name-asc": return list.sort((a,b)=>a.name.localeCompare(b.name));
@@ -2552,6 +2795,7 @@ function renderCard(card){
       <div class="card-gallery-dots">${gallery.map((_,i) => `<span class="${i===0?'active':''}"></span>`).join("")}</div>`;
   } else {
     artImg = card.image ? `<img class="real" src="${card.image}" alt="${card.name}" loading="lazy" onload="this.closest('.card-art').classList.remove('loading')" onerror="this.closest('.card-art')?.classList.remove('loading');this.remove()">` : "";
+    if (artImg && card.finish) artImg = `<span class="holo-wrap ${card.finish}">${artImg}</span>`;
   }
   el.innerHTML = `
     <div class="card-art${card.image ? ' loading' : ''}" data-toggle="1">
@@ -2566,7 +2810,7 @@ function renderCard(card){
     <div class="card-info">
       <div class="card-set"><span>${card.set}</span>${card.num ? `<span>${card.code}${String(card.num).padStart(3,"0")}/${card.total}</span>` : ""}</div>
       <p class="card-name">${card.name}</p>
-      <div class="card-meta">${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}<span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}${isOnOffer(card) ? '<span class="tag offer-tag">🏷️ Descuento</span>' : ''}</div>
+      <div class="card-meta">${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}${holoTag(card)}<span class="tag" style="display:inline-flex;align-items:center;gap:4px;">${getLangInfo(card).flag} ${getLangInfo(card).label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}${isOnOffer(card) ? '<span class="tag offer-tag">🏷️ Descuento</span>' : ''}</div>
       <div class="card-price-row"><span class="card-price-group">${isOnOffer(card) ? `<span class="card-price-was">${money(card.originalPrice)}</span>` : ''}<span class="card-price">${money(card.price)}</span></span><span class="card-cond">${card.condition}</span></div>
       ${isQtyKind(card.kind) ? `
       <div class="qty-stepper">
@@ -2678,11 +2922,12 @@ function openZoom(card){
   let galleryIdx = 0;
 
   function renderZoomArt(){
-    artWrap.querySelectorAll("img, .zoom-gallery-arrow").forEach(el => el.remove());
+    artWrap.querySelectorAll(".holo-wrap, img, .zoom-gallery-arrow").forEach(el => el.remove());
     if (!gallery.length){
       artWrap.insertAdjacentHTML("afterbegin", GEM_ICON);
     } else {
-      artWrap.insertAdjacentHTML("afterbegin", `<img src="${gallery[galleryIdx]}" alt="${card.name}" onerror="this.remove()">`);
+      const zoomImg = `<img src="${gallery[galleryIdx]}" alt="${card.name}" onerror="this.remove()">`;
+      artWrap.insertAdjacentHTML("afterbegin", (card.finish && galleryIdx === 0) ? `<span class="holo-wrap zoom ${card.finish}">${zoomImg}</span>` : zoomImg);
       if (gallery.length > 1){
         artWrap.insertAdjacentHTML("beforeend", `
           <button type="button" class="zoom-gallery-arrow prev" aria-label="Anterior"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -2708,7 +2953,7 @@ function openZoom(card){
   document.getElementById("zoomSet").textContent = card.set ? `${card.set}${card.num ? ` · ${card.code}${String(card.num).padStart(3,"0")}/${card.total}` : ""}` : "";
   document.getElementById("zoomName").textContent = card.name;
   const langInfo = getLangInfo(card);
-  document.getElementById("zoomMeta").innerHTML = `${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}<span class="tag" style="display:inline-flex;align-items:center;gap:5px;">${langInfo.flag} ${langInfo.label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}${card.condition ? `<span class="tag">${card.condition}</span>` : ''}`;
+  document.getElementById("zoomMeta").innerHTML = `${card.rarity ? `<span class="tag">${card.rarity}</span>` : ''}${holoTag(card)}<span class="tag" style="display:inline-flex;align-items:center;gap:5px;">${langInfo.flag} ${langInfo.label}</span>${card.trending ? '<span class="tag trend-tag">📈 En alza</span>' : ''}${card.condition ? `<span class="tag">${card.condition}</span>` : ''}`;
   const descEl = document.getElementById("zoomDescription");
   if (descEl){
     if (card.description && card.description.trim()){
@@ -2985,7 +3230,7 @@ function updateCartUI(){
         <div class="art" style="${bg}"></div>
         <div class="grow">
           <div class="name">${card.name}${(!qtyCapable && qty>1)?` ×${qty}`:''}</div>
-          <div class="sub">${card.set} · ${card.condition}</div>
+          <div class="sub">${card.set} · ${card.condition}${finishLabel(card) ? ` · ✨ ${finishLabel(card)}` : ""}</div>
           ${qtyCapable ? `
           <div class="drawer-qty-stepper">
             <button class="drawer-qty-minus" aria-label="Quitar uno">−</button>
@@ -3543,7 +3788,8 @@ function renderToys(){
   let list = CARDS.filter(c => c.category === "toy");
   const q = toyState.query.trim().toLowerCase();
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
-  if (toyState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
+  if (toyState.sort === "relevance") list = sortByRelevance([...list]);
+  else if (toyState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
   else if (toyState.sort === "price-desc") list = [...list].sort((a,b)=>b.price-a.price);
 
   document.getElementById("toyResultsCount").textContent = `${list.length} producto${list.length===1?'':'s'}`;
@@ -3570,7 +3816,8 @@ function renderAcrylics(){
   let list = CARDS.filter(c => c.category === "acrylic");
   const q = acrylicState.query.trim().toLowerCase();
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
-  if (acrylicState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
+  if (acrylicState.sort === "relevance") list = sortByRelevance([...list]);
+  else if (acrylicState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
   else if (acrylicState.sort === "price-desc") list = [...list].sort((a,b)=>b.price-a.price);
 
   document.getElementById("acrylicResultsCount").textContent = `${list.length} producto${list.length===1?'':'s'}`;
@@ -3597,7 +3844,8 @@ function renderPcjp(){
   let list = CARDS.filter(c => c.category === "pcjp");
   const q = pcjpState.query.trim().toLowerCase();
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
-  if (pcjpState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
+  if (pcjpState.sort === "relevance") list = sortByRelevance([...list]);
+  else if (pcjpState.sort === "price-asc") list = [...list].sort((a,b)=>a.price-b.price);
   else if (pcjpState.sort === "price-desc") list = [...list].sort((a,b)=>b.price-a.price);
 
   document.getElementById("pcjpResultsCount").textContent = `${list.length} producto${list.length===1?'':'s'}`;
@@ -3728,6 +3976,11 @@ function applySiteSettings(settings){
     orderWaBtn.href = orderWaBtn.href.replace(/wa\.me\/\d+/, `wa.me/${WHATSAPP_PHONE}`);
   }
   applyCategoryBanners(settings.categoryBanners);
+  document.body.classList.toggle("no-holo-fx", settings.holoEffect === false);
+  if (Array.isArray(settings.relevanceOrder)){
+    RELEVANCE_ORDER = settings.relevanceOrder;
+    if (typeof refreshAllViews === "function") refreshAllViews();
+  }
 }
 fetch(`${WORKER_URL}/settings`, { cache: "no-store" })
   .then(r => r.json())
@@ -3900,6 +4153,14 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("adminTabCsv").classList.toggle("active", tab === "csv");
     document.getElementById("adminCsvPanel").style.display = tab === "csv" ? "block" : "none";
     document.getElementById("adminPricesPanel").style.display = tab === "prices" ? "block" : "none";
+    document.getElementById("adminTabOrder").classList.toggle("active", tab === "order");
+    document.getElementById("adminTabHolo").classList.toggle("active", tab === "holo");
+    document.getElementById("adminTabCatalog").classList.toggle("active", tab === "catalog");
+    // la tabla del catálogo necesita espacio: el modal se ensancha solo en esa pestaña
+    document.getElementById("adminModal").style.width = tab === "catalog" ? "min(1180px,96vw)" : "min(420px,92vw)";
+    document.getElementById("adminCatalogPanel").style.display = tab === "catalog" ? "block" : "none";
+    document.getElementById("adminHoloPanel").style.display = tab === "holo" ? "block" : "none";
+    document.getElementById("adminOrderPanel").style.display = tab === "order" ? "block" : "none";
     document.getElementById("adminCouponsPanel").style.display = tab === "coupons" ? "block" : "none";
     document.getElementById("adminAnalyticsPanel").style.display = tab === "analytics" ? "block" : "none";
     document.getElementById("adminTabConfig").classList.toggle("active", tab === "config");
@@ -3914,6 +4175,161 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   document.getElementById("adminTabCoupons").addEventListener("click", () => { showAdminTab("coupons"); loadCoupons(); });
   document.getElementById("adminTabAnalytics").addEventListener("click", async () => { showAdminTab("analytics"); await loadAnalytics(); });
   document.getElementById("adminTabConfig").addEventListener("click", () => { showAdminTab("config"); loadSiteConfig(); });
+  document.getElementById("adminTabOrder").addEventListener("click", () => { showAdminTab("order"); openOrderPanel(); });
+  document.getElementById("adminTabCatalog").addEventListener("click", () => { showAdminTab("catalog"); renderCatalogTable(); });
+  document.getElementById("adminTabHolo").addEventListener("click", () => { showAdminTab("holo"); updateHoloCheckLine(); syncHoloFxToggle(); });
+
+  /* ---- pestaña "↕️ Orden": acomodar a mano el orden por relevancia ---- */
+  let orderDraft = null;
+  let orderDirty = false;
+  let orderSortable = null;
+  const orderListEl = document.getElementById("orderList");
+  const orderStatusEl = document.getElementById("orderStatus");
+
+  function loadSortableLib(){
+    if (window.Sortable) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js";
+      sc.onload = resolve; sc.onerror = reject;
+      document.head.appendChild(sc);
+    });
+  }
+  // completa el borrador con piezas nuevas/borradas desde la última vez, usando la misma regla
+  // que ve el público (lo no acomodado cae según su precio)
+  function syncOrderDraft(){
+    const saved = RELEVANCE_ORDER;
+    RELEVANCE_ORDER = orderDraft || saved;
+    orderDraft = relevanceEffectiveOrder();
+    RELEVANCE_ORDER = saved;
+  }
+  function markOrderDirty(){
+    orderDirty = true;
+    orderStatusEl.textContent = "Cambios sin guardar — dale \"Guardar orden\" para que los vean tus clientes.";
+    orderStatusEl.style.color = "var(--foil-bright)";
+  }
+  function orderSubset(){
+    const cat = document.getElementById("orderCategory").value;
+    const byId = new Map(CARDS.map(c => [String(c.id), c]));
+    return orderDraft.filter(id => relevanceCategory(byId.get(id)) === cat);
+  }
+  function openOrderPanel(){
+    if (!orderDirty){ orderDraft = null; orderStatusEl.textContent = ""; }
+    syncOrderDraft();
+    renderOrderList();
+  }
+  function moveOrderItem(id, position){
+    const subset = orderSubset().filter(x => x !== id);
+    const target = Math.max(0, Math.min(subset.length, (Number(position)||1) - 1));
+    subset.splice(target, 0, id);
+    orderDraft = applySubsetOrder(orderDraft, subset);
+    markOrderDirty();
+    renderOrderList();
+    const row = orderListEl.querySelector(`.rel-row[data-id="${CSS.escape(id)}"]`);
+    if (row){
+      row.scrollIntoView({ block: "nearest" });
+      row.classList.add("rel-chosen");
+      setTimeout(() => row.classList.remove("rel-chosen"), 900);
+    }
+  }
+  function renderOrderList(){
+    syncOrderDraft();
+    const q = document.getElementById("orderSearch").value.trim().toLowerCase();
+    const searchNote = document.getElementById("orderSearchNote");
+    searchNote.textContent = "Con búsqueda activa solo puedes cambiar el número de lugar; para arrastrar, borra la búsqueda.";
+    searchNote.style.display = q ? "block" : "none";
+    const byId = new Map(CARDS.map(c => [String(c.id), c]));
+    const subset = orderSubset();
+    const scrollTop = orderListEl.scrollTop;
+    const rows = [];
+    subset.forEach((id, i) => {
+      const c = byId.get(id);
+      if (q && !`${c.name} ${c.set || ""}`.toLowerCase().includes(q)) return;
+      const esc = t => String(t || "").replace(/[&<>"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[ch]));
+      const meta = [money(Number(c.price)||0), c.set, c.stock <= 0 ? "agotada" : ""].filter(Boolean).join(" · ");
+      rows.push(`<div class="rel-row" data-id="${esc(id)}">
+        ${q ? "" : `<span class="rel-handle" title="Arrastrar">⠿</span>`}
+        <input type="number" min="1" class="rel-pos" value="${i + 1}" aria-label="Lugar">
+        ${c.image ? `<img class="rel-thumb" src="${esc(c.image)}" loading="lazy" alt="">` : `<span class="rel-thumb"></span>`}
+        <div class="rel-info"><div class="rel-name">${esc(c.name)}</div><div class="rel-meta">${esc(meta)}</div></div>
+        <div class="rel-arrows">
+          <button type="button" data-move="-1" ${i === 0 ? "disabled" : ""} aria-label="Subir">▲</button>
+          <button type="button" data-move="1" ${i === subset.length - 1 ? "disabled" : ""} aria-label="Bajar">▼</button>
+        </div>
+      </div>`);
+    });
+    orderListEl.innerHTML = rows.join("") || `<p style="padding:14px;font-size:12.5px;color:var(--slate);">No hay piezas en esta sección${q ? " con esa búsqueda" : ""}.</p>`;
+    orderListEl.scrollTop = scrollTop;
+
+    if (orderSortable){ orderSortable.destroy(); orderSortable = null; }
+    if (q || !subset.length) return;
+    loadSortableLib().then(() => {
+      if (orderSortable) orderSortable.destroy();
+      orderSortable = window.Sortable.create(orderListEl, {
+        handle: ".rel-handle", animation: 150, ghostClass: "rel-ghost", chosenClass: "rel-chosen",
+        onEnd: () => {
+          const ids = [...orderListEl.querySelectorAll(".rel-row")].map(r => r.dataset.id);
+          orderDraft = applySubsetOrder(orderDraft, ids);
+          markOrderDirty();
+          renderOrderList();
+        }
+      });
+    }).catch(() => {
+      const note = document.getElementById("orderSearchNote");
+      note.textContent = "No se pudo cargar la función de arrastrar (revisa tu conexión) — mientras, usa las flechas o el número de lugar.";
+      note.style.display = "block";
+    });
+  }
+  orderListEl.addEventListener("click", e => {
+    const btn = e.target.closest("[data-move]");
+    if (!btn) return;
+    const id = btn.closest(".rel-row").dataset.id;
+    const current = orderSubset().indexOf(id) + 1;
+    moveOrderItem(id, current + Number(btn.dataset.move));
+  });
+  orderListEl.addEventListener("change", e => {
+    if (!e.target.classList.contains("rel-pos")) return;
+    const id = e.target.closest(".rel-row").dataset.id;
+    if (Number(e.target.value) >= 1) moveOrderItem(id, Number(e.target.value));
+    else renderOrderList();
+  });
+  orderListEl.addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.target.classList.contains("rel-pos")) e.target.blur();
+  });
+  document.getElementById("orderCategory").addEventListener("change", renderOrderList);
+  document.getElementById("orderSearch").addEventListener("input", renderOrderList);
+  document.getElementById("orderResetBtn").addEventListener("click", () => {
+    const label = document.getElementById("orderCategory").selectedOptions[0].textContent.trim();
+    if (!confirm(`¿Reacomodar "${label}" por precio, de mayor a menor? Se pierde lo que habías acomodado a mano en esta sección (las demás no se tocan).`)) return;
+    const byId = new Map(CARDS.map(c => [String(c.id), c]));
+    const subset = orderSubset().sort((a,b) => (Number(byId.get(b).price)||0) - (Number(byId.get(a).price)||0));
+    orderDraft = applySubsetOrder(orderDraft, subset);
+    markOrderDirty();
+    renderOrderList();
+  });
+  document.getElementById("orderSaveBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("orderSaveBtn");
+    btn.disabled = true;
+    orderStatusEl.style.color = "";
+    orderStatusEl.textContent = "Guardando…";
+    try {
+      syncOrderDraft();
+      const result = await saveRelevanceOrder(orderDraft);
+      if (result.ok){
+        orderDirty = false;
+        orderStatusEl.textContent = "✓ Orden guardado — así lo ven tus clientes desde ya.";
+        orderStatusEl.style.color = "var(--ok)";
+      } else {
+        orderStatusEl.textContent = result.error;
+        orderStatusEl.style.color = "var(--ember-bright)";
+        if (result.status === 401) sessionStorage.removeItem("vitrina_admin_pass");
+      }
+    } catch {
+      orderStatusEl.textContent = "No se pudo conectar con el servidor.";
+      orderStatusEl.style.color = "var(--ember-bright)";
+    }
+    btn.disabled = false;
+  });
 
   function populateBannerEditors(categoryBanners){
     const banners = Object.assign({}, DEFAULT_CATEGORY_BANNERS);
@@ -4178,7 +4594,11 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("editPrice").value = card.price;
     document.getElementById("editStock").value = card.stock;
     document.getElementById("editOriginalPrice").value = card.originalPrice || "";
+    const relInput = document.getElementById("editRelevancePos");
+    relInput.value = relevancePositionOf(card) || "";
+    relInput.dataset.before = relInput.value;
     document.getElementById("editRarity").value = card.rarity || "";
+    document.getElementById("editFinish").value = ["holo","reverse"].includes(card.finish) ? card.finish : "";
     document.getElementById("editLanguage").value = ["Inglés","Japonés","Chino"].includes(card.language) ? card.language : "Inglés";
     document.getElementById("editCondition").value = card.condition || "";
     const rarityOptions = document.getElementById("rarityOptions");
@@ -4232,6 +4652,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       stock: Number(document.getElementById("editStock").value),
       originalPrice: Number(document.getElementById("editOriginalPrice").value) || 0,
       rarity: document.getElementById("editRarity").value.trim(),
+      finish: document.getElementById("editFinish").value,
       language: document.getElementById("editLanguage").value,
       condition: document.getElementById("editCondition").value.trim(),
       description: document.getElementById("editDescription").value.trim(),
@@ -4253,6 +4674,16 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         if (card) Object.assign(card, changes);
         refreshAllViews();
         status.textContent = "✓ Guardado — ya está actualizado en el sitio.";
+        const relInput = document.getElementById("editRelevancePos");
+        const relPos = Number(relInput.value);
+        if (relPos >= 1 && relInput.value !== relInput.dataset.before){
+          saveRelevanceOrder(orderWithCardAtPosition(editingId, relPos))
+            .then(r => {
+              if (r.ok){ relInput.value = relevancePositionOf(card) || relPos; relInput.dataset.before = relInput.value; status.textContent = `✓ Guardado — ahora está en el lugar ${relInput.value} de su sección.`; }
+              else status.textContent = `✓ Guardado, pero no se movió de lugar: ${r.error}`;
+            })
+            .catch(() => { status.textContent = "✓ Guardado, pero no se pudo mover de lugar (sin conexión)."; });
+        }
         // registra el cambio de precio en el historial, para ir armando la tendencia "📈 En alza"
         if (priceBefore !== undefined && changes.price !== priceBefore){
           fetch(`${WORKER_URL}/admin/log-price`, {
@@ -4580,12 +5011,38 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     refreshAllViews();
   });
 
-  document.getElementById("adminLoginBtn").addEventListener("click", () => {
+  document.getElementById("adminLoginBtn").addEventListener("click", async () => {
     const pass = document.getElementById("adminPasswordInput").value;
     const status = document.getElementById("adminLoginStatus");
+    const loginBtn = document.getElementById("adminLoginBtn");
     if (!pass){ status.textContent = "Escribe la contraseña."; return; }
-    // no la verificamos aquí (eso lo hace el Worker en cada acción) —
-    // solo la guardamos para esta sesión y seguimos al formulario
+    // se verifica contra el Worker ANTES de abrir el panel — con contraseña incorrecta no se ve nada
+    loginBtn.disabled = true;
+    status.textContent = "Verificando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/verify`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pass })
+      });
+      if (res.status === 404 || res.headers.get("content-type")?.includes("text/plain")){
+        status.textContent = "El Worker todavía no tiene la verificación de contraseña — pega el worker.js nuevo en Cloudflare y dale Deploy.";
+        loginBtn.disabled = false;
+        return;
+      }
+      const data = await res.json();
+      if (!data.ok){
+        status.textContent = "Contraseña incorrecta.";
+        document.getElementById("adminPasswordInput").value = "";
+        loginBtn.disabled = false;
+        return;
+      }
+    } catch {
+      status.textContent = "No se pudo conectar con el servidor para verificar la contraseña.";
+      loginBtn.disabled = false;
+      return;
+    }
+    loginBtn.disabled = false;
+    status.textContent = "";
     sessionStorage.setItem("vitrina_admin_pass", pass);
     markAdminDevice();
     loginStep.style.display = "none";
@@ -4738,6 +5195,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       num: Number(document.getElementById("adminNum").value) || 0,
       total: Number(document.getElementById("adminTotal").value) || 0,
       rarity: document.getElementById("adminRarity").value.trim(),
+      finish: document.getElementById("adminFinish").value,
       language: document.getElementById("adminLanguage").value,
       condition: document.getElementById("adminCondition").value.trim(),
       featured: document.getElementById("adminFeatured").checked,
@@ -4756,6 +5214,14 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         CARDS.push(data.product);
         refreshAllViews();
         status.textContent = "✓ Publicado — ya está en el sitio.";
+        const relPosInput = document.getElementById("adminRelevancePos");
+        const relPos = Number(relPosInput.value);
+        relPosInput.value = "";
+        if (relPos >= 1){
+          saveRelevanceOrder(orderWithCardAtPosition(data.product.id, relPos))
+            .then(r => { status.textContent = r.ok ? `✓ Publicado en el lugar ${relPos} de su sección.` : `✓ Publicado, pero no se guardó el lugar: ${r.error}`; })
+            .catch(() => { status.textContent = "✓ Publicado, pero no se pudo guardar el lugar (sin conexión)."; });
+        }
         fetch(`${WORKER_URL}/admin/log-price`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -4767,6 +5233,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         document.getElementById("adminNum").value = "";
         document.getElementById("adminTotal").value = "";
         document.getElementById("adminRarity").value = "";
+        document.getElementById("adminFinish").value = "";
         document.getElementById("adminLanguage").value = "Inglés";
         document.getElementById("adminCondition").value = "";
         document.getElementById("adminPrice").value = "";
@@ -5411,7 +5878,28 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       try {
         const rows = parseCsv(reader.result);
         const forcePrice = document.getElementById("forceCsvPrice").checked;
-        const existingKeys = new Map(CARDS.filter(c => !c.deleted).map(c => [catalogKey(c.name, c.set, c.num), c]));
+        // columna de variante de Collectr (Normal / Holofoil / Reverse Holofoil) — antes se
+        // ignoraba y todo entraba como normal; se detecta por nombre para no depender del texto exacto
+        const varianceCol = rows.length ? Object.keys(rows[0]).find(h => /varian|printing|finish/i.test(h)) : null;
+        const existingByKey = new Map();
+        CARDS.filter(c => !c.deleted).forEach(c => {
+          const k = catalogKey(c.name, c.set, c.num);
+          if (!existingByKey.has(k)) existingByKey.set(k, []);
+          existingByKey.get(k).push(c);
+        });
+        const claimed = new Set();
+        // 1ª pasada: misma carta y mismo acabado; 2ª pasada (dentro del forEach): si solo hay una
+        // copia de esa carta y no choca de acabado, se toma esa — así una fila "Normal" nunca le
+        // quita el holo a una carta que ya corregiste, y una fila holo sí corrige a una normal
+        rows.forEach(r => {
+          const name = (r["Product Name"] || "").trim();
+          if (!name) return;
+          const cardNumRaw = (r["Card Number"] || "").trim();
+          const num = parseInt((cardNumRaw.split("/")[0] || "").replace(/\D/g,"")) || 0;
+          const fin = normalizeFinish(varianceCol ? r[varianceCol] : "");
+          const exact = (existingByKey.get(catalogKey(name, (r["Set"] || "").trim(), num)) || []).find(c => (c.finish || "") === fin && !claimed.has(c.id));
+          if (exact){ claimed.add(exact.id); r.__match = exact; }
+        });
         const toAdd = [], toEdit = [];
         let skipped = 0;
 
@@ -5433,10 +5921,17 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
           let price = Math.round(parseFloat(priceRaw)) || 1;
           if (price <= 0) price = 1;
           const csvRarity = (r["Rarity"] || "").trim();
+          const csvFinish = normalizeFinish(varianceCol ? r[varianceCol] : "");
 
-          const existing = existingKeys.get(key);
+          let existing = r.__match;
+          if (!existing){
+            const same = (existingByKey.get(key) || []).filter(c => !claimed.has(c.id));
+            if (same.length === 1 && (!csvFinish || !same[0].finish)) existing = same[0];
+            if (existing) claimed.add(existing.id);
+          }
           if (existing){
             const changes = {};
+            if (csvFinish && existing.finish !== csvFinish) changes.finish = csvFinish;
             if (Number(existing.stock) !== stockVal) changes.stock = stockVal;
             if (csvRarity && existing.rarity !== csvRarity) changes.rarity = csvRarity;
             if (!existing.priceLocked){
@@ -5454,6 +5949,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
             name: cleanRowName(name), set: setName, num, total,
             rarity: csvRarity || (cardNumRaw ? "Rare" : "Sellado"), condition: "Nuevo", language,
             category: "pokemon", kind: cardNumRaw ? "single" : "sellado",
+            finish: cardNumRaw ? csvFinish : "",
             price, priceSource: "csv", stock: stockVal, priceLocked: false
           });
         });
@@ -5563,6 +6059,459 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("pricesSaveBar").style.display = checked.length ? "block" : "none";
     document.getElementById("pricesSelectedCount").textContent = checked.length;
   }
+
+  /* ---- "🗂️ Catálogo": todo el inventario editable como hoja de cálculo (reemplazo mejorado
+     del catálogo de admin.html). Los cambios quedan en borrador (catDirty) hasta "Guardar". ---- */
+  const catDirty = new Map();   // id -> { campo: valorNuevo }
+  const catSelected = new Set();
+  let catPageSize = 80;
+  const CAT_COLS = [
+    { key: "name", label: "Nombre", w: 210 },
+    { key: "set", label: "Expansión", w: 150 },
+    { key: "num", label: "#", w: 64, num: true },
+    { key: "total", label: "Total", w: 64, num: true },
+    { key: "rarity", label: "Rareza", w: 120, list: "rarityOptions" },
+    { key: "finish", label: "Acabado", w: 138, options: [["", "Normal"], ["holo", "✨ Holo"], ["reverse", "✨ Reverse Holo"]] },
+    { key: "condition", label: "Condición", w: 80 },
+    { key: "language", label: "Idioma", w: 90, options: [["Inglés","Inglés"],["Japonés","Japonés"],["Chino","Chino"],["",""]] },
+    { key: "price", label: "Precio", w: 70, num: true },
+    { key: "originalPrice", label: "Precio ant.", w: 70, num: true },
+    { key: "stock", label: "Stock", w: 55, num: true },
+    { key: "image", label: "Foto (link)", w: 190 },
+  ];
+  const catEsc = t => String(t ?? "").replace(/[&<>"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[ch]));
+  function catValue(card, key){
+    const d = catDirty.get(String(card.id));
+    if (d && key in d) return d[key];
+    const v = card[key];
+    if (key === "finish") return ["holo","reverse"].includes(v) ? v : "";
+    return v ?? "";
+  }
+  function catOriginal(card, key){
+    const v = card[key];
+    if (key === "finish") return ["holo","reverse"].includes(v) ? v : "";
+    if (CAT_COLS.find(c => c.key === key)?.num) return Number(v) || 0;
+    return v ?? "";
+  }
+  function catSetValue(card, key, raw){
+    const col = CAT_COLS.find(c => c.key === key);
+    const value = col && col.num ? (Number(raw) || 0) : String(raw).trim();
+    const id = String(card.id);
+    const d = catDirty.get(id) || {};
+    if (value === catOriginal(card, key)) delete d[key]; else d[key] = value;
+    if (key === "image" && "image" in d) d.images = d.image ? [d.image, ...((card.images || []).filter(u => u && u !== card.image))] : [];
+    if (key === "image" && !("image" in d)) delete d.images;
+    if (Object.keys(d).length) catDirty.set(id, d); else catDirty.delete(id);
+  }
+  function catFiltered(){
+    const q = document.getElementById("catSearch").value.trim().toLowerCase();
+    const cat = document.getElementById("catCategory").value;
+    const quick = document.getElementById("catQuick").value;
+    return CARDS.filter(c => {
+      if (c.deleted) return false;
+      const isCard = !c.category || c.category === "pokemon";
+      if (cat === "single" && !(isCard && c.kind !== "sellado")) return false;
+      if (cat === "sellado" && !(isCard && c.kind === "sellado")) return false;
+      if (["pcjp","acrylic","toy"].includes(cat) && c.category !== cat) return false;
+      if (quick === "nofinish" && !(isCard && c.kind !== "sellado" && Number(c.num) > 0 && !catValue(c, "finish"))) return false;
+      if (quick === "noimage" && catValue(c, "image")) return false;
+      if (quick === "soldout" && Number(catValue(c, "stock")) > 0) return false;
+      if (quick === "dirty" && !catDirty.has(String(c.id))) return false;
+      if (q && !`${c.name} ${c.set} ${c.num} ${c.rarity}`.toLowerCase().includes(q)) return false;
+      return true;
+    }).sort((a,b) => (a.set || "").localeCompare(b.set || "") || (Number(a.num) - Number(b.num)) || (a.name || "").localeCompare(b.name || ""));
+  }
+  function catCell(card, col){
+    const v = catValue(card, col.key);
+    const dirty = catDirty.get(String(card.id))?.[col.key] !== undefined;
+    let inner;
+    if (col.options){
+      const opts = col.options.some(([val]) => val === v) ? col.options : [...col.options, [v, v]];
+      inner = `<select data-k="${col.key}">${opts.map(([val, lab]) => `<option value="${catEsc(val)}"${val === v ? " selected" : ""}>${catEsc(lab)}</option>`).join("")}</select>`;
+    } else {
+      inner = `<input data-k="${col.key}" ${col.num ? 'type="number"' : 'type="text"'} ${col.list ? `list="${col.list}"` : ""} value="${catEsc(v)}">`;
+    }
+    return `<td class="${dirty ? "dirty" : ""}${col.key === "name" ? " sticky-l2" : ""}" style="min-width:${col.w}px;">${inner}</td>`;
+  }
+  function updateCatBars(){
+    document.getElementById("catDirtyCount").textContent = catDirty.size;
+    document.getElementById("catSelInfo").textContent = `${catSelected.size} seleccionada(s)`;
+  }
+  function renderCatalogTable(){
+    const wrap = document.getElementById("catWrap");
+    const rows = catFiltered();
+    const shown = rows.slice(0, catPageSize);
+    const allSel = shown.length && shown.every(c => catSelected.has(String(c.id)));
+    const scrollTop = wrap.scrollTop, scrollLeft = wrap.scrollLeft;
+    wrap.innerHTML = !rows.length ? `<p style="padding:14px;font-size:12.5px;color:var(--slate);">No hay piezas con esos filtros.</p>` : `
+      <table class="cat-table"><thead><tr>
+        <th class="sticky-l" style="width:34px;"><input type="checkbox" id="catSelAll" ${allSel ? "checked" : ""} title="Seleccionar las visibles"></th>
+        <th class="sticky-l2">Nombre</th>
+        ${CAT_COLS.slice(1).map(c => `<th>${c.label}</th>`).join("")}
+        <th></th>
+      </tr></thead><tbody>
+      ${shown.map(card => {
+        const id = String(card.id);
+        const img = catValue(card, "image");
+        return `<tr data-id="${catEsc(id)}" class="${catSelected.has(id) ? "sel" : ""}">
+          <td class="sticky-l"><input type="checkbox" class="cat-sel" ${catSelected.has(id) ? "checked" : ""}></td>
+          ${CAT_COLS.map(col => catCell(card, col)).join("")}
+          <td>${img ? `<img class="cat-thumb" src="${catEsc(img)}" loading="lazy" alt="">` : ""}</td>
+        </tr>`;
+      }).join("")}
+      </tbody></table>
+      ${rows.length > shown.length ? `<button type="button" class="cat-more" id="catMore">Mostrar ${Math.min(80, rows.length - shown.length)} más (de ${rows.length - shown.length} restantes)</button>` : ""}`;
+    wrap.scrollTop = scrollTop; wrap.scrollLeft = scrollLeft;
+    document.getElementById("catMore")?.addEventListener("click", () => { catPageSize += 80; renderCatalogTable(); });
+    document.getElementById("catSelAll")?.addEventListener("change", e => {
+      shown.forEach(c => e.target.checked ? catSelected.add(String(c.id)) : catSelected.delete(String(c.id)));
+      renderCatalogTable();
+    });
+    updateCatBars();
+  }
+  const catWrapEl = document.getElementById("catWrap");
+  catWrapEl.addEventListener("change", e => {
+    const tr = e.target.closest("tr[data-id]");
+    if (!tr) return;
+    const card = CARDS.find(c => String(c.id) === tr.dataset.id);
+    if (!card) return;
+    if (e.target.classList.contains("cat-sel")){
+      e.target.checked ? catSelected.add(tr.dataset.id) : catSelected.delete(tr.dataset.id);
+      tr.classList.toggle("sel", e.target.checked);
+      updateCatBars();
+      return;
+    }
+    const key = e.target.dataset.k;
+    if (!key) return;
+    catSetValue(card, key, e.target.value);
+    e.target.closest("td").classList.toggle("dirty", catDirty.get(tr.dataset.id)?.[key] !== undefined);
+    if (key === "image"){
+      const thumbCell = tr.lastElementChild;
+      const v = catValue(card, "image");
+      thumbCell.innerHTML = v ? `<img class="cat-thumb" src="${catEsc(v)}" alt="">` : "";
+    }
+    updateCatBars();
+  });
+  // Enter en una celda baja a la misma columna de la fila siguiente, como en Excel
+  catWrapEl.addEventListener("keydown", e => {
+    if (e.key !== "Enter" || !e.target.dataset.k) return;
+    e.preventDefault();
+    const nextRow = e.target.closest("tr").nextElementSibling;
+    const next = nextRow?.querySelector(`[data-k="${e.target.dataset.k}"]`);
+    e.target.dispatchEvent(new Event("change", { bubbles: true }));
+    if (next){ next.focus(); next.select?.(); }
+  });
+  ["catSearch","catCategory","catQuick"].forEach(id => document.getElementById(id).addEventListener(id === "catSearch" ? "input" : "change", () => { catPageSize = 80; renderCatalogTable(); }));
+  function renderCatBulkValue(){
+    const field = document.getElementById("catBulkField").value;
+    const col = CAT_COLS.find(c => c.key === field);
+    const wrap = document.getElementById("catBulkValueWrap");
+    wrap.innerHTML = col.options
+      ? `<select id="catBulkValue" style="width:100%;">${col.options.filter(([v,l]) => l).map(([v,l]) => `<option value="${catEsc(v)}">${catEsc(l)}</option>`).join("")}</select>`
+      : `<input id="catBulkValue" ${col.num ? 'type="number"' : 'type="text"'} ${col.list ? `list="${col.list}"` : ""} placeholder="Nuevo valor" style="width:100%;">`;
+  }
+  document.getElementById("catBulkField").addEventListener("change", renderCatBulkValue);
+  renderCatBulkValue();
+  document.getElementById("catBulkApply").addEventListener("click", () => {
+    const field = document.getElementById("catBulkField").value;
+    const value = document.getElementById("catBulkValue").value;
+    const status = document.getElementById("catStatus");
+    if (!catSelected.size){ status.textContent = "Marca primero las piezas con la casilla de la izquierda."; status.style.color = ""; return; }
+    let n = 0;
+    catSelected.forEach(id => { const card = CARDS.find(c => String(c.id) === id); if (card){ catSetValue(card, field, value); n++; } });
+    status.textContent = `Listo en borrador: ${n} pieza(s). Revisa y dale "Guardar cambios" para publicarlo.`;
+    status.style.color = "var(--foil-bright)";
+    renderCatalogTable();
+  });
+  document.getElementById("catDiscardBtn").addEventListener("click", () => {
+    if (catDirty.size && !confirm(`¿Descartar ${catDirty.size} pieza(s) con cambios sin guardar?`)) return;
+    catDirty.clear();
+    document.getElementById("catStatus").textContent = "";
+    renderCatalogTable();
+  });
+  document.getElementById("catSaveBtn").addEventListener("click", async () => {
+    const status = document.getElementById("catStatus");
+    const btn = document.getElementById("catSaveBtn");
+    if (!catDirty.size){ status.textContent = "No hay cambios por guardar."; status.style.color = ""; return; }
+    const edits = [...catDirty.entries()].map(([id, changes]) => ({ id, changes: { ...changes } }));
+    btn.disabled = true; status.style.color = ""; 
+    const send = async batch => {
+      const res = await fetch(`${WORKER_URL}/admin/bulk-edit-products`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), edits: batch })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "No se pudo guardar.");
+      // si el Worker descartó algún campo (versión vieja), avisamos en vez de fingir que se guardó
+      const dropped = new Set();
+      batch.forEach((e, i) => Object.keys(e.changes).forEach(k => { if (!(k in (data.results[i]?.changes || {}))) dropped.add(k); }));
+      if (dropped.size) throw new Error(`El Worker no guardó: ${[...dropped].join(", ")} — pega el worker.js nuevo en Cloudflare y dale Deploy.`);
+      return data;
+    };
+    let done = 0;
+    try {
+      // una primera pieza sola, para detectar un Worker desactualizado antes de tocar el resto
+      status.textContent = "Guardando…";
+      await send(edits.slice(0, 1));
+      done = 1;
+      for (let i = 1; i < edits.length; i += 400){
+        status.textContent = `Guardando ${Math.min(i + 400, edits.length)} de ${edits.length}…`;
+        await send(edits.slice(i, i + 400));
+        done = Math.min(i + 400, edits.length);
+      }
+    } catch (err) {
+      status.textContent = `${done ? `${done} guardada(s), pero ` : ""}${err.message}`;
+      status.style.color = "var(--ember-bright)";
+    }
+    edits.slice(0, done).forEach(e => {
+      const card = CARDS.find(c => String(c.id) === e.id);
+      if (card) Object.assign(card, e.changes);
+      catDirty.delete(e.id);
+      if ("price" in e.changes){
+        fetch(`${WORKER_URL}/admin/log-price`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: e.id, price: e.changes.price })
+        }).catch(() => {});
+      }
+    });
+    if (done === edits.length){ status.textContent = `✓ ${done} pieza(s) guardadas — ya están así en tu sitio.`; status.style.color = "var(--ok)"; }
+    if (done) refreshAllViews();
+    btn.disabled = false;
+    renderCatalogTable();
+  });
+
+  /* ---- "✨ Holo": marcar de un jalón como holo/reverse holo las cartas sueltas que entraron
+     como normales (el importador de CSV ignoraba la variante de Collectr) ---- */
+  let holoFound = []; // {card, finish, current, prices, apiImage, newPrice}
+  // rarezas cuya única versión holo es la reverse
+  const REVERSE_ONLY_RARITIES = ["common","uncommon","c","uc"];
+  // todas las cartas sueltas (no sellado, no JP-exclusivos/juguetes/acrílicos)
+  function holoSingles(){
+    return CARDS.filter(c => !c.deleted && c.kind !== "sellado" && (!c.category || c.category === "pokemon") && Number(c.num) > 0);
+  }
+  // verificación en vivo: cuántas cartas sueltas siguen sin acabado holo
+  function updateHoloCheckLine(){
+    const el = document.getElementById("holoCheckLine");
+    const singles = holoSingles();
+    const pending = singles.filter(c => !c.finish).length;
+    if (!pending){
+      el.innerHTML = `✓ Verificado: tus ${singles.length} cartas sueltas tienen acabado holo. Ninguna está como normal.`;
+      el.style.color = "var(--ok)";
+    } else {
+      el.innerHTML = `⚠️ ${pending} de ${singles.length} cartas sueltas siguen como normales (sin holo).`;
+      el.style.color = "var(--foil-bright)";
+    }
+  }
+  let holoFxOn = !document.body.classList.contains("no-holo-fx");
+  function syncHoloFxToggle(){
+    holoFxOn = !document.body.classList.contains("no-holo-fx");
+    const b = document.getElementById("holoFxToggle");
+    b.textContent = holoFxOn ? "✨ Encendido" : "Apagado";
+    b.classList.toggle("active", holoFxOn);
+  }
+  document.getElementById("holoFxToggle").addEventListener("click", async () => {
+    const b = document.getElementById("holoFxToggle");
+    const next = !holoFxOn;
+    b.disabled = true;
+    b.textContent = "Guardando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/save-settings`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), holoEffect: next })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      if (typeof (data.settings && data.settings.holoEffect) !== "boolean") throw new Error("worker viejo");
+      document.body.classList.toggle("no-holo-fx", !data.settings.holoEffect);
+    } catch (err) {
+      alert(err.message === "worker viejo" ? "El Worker todavía no guarda este interruptor — pega el worker.js nuevo en Cloudflare y dale Deploy." : "No se pudo guardar el cambio.");
+    }
+    b.disabled = false;
+    syncHoloFxToggle();
+  });
+  function holoPriceMxn(prices, finish){
+    const p = prices && prices[finish === "reverse" ? "reverseHolofoil" : "holofoil"];
+    if (!p) return null;
+    const usd = Math.max(Number(p.market) || 0, Number(p.low) || 0) || Number(p.mid) || 0;
+    return usd > 0 ? Math.round(usd * bulkFxRate) : null;
+  }
+  function holoNewPrice(item){
+    if (!document.getElementById("holoUpdatePrice").checked) return item.current;
+    const suggested = holoPriceMxn(item.prices, item.finish);
+    if (item.card.priceLocked || !suggested) return item.current;
+    return Math.max(item.current, suggested);
+  }
+  function updateHoloSaveBar(){
+    const n = document.querySelectorAll(".holo-check:checked").length;
+    document.getElementById("holoSelectedCount").textContent = n;
+    document.getElementById("holoSaveBar").style.display = holoFound.length ? "block" : "none";
+  }
+  function renderHoloList(){
+    const list = document.getElementById("holoList");
+    const esc = t => String(t ?? "").replace(/[&<>"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[ch]));
+    list.innerHTML = !holoFound.length ? "" : `
+      <div style="display:flex;gap:14px;padding:6px 0;font-size:12px;">
+        <button type="button" id="holoSelectAll" style="background:none;color:var(--foil-bright);text-decoration:underline;">Seleccionar todas (${holoFound.length})</button>
+        <button type="button" id="holoSelectNone" style="background:none;color:var(--slate);text-decoration:underline;">Ninguna</button>
+      </div>
+      <div class="rel-list">${holoFound.map((it, i) => {
+        const c = it.card;
+        const priceNote = c.priceLocked ? `$${it.current} 🔒` : (it.newPrice > it.current ? `$${it.current} → <b style="color:var(--foil-bright);">$${it.newPrice}</b>` : `$${it.current}`);
+        const img = c.image || it.apiImage;
+        return `<div class="rel-row">
+          <input type="checkbox" class="holo-check" data-i="${i}" checked style="width:16px;height:16px;flex:none;">
+          ${img ? `<img class="rel-thumb" src="${esc(img)}" loading="lazy" alt="">` : `<span class="rel-thumb"></span>`}
+          <div class="rel-info"><div class="rel-name">${esc(c.name)}</div><div class="rel-meta">${esc(c.set)}${c.num ? ` #${c.num}` : ""} · ${esc(c.rarity)} · <span class="holo-price">${priceNote}</span></div></div>
+          <select class="holo-finish" data-i="${i}" style="flex:none;font-size:12px;padding:5px;">
+            <option value="reverse"${it.finish === "reverse" ? " selected" : ""}>Reverse Holo</option>
+            <option value="holo"${it.finish === "holo" ? " selected" : ""}>Holo</option>
+          </select>
+        </div>`;
+      }).join("")}</div>`;
+    list.querySelectorAll(".holo-check").forEach(el => el.addEventListener("change", updateHoloSaveBar));
+    list.querySelectorAll(".holo-finish").forEach(el => el.addEventListener("change", e => {
+      const it = holoFound[Number(e.target.dataset.i)];
+      it.finish = e.target.value;
+      it.newPrice = holoNewPrice(it);
+      const checks = [...list.querySelectorAll(".holo-check")].map(x => x.checked);
+      renderHoloList();
+      list.querySelectorAll(".holo-check").forEach((x, j) => { x.checked = checks[j]; });
+      updateHoloSaveBar();
+    }));
+    document.getElementById("holoSelectAll")?.addEventListener("click", () => { list.querySelectorAll(".holo-check").forEach(x => x.checked = true); updateHoloSaveBar(); });
+    document.getElementById("holoSelectNone")?.addEventListener("click", () => { list.querySelectorAll(".holo-check").forEach(x => x.checked = false); updateHoloSaveBar(); });
+    updateHoloSaveBar();
+  }
+
+  document.getElementById("holoUpdatePrice").addEventListener("change", () => {
+    holoFound.forEach(it => { it.newPrice = holoNewPrice(it); });
+    const checks = [...document.querySelectorAll(".holo-check")].map(x => x.checked);
+    renderHoloList();
+    document.querySelectorAll(".holo-check").forEach((x, j) => { x.checked = checks[j]; });
+    updateHoloSaveBar();
+  });
+  document.getElementById("holoScanBtn").addEventListener("click", async () => {
+    const status = document.getElementById("holoScanStatus");
+    const btn = document.getElementById("holoScanBtn");
+    document.getElementById("holoSaveStatus").textContent = "";
+    const candidates = holoSingles().filter(c => !c.finish);
+    const isPatternVariant = c => /pattern|ball\)|reverse/i.test(c.name || "");
+    holoFound = [];
+    renderHoloList();
+    updateHoloCheckLine();
+    if (!candidates.length){
+      status.textContent = "No hay cartas por corregir — todas tus cartas sueltas ya tienen acabado holo.";
+      return;
+    }
+    btn.disabled = true;
+    if (!bulkFxLoaded){
+      try {
+        const fxRes = await fetch(`${WORKER_URL}/fx-rate`, { cache: "no-store" });
+        const fxData = await fxRes.json();
+        if (fxData.rate){ bulkFxRate = fxData.rate; bulkFxLoaded = true; }
+      } catch {}
+    }
+    const bySet = {};
+    candidates.forEach(c => { const k = (c.set || "").toLowerCase(); (bySet[k] = bySet[k] || []).push(c); });
+    const setKeys = Object.keys(bySet);
+    let n = 0, withoutData = 0;
+    for (const setKey of setKeys){
+      n++;
+      status.textContent = `Revisando expansión ${n} de ${setKeys.length}: ${bySet[setKey][0].set}…`;
+      let apiCards = [];
+      try {
+        const res = await fetch(`${WORKER_URL}/cards-by-set?set=${encodeURIComponent(bySet[setKey][0].set)}`, { cache: "no-store" });
+        apiCards = (await res.json()).cards || [];
+      } catch { /* sin datos de esa expansión: se marca igual, sin cambiar precio */ }
+      bySet[setKey].forEach(card => {
+        const match = apiCards.find(ac => parseInt(ac.number, 10) === Number(card.num))
+          || apiCards.find(ac => ac.name.toLowerCase() === (card.name || "").toLowerCase());
+        const prices = match?.tcgplayer?.prices || null;
+        if (!prices) withoutData++;
+        const rarity = String(card.rarity || "").trim().toLowerCase();
+        // Common/Uncommon y variantes con patrón solo existen en reverse holo. Cualquier otra que
+        // tenga versión normal en TCGplayer también es reverse; si su versión estándar ya es holo
+        // (ex, Ultra Rare, Illustration Rare… no tienen "normal"), queda como Holo.
+        let finish = "holo";
+        if (REVERSE_ONLY_RARITIES.includes(rarity) || isPatternVariant(card) || (prices && prices.normal)) finish = "reverse";
+        const item = { card, finish, current: Number(card.price) || 0, prices, apiImage: match?.image || "" };
+        item.newPrice = holoNewPrice(item);
+        holoFound.push(item);
+      });
+    }
+    btn.disabled = false;
+    holoFound.sort((a,b) => (a.card.set || "").localeCompare(b.card.set || "") || (Number(a.card.num) - Number(b.card.num)));
+    const raised = holoFound.filter(it => it.newPrice > it.current).length;
+    status.textContent = `${holoFound.length} carta(s) por corregir, ${raised} con precio holo más alto en TCGplayer.`
+      + (withoutData ? ` ${withoutData} sin datos en la API (sets muy nuevos o no indexados): se marcan igual, sin cambiar precio.` : "")
+      + " Revisa y quita las que no apliquen.";
+    renderHoloList();
+  });
+
+  document.getElementById("holoSaveBtn").addEventListener("click", async () => {
+    const status = document.getElementById("holoSaveStatus");
+    const btn = document.getElementById("holoSaveBtn");
+    const items = [...document.querySelectorAll(".holo-check:checked")].map(x => holoFound[Number(x.dataset.i)]);
+    if (!items.length){ status.textContent = "Selecciona al menos una carta."; return; }
+    status.style.color = "";
+    const edits = items.map(it => {
+      const changes = { finish: it.finish };
+      if (it.newPrice > it.current) changes.price = it.newPrice;
+      if (!it.card.image && it.apiImage){ changes.image = it.apiImage; changes.images = [it.apiImage]; }
+      return { id: String(it.card.id), changes, _item: it };
+    });
+    const send = async batch => {
+      const res = await fetch(`${WORKER_URL}/admin/bulk-edit-products`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), edits: batch.map(e => ({ id: e.id, changes: e.changes })) })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "No se pudo guardar.");
+      return data;
+    };
+    btn.disabled = true;
+    let done = 0;
+    try {
+      // primero UNA sola carta, para confirmar que el Worker ya guarda el campo "finish" antes
+      // de tocar precios del resto (con el Worker viejo, el precio sí cambiaría pero el holo no)
+      status.textContent = "Probando con la primera carta…";
+      const probe = await send(edits.slice(0, 1));
+      if (!probe.results?.[0]?.changes || probe.results[0].changes.finish !== edits[0].changes.finish){
+        throw new Error("El Worker todavía no acepta el acabado holo — pega el worker.js nuevo en Cloudflare, dale Deploy y vuelve a intentar.");
+      }
+      done = 1;
+      for (let i = 1; i < edits.length; i += 400){
+        status.textContent = `Corrigiendo ${Math.min(i + 400, edits.length)} de ${edits.length}…`;
+        await send(edits.slice(i, i + 400));
+        done = Math.min(i + 400, edits.length);
+      }
+    } catch (err) {
+      status.textContent = `${done ? `${done} corregida(s), pero ` : ""}${err.message}`;
+      status.style.color = "var(--ember-bright)";
+    }
+    edits.slice(0, done).forEach(e => {
+      Object.assign(e._item.card, e.changes);
+      if (e.changes.price){
+        fetch(`${WORKER_URL}/admin/log-price`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), id: e.id, price: e.changes.price })
+        }).catch(() => {});
+      }
+    });
+    if (done){
+      refreshAllViews();
+      if (done === edits.length){
+        const raised = edits.filter(e => e.changes.price).length;
+        status.textContent = `✓ ${done} carta(s) marcadas como holo${raised ? `, ${raised} con precio actualizado` : ""} — ya se ven así en tu sitio.`;
+        status.style.color = "var(--ok)";
+        const fixedIds = new Set(edits.map(e => e.id));
+        holoFound = holoFound.filter(it => !fixedIds.has(String(it.card.id)));
+        renderHoloList();
+        updateHoloCheckLine();
+      }
+    }
+    btn.disabled = false;
+  });
 
   document.getElementById("pricesScanBtn").addEventListener("click", async () => {
     const status = document.getElementById("pricesScanStatus");
@@ -5958,7 +6907,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     <div class="row total"><span>Total</span><b>${money(total)}</b></div>
   `;
 
-  const lines = items.map(({card,qty}) => `• ${card.name}${qty>1?` x${qty}`:''} — ${money(card.price*qty)}`);
+  const lines = items.map(({card,qty}) => `• ${card.name}${finishLabel(card) ? ` (${finishLabel(card)})` : ''}${qty>1?` x${qty}`:''} — ${money(card.price*qty)}`);
   const waMsg = `Hola, quiero confirmar mi pedido:%0A%0A${lines.join("%0A")}%0A${hasCoupon ? `%0ACupón ${couponCode} (-${couponPercent}%25): -${money(discount)}` : ""}${acrylicPromo ? `%0APromo acrílicos (-10%25): -${money(acrylicPromo)}` : ""}${deliveryLabel ? `%0AEntrega: ${encodeURIComponent(deliveryLabel)}` : ""}%0ATotal: ${money(total)}`;
   document.getElementById("orderWhatsappBtn").href = `https://wa.me/${WHATSAPP_PHONE}?text=${waMsg}`;
 
