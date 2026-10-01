@@ -582,6 +582,11 @@
   .promo-status{font-size:12px;color:var(--ember-bright);margin:8px 0 0;min-height:14px;}
   .field-label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--slate);text-transform:uppercase;margin:0 0 4px 2px;}
   .field-mini{flex:1;min-width:0;}
+  .card-skel{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ink-2);}
+  .card-skel-art{aspect-ratio:3/4;background:linear-gradient(100deg,var(--ink) 30%,rgba(255,255,255,.05) 50%,var(--ink) 70%);background-size:300% 100%;animation:skel 1.4s ease-in-out infinite;}
+  .card-skel-line{height:10px;margin:12px 12px 0;border-radius:5px;background:var(--ink);}
+  .card-skel-line.short{width:45%;margin-bottom:14px;}
+  @keyframes skel{0%{background-position:100% 0;}100%{background-position:0 0;}}
   .cat-wrap{max-height:60vh;overflow:auto;border:1px solid var(--line);border-radius:10px;}
   .cat-table{border-collapse:separate;border-spacing:0;font-size:12px;min-width:1180px;width:100%;}
   .cat-table th{position:sticky;top:0;z-index:3;background:var(--ink);color:var(--slate);font-weight:600;text-align:left;padding:7px 6px;border-bottom:1px solid var(--line-strong);white-space:nowrap;font-size:11px;}
@@ -1395,7 +1400,7 @@
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
       <button type="button" class="pay-opt" id="adminTabConfig" style="flex:1;">⚙️ Config</button>
     </div>
-    <p style="font-size:10px;color:var(--slate);margin:-8px 0 12px;text-align:right;">Versión del panel: 30 sep 2026 · orden, holo y catálogo editable</p>
+    <p style="font-size:10px;color:var(--slate);margin:-8px 0 12px;text-align:right;">Versión del panel: 1 oct 2026 (b) · carga sin brincos</p>
     <button type="button" id="adminLogoutBtn" style="background:none;border:none;padding:0;color:var(--slate);font-size:11px;cursor:pointer;text-decoration:underline;margin:-10px 0 16px;display:block;">🚪 Cerrar sesión de admin</button>
 
     <div id="adminAddForm">
@@ -2051,6 +2056,52 @@ const BANK_INFO = { // <-- reemplaza con tus datos reales para transferencia
   titular: "Nombre del titular"
 };
 const CARDS = window.CARDS || [];
+/* ---- arranque sin "brinco" del catálogo ----
+   cards-data.js es una foto fija del catálogo; lo vivo (productos agregados desde el panel,
+   ediciones, borrados, stock vendido) llega del Worker un par de segundos después. Antes la
+   página se pintaba con la foto vieja y luego brincaba. Ahora:
+   - si este navegador ya visitó el sitio, se usa al instante la última versión en vivo que
+     vio (guardada en localStorage) y luego se actualiza en silencio;
+   - si es su primera visita, se muestran tarjetas de "cargando" hasta que llega lo vivo
+     (máximo LIVE_WAIT_MS, por si el Worker tarda, y entonces se muestra lo que haya). */
+const LIVE_CACHE_KEY = "pb_live_catalog_v1";
+const LIVE_CACHE_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
+const LIVE_WAIT_MS = 4000;
+let LIVE_EDITS = {};
+let LIVE_STOCK = {};
+function readLiveCache(){
+  try {
+    const c = JSON.parse(localStorage.getItem(LIVE_CACHE_KEY) || "null");
+    if (c && Array.isArray(c.products) && Date.now() - (c.savedAt || 0) < LIVE_CACHE_MAX_AGE) return c;
+  } catch {}
+  return null;
+}
+// aplica ediciones, stock y borrados guardados en LIVE_EDITS / LIVE_STOCK a CARDS. Se corre
+// cada vez que llega algo, en cualquier orden — así no importa si /edits o /stock-overrides
+// llegan antes que /products (antes se perdían los cambios de los productos "kv_…")
+function applyLiveData(){
+  Object.keys(LIVE_EDITS).forEach(id => {
+    const card = CARDS.find(c => String(c.id) === String(id));
+    if (card) Object.assign(card, LIVE_EDITS[id]);
+  });
+  Object.keys(LIVE_STOCK).forEach(id => {
+    const card = CARDS.find(c => String(c.id) === String(id));
+    if (card) card.stock = LIVE_STOCK[id];
+  });
+  // las marcadas como eliminadas se quitan del todo, aunque sigan en cards-data.js
+  for (let i = CARDS.length - 1; i >= 0; i--){ if (CARDS[i].deleted) CARDS.splice(i, 1); }
+}
+const LIVE_CACHE = readLiveCache();
+let CATALOG_LOADING = !LIVE_CACHE;
+if (LIVE_CACHE){
+  LIVE_CACHE.products.forEach(p => { if (!CARDS.some(c => c.id === p.id)) CARDS.push(p); });
+  LIVE_EDITS = LIVE_CACHE.edits || {};
+  LIVE_STOCK = LIVE_CACHE.stock || {};
+  applyLiveData();
+}
+function skeletonCards(n){
+  return Array.from({ length: n }, () => `<div class="card-skel"><div class="card-skel-art"></div><div class="card-skel-line"></div><div class="card-skel-line short"></div></div>`).join("");
+}
 
 // "sellado" (pokémon) y los productos de las otras categorías (acrílico, juguete, exclusivo JP)
 // se venden por STOCK/cantidad — puedes tener 2, 3, etc. — a diferencia de una carta suelta
@@ -3070,7 +3121,7 @@ function startMarquee(track, pxPerSecond){
 
 function buildCarousel(){
   const el = document.getElementById("featuredCarousel");
-  if (!el) return;
+  if (!el || CATALOG_LOADING) return;
   const featured = CARDS.filter(c => c.featured && c.image);
   if (!featured.length){
     el.innerHTML = `<div class="carousel-track" style="animation:none;"><div class="carousel-card" style="border-right:none;cursor:default;"><div class="carousel-info" style="text-align:center;"><div class="featured-tag">PokéBaúl</div><p class="name" style="max-width:none;white-space:normal;">Marca piezas como "destacado" en admin.html para que aparezcan aquí.</p></div></div></div>`;
@@ -3154,6 +3205,11 @@ function render(){
   document.querySelectorAll(".kind-tab").forEach(t => t.classList.toggle("active", t.dataset.kind === state.kind));
   updateClearFiltersVisibility();
   const grid = document.getElementById("cardGrid");
+  if (CATALOG_LOADING){
+    grid.innerHTML = skeletonCards(8);
+    document.getElementById("resultsCount").textContent = "Cargando…";
+    return;
+  }
   grid.classList.add("grid-fading");
   const list = currentList();
   document.getElementById("resultsCount").textContent = `${list.length} pieza${list.length===1?'':'s'}`;
@@ -3785,6 +3841,7 @@ const toyState = { query: "", sort: "relevance" };
 function renderToys(){
   const grid = document.getElementById("toyGrid");
   if (!grid) return;
+  if (CATALOG_LOADING){ grid.innerHTML = skeletonCards(4); return; }
   let list = CARDS.filter(c => c.category === "toy");
   const q = toyState.query.trim().toLowerCase();
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
@@ -3813,6 +3870,7 @@ const acrylicState = { query: "", sort: "relevance" };
 function renderAcrylics(){
   const grid = document.getElementById("acrylicGrid");
   if (!grid) return;
+  if (CATALOG_LOADING){ grid.innerHTML = skeletonCards(4); return; }
   let list = CARDS.filter(c => c.category === "acrylic");
   const q = acrylicState.query.trim().toLowerCase();
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
@@ -3841,6 +3899,7 @@ const pcjpState = { query: "", sort: "relevance" };
 function renderPcjp(){
   const grid = document.getElementById("pcjpGrid");
   if (!grid) return;
+  if (CATALOG_LOADING){ grid.innerHTML = skeletonCards(4); return; }
   let list = CARDS.filter(c => c.category === "pcjp");
   const q = pcjpState.query.trim().toLowerCase();
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
@@ -3866,6 +3925,10 @@ renderPcjp();
 
 /* ---- productos publicados en vivo desde el Worker (sin GitHub) ---- */
 function updateCategoryCounts(){
+  if (CATALOG_LOADING){
+    ["countCartas","countPcjp","countAcrilicos","countJuguetes"].forEach(id => { document.getElementById(id).textContent = "…"; });
+    return;
+  }
   document.getElementById("countCartas").textContent = CARDS.filter(c => c.category === "pokemon" || !c.category).length;
   document.getElementById("countPcjp").textContent = CARDS.filter(c => c.category === "pcjp").length;
   document.getElementById("countAcrilicos").textContent = CARDS.filter(c => c.category === "acrylic").length;
@@ -3882,47 +3945,78 @@ function refreshAllViews(){
                        // de inmediato, sin necesitar que alguien toque el filtro de idioma primero
 }
 updateCategoryCounts();
-fetch(`${WORKER_URL}/products`, { cache: "no-store" })
+let liveFresh = { products: null, edits: null, stock: null };
+// mientras se espera la primera carga, no se re-pinta a cada respuesta (eso era el "brinco")
+function refreshIfReady(){ if (!CATALOG_LOADING) refreshAllViews(); }
+const liveProductsReady = fetch(`${WORKER_URL}/products`, { cache: "no-store" })
   .then(r => r.json())
   .then(data => {
-    if (data.products && data.products.length){
-      data.products.forEach(p => {
-        if (!CARDS.some(c => c.id === p.id)) CARDS.push(p);
-      });
-      refreshAllViews();
+    const products = Array.isArray(data.products) ? data.products : [];
+    liveFresh.products = products;
+    // productos agregados desde el panel que vinieron de la caché pero ya no existen
+    const freshIds = new Set(products.map(p => String(p.id)));
+    for (let i = CARDS.length - 1; i >= 0; i--){
+      if (String(CARDS[i].id).startsWith("kv_") && !freshIds.has(String(CARDS[i].id))) CARDS.splice(i, 1);
     }
+    products.forEach(p => { if (!CARDS.some(c => c.id === p.id)) CARDS.push(p); });
+    applyLiveData();
+    refreshIfReady();
   })
   .catch(() => {});
 
-fetch(`${WORKER_URL}/stock-overrides`, { cache: "no-store" })
+const liveStockReady = fetch(`${WORKER_URL}/stock-overrides`, { cache: "no-store" })
   .then(r => r.json())
   .then(data => {
-    const overrides = data.overrides || {};
-    let changed = false;
-    Object.keys(overrides).forEach(id => {
-      const card = CARDS.find(c => String(c.id) === String(id));
-      if (card && card.stock !== overrides[id]){ card.stock = overrides[id]; changed = true; }
-    });
-    if (changed) refreshAllViews();
+    LIVE_STOCK = data.overrides || {};
+    liveFresh.stock = LIVE_STOCK;
+    applyLiveData();
+    refreshIfReady();
   })
   .catch(() => {});
 
-fetch(`${WORKER_URL}/edits`, { cache: "no-store" })
+const liveEditsReady = fetch(`${WORKER_URL}/edits`, { cache: "no-store" })
   .then(r => r.json())
   .then(data => {
-    const edits = data.edits || {};
-    let changed = false;
-    Object.keys(edits).forEach(id => {
-      const card = CARDS.find(c => String(c.id) === String(id));
-      if (card){ Object.assign(card, edits[id]); changed = true; }
-    });
-    if (changed){
-      // las marcadas como eliminadas se quitan del todo, aunque sigan en cards-data.js
-      for (let i = CARDS.length - 1; i >= 0; i--){ if (CARDS[i].deleted) CARDS.splice(i, 1); }
-      refreshAllViews();
-    }
+    LIVE_EDITS = data.edits || {};
+    liveFresh.edits = LIVE_EDITS;
+    applyLiveData();
+    refreshIfReady();
   })
   .catch(() => {});
+
+const liveAllReady = Promise.allSettled([liveProductsReady, liveEditsReady, liveStockReady]).then(() => {
+  // se guarda para que la próxima visita arranque ya con esto (solo si todo llegó bien)
+  if (liveFresh.products && liveFresh.edits && liveFresh.stock){
+    try {
+      localStorage.setItem(LIVE_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), ...liveFresh }));
+    } catch { /* sin espacio o modo privado: no pasa nada, solo no se guarda */ }
+  }
+});
+// primera visita: se quita el "cargando" cuando llega todo, o a los LIVE_WAIT_MS si el
+// Worker tarda (en ese caso se muestra lo que haya y lo demás entra conforme llegue)
+Promise.race([liveAllReady, new Promise(r => setTimeout(r, LIVE_WAIT_MS))]).then(() => {
+  if (!CATALOG_LOADING) return;
+  CATALOG_LOADING = false;
+  refreshAllViews();
+});
+// si la caché hizo que ya se pintara, al terminar de llegar todo se re-pinta una sola vez
+liveAllReady.then(() => { if (LIVE_CACHE) refreshAllViews(); });
+
+// ---- enlace compartido de un producto (?producto=ID, lo arma el botón "Compartir" del zoom) ----
+// Se espera a que lleguen los productos en vivo y las ediciones, porque los productos agregados
+// desde el panel ("kv_…") no vienen en cards-data.js — antes este parámetro ni se leía y el
+// enlace siempre caía en la página principal.
+liveAllReady.then(() => {
+  const sharedId = new URLSearchParams(location.search).get("producto");
+  if (!sharedId) return;
+  const card = CARDS.find(c => String(c.id) === sharedId && !c.deleted);
+  if (card){
+    trackEvent("shared_link_open", card.id);
+    openZoom(card);
+  } else {
+    showToast("Ese producto ya no está disponible — mira lo que tenemos en el catálogo 👇");
+  }
+});
 
 // configuración del sitio editable desde el panel ("⚙️ Config"): número de WhatsApp del
 // carrito y enlace de la Comunidad de WhatsApp — si no se ha guardado nada todavía, se quedan
@@ -6822,15 +6916,21 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   }, 600); // margen para que carguen productos agregados en vivo también
 })();
 
-/* ---- resumen de pedido: se abre solo si el link trae ?pedido=... ---- */
-(function(){
+/* ---- resumen de pedido: se abre solo si el link trae ?pedido=... ----
+   Espera a los productos en vivo: los agregados desde el panel ("kv_…") no vienen en
+   cards-data.js, y antes de esto desaparecían del resumen del pedido. */
+liveAllReady.then(function(){
   const params = new URLSearchParams(location.search);
   const code = params.get("pedido");
   if (!code) return;
 
   const items = code.split(",").map(pair => {
-    const [id, qty] = pair.split("x");
-    return { card: CARDS.find(c => c.id === Number(id)), qty: Number(qty) || 1 };
+    // separa por la ÚLTIMA "x" (el id puede ser numérico o "kv_…") y compara como texto —
+    // antes se comparaba con Number(id) y los productos "kv_…" nunca se encontraban
+    const cut = pair.lastIndexOf("x");
+    const id = cut > 0 ? pair.slice(0, cut) : pair;
+    const qty = cut > 0 ? pair.slice(cut + 1) : "1";
+    return { card: CARDS.find(c => String(c.id) === id), qty: Number(qty) || 1 };
   }).filter(e => e.card);
 
   if (!items.length) return;
@@ -6919,7 +7019,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   };
   document.getElementById("orderClose").addEventListener("click", closeOrder);
   document.getElementById("orderBackdrop").addEventListener("click", closeOrder);
-})();
+});
 
 /* ---- "Ver como": vista del catálogo principal — 4/3 por fila o "binder" en escritorio;
    1×1/2×2/3×3 en celular/tablet angosta. Recuerda una preferencia distinta para cada
@@ -6965,8 +7065,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
 })();
 
 buildFilterUI();
-buildCarousel();
-render();
+refreshAllViews();
 </script>
 </body>
 </html>
