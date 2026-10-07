@@ -582,6 +582,30 @@
   .promo-status{font-size:12px;color:var(--ember-bright);margin:8px 0 0;min-height:14px;}
   .field-label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--slate);text-transform:uppercase;margin:0 0 4px 2px;}
   .field-mini{flex:1;min-width:0;}
+  .cost-box{border:1px dashed var(--line-strong);border-radius:10px;padding:8px 10px 6px;margin:4px 0 8px;background:rgba(0,0,0,.15);}
+  .cost-hint{font-size:11.5px;color:var(--slate);margin-top:5px;min-height:14px;}
+  .cost-hint.up{color:var(--ok);} .cost-hint.down{color:var(--ember-bright);}
+  .cat-table td.cat-profit{white-space:nowrap;font-size:11.5px;padding:3px 8px;}
+  .value-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px;}
+  .value-kpi{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--ink);}
+  .value-kpi .k{font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.04em;}
+  .value-kpi .v{font-family:"Fraunces",serif;font-size:22px;color:var(--cream);margin-top:4px;}
+  .value-kpi .s{font-size:11px;color:var(--cream-dim);margin-top:2px;}
+  .value-kpi.main{border-color:var(--foil-dim);background:linear-gradient(140deg,rgba(232,199,102,.10),var(--ink));}
+  .value-kpi.main .v{color:var(--foil-bright);font-size:26px;}
+  .value-card{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;background:var(--ink-2);}
+  .value-h{font-size:13px;color:var(--cream);font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;}
+  .value-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;}
+  .value-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .value-table th{text-align:left;color:var(--slate);font-weight:600;font-size:11px;padding:5px 6px;border-bottom:1px solid var(--line-strong);white-space:nowrap;}
+  .value-table td{padding:6px;border-bottom:1px solid var(--line);color:var(--cream-dim);vertical-align:middle;}
+  .value-table td.num, .value-table th.num{text-align:right;white-space:nowrap;}
+  .value-table td b{color:var(--cream);font-weight:600;}
+  .value-table tr.clickable{cursor:pointer;}
+  .value-table tr.clickable:hover td{background:var(--ink);}
+  .value-bar{height:6px;border-radius:3px;background:var(--ink);overflow:hidden;min-width:60px;}
+  .value-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--foil),var(--foil-bright));}
+  .value-scroll{max-height:380px;overflow:auto;}
   .card-skel{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ink-2);}
   .card-skel-art{aspect-ratio:3/4;background:linear-gradient(100deg,var(--ink) 30%,rgba(255,255,255,.05) 50%,var(--ink) 70%);background-size:300% 100%;animation:skel 1.4s ease-in-out infinite;}
   .card-skel-line{height:10px;margin:12px 12px 0;border-radius:5px;background:var(--ink);}
@@ -1391,6 +1415,7 @@
       <button type="button" class="pay-opt active" id="adminTabAdd" style="flex:1;">➕ Agregar</button>
       <button type="button" class="pay-opt" id="adminTabEdit" style="flex:1;">✏️ Editar</button>
       <button type="button" class="pay-opt" id="adminTabCatalog" style="flex:1;">🗂️ Catálogo</button>
+      <button type="button" class="pay-opt" id="adminTabValue" style="flex:1;">💰 Valor</button>
       <button type="button" class="pay-opt" id="adminTabBulk" style="flex:1;">📋 Inventario rápido</button>
       <button type="button" class="pay-opt" id="adminTabCsv" style="flex:1;">📥 Importar CSV</button>
       <button type="button" class="pay-opt" id="adminTabPrices" style="flex:1;">💲 Precios</button>
@@ -1400,7 +1425,7 @@
       <button type="button" class="pay-opt" id="adminTabAnalytics" style="flex:1;">📊 Analíticas</button>
       <button type="button" class="pay-opt" id="adminTabConfig" style="flex:1;">⚙️ Config</button>
     </div>
-    <p style="font-size:10px;color:var(--slate);margin:-8px 0 12px;text-align:right;">Versión del panel: 1 oct 2026 (b) · carga sin brincos</p>
+    <p style="font-size:10px;color:var(--slate);margin:-8px 0 12px;text-align:right;">Versión del panel: 7 oct 2026 (b) · precio de compra</p>
     <button type="button" id="adminLogoutBtn" style="background:none;border:none;padding:0;color:var(--slate);font-size:11px;cursor:pointer;text-decoration:underline;margin:-10px 0 16px;display:block;">🚪 Cerrar sesión de admin</button>
 
     <div id="adminAddForm">
@@ -1457,6 +1482,10 @@
       <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
         <div class="field-mini"><span class="field-label">Precio (MXN)</span><input type="number" id="adminPrice" placeholder="Precio (MXN)" style="width:100%;"></div>
         <div class="field-mini"><span class="field-label">Stock</span><input type="number" id="adminStock" placeholder="Stock" value="1" style="width:100%;"></div>
+      </div>
+      <div class="cost-box">
+        <div class="field-mini"><span class="field-label">🔒 Precio de compra (opcional · solo lo ves tú)</span><input type="number" min="0" step="0.01" id="adminCost" placeholder="¿Cuánto te costó cada pieza?" style="width:100%;"></div>
+        <div class="cost-hint" id="adminProfitHint"></div>
       </div>
       <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
         <div class="field-mini"><span class="field-label">Precio anterior (opcional)</span><input type="number" id="adminOriginalPrice" placeholder="Ej. 300" style="width:100%;"></div>
@@ -1529,6 +1558,10 @@
         <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
           <div class="field-mini"><span class="field-label">Precio (MXN)</span><input type="number" id="editPrice" placeholder="Precio (MXN)" style="width:100%;"></div>
           <div class="field-mini"><span class="field-label">Stock</span><input type="number" id="editStock" placeholder="Stock" style="width:100%;"></div>
+        </div>
+        <div class="cost-box">
+          <div class="field-mini"><span class="field-label">🔒 Precio de compra (opcional · solo lo ves tú)</span><input type="number" min="0" step="0.01" id="editCost" placeholder="¿Cuánto te costó cada pieza?" style="width:100%;"></div>
+          <div class="cost-hint" id="editProfitHint"></div>
         </div>
         <div class="row" style="display:flex;gap:8px;margin-bottom:4px;">
           <div class="field-mini"><span class="field-label">Precio anterior (opcional)</span><input type="number" id="editOriginalPrice" placeholder="Ej. 300" style="width:100%;"></div>
@@ -1660,6 +1693,27 @@
       <p class="promo-status" id="orderStatus"></p>
     </div>
 
+    <div id="adminValuePanel" style="display:none;">
+      <div class="order-head"><span class="eyebrow">Solo para ti</span><h3>Valor de tu inventario</h3></div>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 12px;">Lo que valdría todo tu stock si se vendiera al precio publicado (precio × piezas en stock). Las agotadas no suman. Tus costos son privados: se guardan aparte en el servidor y solo se ven con tu contraseña.</p>
+      <div id="valueBody"></div>
+
+      <div class="value-card" style="margin-top:14px;">
+        <div class="value-h">🔒 Costos y ganancia (privado)</div>
+        <p style="font-size:12px;color:var(--cream-dim);margin:0 0 10px;">Captura lo que pagaste por pieza (costo unitario en MXN) para ver tu ganancia potencial y margen. Puedes importarlos del CSV de Collectr (columna de costo promedio pagado) o escribirlos a mano.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <button type="button" class="btn btn-ghost" id="costCsvBtn" style="flex:1;justify-content:center;">📥 Importar costos del CSV de Collectr</button>
+          <input type="file" id="costCsvInput" accept=".csv" style="display:none;">
+          <input type="text" id="costSearch" placeholder="Buscar pieza para capturar su costo…" style="flex:1;min-width:180px;">
+        </div>
+        <div id="costList"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button type="button" class="btn btn-foil" id="costSaveBtn" style="flex:1;justify-content:center;">Guardar costos (<span id="costDirtyCount">0</span>)</button>
+        </div>
+        <p class="promo-status" id="costStatus"></p>
+      </div>
+    </div>
+
     <div id="adminCatalogPanel" style="display:none;">
       <div class="order-head"><span class="eyebrow">Todo tu inventario</span><h3>Catálogo editable</h3></div>
       <p style="font-size:12.5px;color:var(--cream-dim);margin:-6px 0 12px;">Edita cualquier dato directo en la tabla, como hoja de cálculo. Las celdas que cambies se marcan en dorado y nada se publica hasta que le das "Guardar cambios". Para cambiar muchas de un jalón, márcalas con la casilla y usa "Aplicar a seleccionadas".</p>
@@ -1678,6 +1732,7 @@
           <option value="nofinish">Cartas sin holo</option>
           <option value="noimage">Sin foto</option>
           <option value="soldout">Agotadas</option>
+          <option value="nocost">🔒 Sin precio de compra</option>
           <option value="dirty">Solo con cambios sin guardar</option>
         </select>
       </div>
@@ -1691,6 +1746,7 @@
           <option value="price">Precio</option>
           <option value="stock">Stock</option>
           <option value="set">Expansión</option>
+          <option value="__cost">🔒 Precio de compra</option>
         </select>
         <span id="catBulkValueWrap" style="flex:1;min-width:120px;display:flex;"></span>
         <button type="button" class="btn btn-ghost" id="catBulkApply" style="flex:none;">Aplicar a seleccionadas</button>
@@ -4251,7 +4307,9 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("adminTabHolo").classList.toggle("active", tab === "holo");
     document.getElementById("adminTabCatalog").classList.toggle("active", tab === "catalog");
     // la tabla del catálogo necesita espacio: el modal se ensancha solo en esa pestaña
-    document.getElementById("adminModal").style.width = tab === "catalog" ? "min(1180px,96vw)" : "min(420px,92vw)";
+    document.getElementById("adminTabValue").classList.toggle("active", tab === "value");
+    document.getElementById("adminValuePanel").style.display = tab === "value" ? "block" : "none";
+    document.getElementById("adminModal").style.width = tab === "catalog" ? "min(1180px,96vw)" : tab === "value" ? "min(980px,96vw)" : "min(420px,92vw)";
     document.getElementById("adminCatalogPanel").style.display = tab === "catalog" ? "block" : "none";
     document.getElementById("adminHoloPanel").style.display = tab === "holo" ? "block" : "none";
     document.getElementById("adminOrderPanel").style.display = tab === "order" ? "block" : "none";
@@ -4270,7 +4328,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   document.getElementById("adminTabAnalytics").addEventListener("click", async () => { showAdminTab("analytics"); await loadAnalytics(); });
   document.getElementById("adminTabConfig").addEventListener("click", () => { showAdminTab("config"); loadSiteConfig(); });
   document.getElementById("adminTabOrder").addEventListener("click", () => { showAdminTab("order"); openOrderPanel(); });
-  document.getElementById("adminTabCatalog").addEventListener("click", () => { showAdminTab("catalog"); renderCatalogTable(); });
+  document.getElementById("adminTabValue").addEventListener("click", () => { showAdminTab("value"); openValuePanel(); });
+  document.getElementById("adminTabCatalog").addEventListener("click", () => { showAdminTab("catalog"); renderCatalogTable(); if (invCosts === null) ensureCosts().then(renderCatalogTable); });
   document.getElementById("adminTabHolo").addEventListener("click", () => { showAdminTab("holo"); updateHoloCheckLine(); syncHoloFxToggle(); });
 
   /* ---- pestaña "↕️ Orden": acomodar a mano el orden por relevancia ---- */
@@ -4588,6 +4647,56 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
 
   /* ---- editar producto existente ---- */
   let editingId = null;
+
+  /* ---- precio de compra (privado). Nunca va en EDITS/PRODUCTS (públicos): se guarda con
+     /admin/save-costs en la llave "private_costs" del Worker, que solo responde con contraseña.
+     Siempre es opcional. Lo usan Agregar, Editar, 🗂️ Catálogo y 💰 Valor. ---- */
+  let invCosts = null;          // { id: costoUnitarioMXN } | null mientras no se ha cargado
+  let invCostsLoading = null;
+  function ensureCosts(){
+    if (invCosts !== null) return Promise.resolve(invCosts);
+    if (!invCostsLoading) invCostsLoading = loadCosts().finally(() => { invCostsLoading = null; });
+    return invCostsLoading;
+  }
+  async function saveCosts(map){
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/save-costs`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), costs: map })
+      });
+      if (res.status === 404 || !res.headers.get("content-type")?.includes("json")) return { ok: false, error: "pega el worker.js nuevo en Cloudflare y dale Deploy" };
+      const data = await res.json();
+      if (!data.ok) return { ok: false, error: data.error || "no se pudo guardar" };
+      invCosts = data.costs || {};
+      return { ok: true };
+    } catch { return { ok: false, error: "sin conexión" }; }
+  }
+  function costOf(id){ const v = invCosts ? invCosts[String(id)] : undefined; return (v === undefined || v === null) ? null : Number(v); }
+  // "Ganancia $50 por pieza (+50% sobre lo que pagaste)"
+  function profitInfo(price, cost){
+    if (cost === null || cost === undefined || cost === "" || !(Number(price) > 0)) return null;
+    const p = Number(price) - Number(cost);
+    const pctOnCost = Number(cost) > 0 ? Math.round(p / Number(cost) * 100) : null;
+    return { profit: p, pctOnCost, up: p >= 0 };
+  }
+  function profitLabel(info){
+    if (!info) return "";
+    return `${info.up ? "Ganancia" : "Pérdida"}: ${money(Math.abs(info.profit))} por pieza${info.pctOnCost !== null ? ` (${info.up ? "+" : "−"}${Math.abs(info.pctOnCost)}% sobre lo que pagaste)` : ""}`;
+  }
+  function wireProfitHint(pre){
+    const update = () => {
+      const costRaw = document.getElementById(`${pre}Cost`).value.trim();
+      const info = costRaw === "" ? null : profitInfo(document.getElementById(`${pre}Price`).value, Number(costRaw));
+      const el = document.getElementById(`${pre}ProfitHint`);
+      el.textContent = info ? profitLabel(info) : "";
+      el.className = "cost-hint" + (info ? (info.up ? " up" : " down") : "");
+    };
+    document.getElementById(`${pre}Cost`).addEventListener("input", update);
+    document.getElementById(`${pre}Price`).addEventListener("input", update);
+    return update;
+  }
+  const updateAdminProfitHint = wireProfitHint("admin");
+  const updateEditProfitHint = wireProfitHint("edit");
   let editImages = [];
 
   function renderEditGallery(){
@@ -4688,6 +4797,19 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     document.getElementById("editPrice").value = card.price;
     document.getElementById("editStock").value = card.stock;
     document.getElementById("editOriginalPrice").value = card.originalPrice || "";
+    const costInput = document.getElementById("editCost");
+    costInput.value = "";
+    costInput.dataset.before = "";
+    costInput.placeholder = "Cargando…";
+    updateEditProfitHint();
+    ensureCosts().then(() => {
+      costInput.placeholder = invCosts === null ? "No disponible (actualiza el Worker)" : "¿Cuánto te costó cada pieza?";
+      if (editingId !== card.id) return;
+      const c = costOf(card.id);
+      costInput.value = c === null ? "" : c;
+      costInput.dataset.before = costInput.value;
+      updateEditProfitHint();
+    });
     const relInput = document.getElementById("editRelevancePos");
     relInput.value = relevancePositionOf(card) || "";
     relInput.dataset.before = relInput.value;
@@ -4768,6 +4890,14 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         if (card) Object.assign(card, changes);
         refreshAllViews();
         status.textContent = "✓ Guardado — ya está actualizado en el sitio.";
+        const costInput = document.getElementById("editCost");
+        if (costInput.value.trim() !== costInput.dataset.before){
+          const raw = costInput.value.trim();
+          saveCosts({ [editingId]: raw === "" ? null : Math.max(0, Number(raw) || 0) }).then(r => {
+            if (r.ok) costInput.dataset.before = raw;
+            else status.textContent += ` (Ojo: no se guardó el precio de compra: ${r.error}.)`;
+          });
+        }
         const relInput = document.getElementById("editRelevancePos");
         const relPos = Number(relInput.value);
         if (relPos >= 1 && relInput.value !== relInput.dataset.before){
@@ -5308,6 +5438,15 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         CARDS.push(data.product);
         refreshAllViews();
         status.textContent = "✓ Publicado — ya está en el sitio.";
+        const costInput = document.getElementById("adminCost");
+        const costRaw = costInput.value.trim();
+        costInput.value = "";
+        updateAdminProfitHint();
+        if (costRaw !== ""){
+          saveCosts({ [data.product.id]: Math.max(0, Number(costRaw) || 0) }).then(r => {
+            if (!r.ok) status.textContent += ` (Ojo: no se guardó el precio de compra: ${r.error}.)`;
+          });
+        }
         const relPosInput = document.getElementById("adminRelevancePos");
         const relPos = Number(relPosInput.value);
         relPosInput.value = "";
@@ -6157,6 +6296,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
   /* ---- "🗂️ Catálogo": todo el inventario editable como hoja de cálculo (reemplazo mejorado
      del catálogo de admin.html). Los cambios quedan en borrador (catDirty) hasta "Guardar". ---- */
   const catDirty = new Map();   // id -> { campo: valorNuevo }
+  const catCostDirty = new Map(); // id -> costo (null = borrar) — PRIVADO, va a /admin/save-costs
   const catSelected = new Set();
   let catPageSize = 80;
   const CAT_COLS = [
@@ -6169,12 +6309,20 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     { key: "condition", label: "Condición", w: 80 },
     { key: "language", label: "Idioma", w: 90, options: [["Inglés","Inglés"],["Japonés","Japonés"],["Chino","Chino"],["",""]] },
     { key: "price", label: "Precio", w: 70, num: true },
+    { key: "__cost", label: "🔒 Compra", w: 80, num: true },
+    { key: "__profit", label: "🔒 Ganancia", w: 120, computed: true },
     { key: "originalPrice", label: "Precio ant.", w: 70, num: true },
     { key: "stock", label: "Stock", w: 55, num: true },
     { key: "image", label: "Foto (link)", w: 190 },
   ];
   const catEsc = t => String(t ?? "").replace(/[&<>"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[ch]));
   function catValue(card, key){
+    if (key === "__cost"){
+      const id = String(card.id);
+      if (catCostDirty.has(id)) return catCostDirty.get(id) ?? "";
+      const c = costOf(id);
+      return c === null ? "" : c;
+    }
     const d = catDirty.get(String(card.id));
     if (d && key in d) return d[key];
     const v = card[key];
@@ -6188,6 +6336,13 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     return v ?? "";
   }
   function catSetValue(card, key, raw){
+    if (key === "__cost"){
+      const id = String(card.id);
+      const txt = String(raw).trim();
+      const value = txt === "" ? null : Math.max(0, Number(txt) || 0);
+      if (value === costOf(id)) catCostDirty.delete(id); else catCostDirty.set(id, value);
+      return;
+    }
     const col = CAT_COLS.find(c => c.key === key);
     const value = col && col.num ? (Number(raw) || 0) : String(raw).trim();
     const id = String(card.id);
@@ -6210,25 +6365,34 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
       if (quick === "nofinish" && !(isCard && c.kind !== "sellado" && Number(c.num) > 0 && !catValue(c, "finish"))) return false;
       if (quick === "noimage" && catValue(c, "image")) return false;
       if (quick === "soldout" && Number(catValue(c, "stock")) > 0) return false;
-      if (quick === "dirty" && !catDirty.has(String(c.id))) return false;
+      if (quick === "dirty" && !catDirtyIds().has(String(c.id))) return false;
+      if (quick === "nocost" && catValue(c, "__cost") !== "") return false;
       if (q && !`${c.name} ${c.set} ${c.num} ${c.rarity}`.toLowerCase().includes(q)) return false;
       return true;
     }).sort((a,b) => (a.set || "").localeCompare(b.set || "") || (Number(a.num) - Number(b.num)) || (a.name || "").localeCompare(b.name || ""));
   }
+  function catProfitHtml(card){
+    const costRaw = catValue(card, "__cost");
+    const info = costRaw === "" ? null : profitInfo(catValue(card, "price"), Number(costRaw));
+    if (!info) return `<span style="color:var(--slate);">—</span>`;
+    return `<span style="color:${info.up ? "var(--ok)" : "var(--ember-bright)"};">${info.up ? "" : "−"}${money(Math.abs(info.profit))}${info.pctOnCost !== null ? ` · ${info.up ? "+" : "−"}${Math.abs(info.pctOnCost)}%` : ""}</span>`;
+  }
   function catCell(card, col){
+    if (col.computed) return `<td class="cat-profit" style="min-width:${col.w}px;">${catProfitHtml(card)}</td>`;
     const v = catValue(card, col.key);
-    const dirty = catDirty.get(String(card.id))?.[col.key] !== undefined;
+    const dirty = col.key === "__cost" ? catCostDirty.has(String(card.id)) : catDirty.get(String(card.id))?.[col.key] !== undefined;
     let inner;
     if (col.options){
       const opts = col.options.some(([val]) => val === v) ? col.options : [...col.options, [v, v]];
       inner = `<select data-k="${col.key}">${opts.map(([val, lab]) => `<option value="${catEsc(val)}"${val === v ? " selected" : ""}>${catEsc(lab)}</option>`).join("")}</select>`;
     } else {
-      inner = `<input data-k="${col.key}" ${col.num ? 'type="number"' : 'type="text"'} ${col.list ? `list="${col.list}"` : ""} value="${catEsc(v)}">`;
+      inner = `<input data-k="${col.key}" ${col.num ? 'type="number"' : 'type="text"'} ${col.list ? `list="${col.list}"` : ""} ${col.key === "__cost" ? 'min="0" step="0.01" placeholder="—"' : ""} value="${catEsc(v)}">`;
     }
     return `<td class="${dirty ? "dirty" : ""}${col.key === "name" ? " sticky-l2" : ""}" style="min-width:${col.w}px;">${inner}</td>`;
   }
+  function catDirtyIds(){ return new Set([...catDirty.keys(), ...catCostDirty.keys()]); }
   function updateCatBars(){
-    document.getElementById("catDirtyCount").textContent = catDirty.size;
+    document.getElementById("catDirtyCount").textContent = catDirtyIds().size;
     document.getElementById("catSelInfo").textContent = `${catSelected.size} seleccionada(s)`;
   }
   function renderCatalogTable(){
@@ -6278,7 +6442,8 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     const key = e.target.dataset.k;
     if (!key) return;
     catSetValue(card, key, e.target.value);
-    e.target.closest("td").classList.toggle("dirty", catDirty.get(tr.dataset.id)?.[key] !== undefined);
+    e.target.closest("td").classList.toggle("dirty", key === "__cost" ? catCostDirty.has(tr.dataset.id) : catDirty.get(tr.dataset.id)?.[key] !== undefined);
+    if (key === "price" || key === "__cost"){ const pc = tr.querySelector(".cat-profit"); if (pc) pc.innerHTML = catProfitHtml(card); }
     if (key === "image"){
       const thumbCell = tr.lastElementChild;
       const v = catValue(card, "image");
@@ -6318,17 +6483,34 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
     renderCatalogTable();
   });
   document.getElementById("catDiscardBtn").addEventListener("click", () => {
-    if (catDirty.size && !confirm(`¿Descartar ${catDirty.size} pieza(s) con cambios sin guardar?`)) return;
+    const n = catDirtyIds().size;
+    if (n && !confirm(`¿Descartar ${n} pieza(s) con cambios sin guardar?`)) return;
     catDirty.clear();
+    catCostDirty.clear();
     document.getElementById("catStatus").textContent = "";
     renderCatalogTable();
   });
   document.getElementById("catSaveBtn").addEventListener("click", async () => {
     const status = document.getElementById("catStatus");
     const btn = document.getElementById("catSaveBtn");
-    if (!catDirty.size){ status.textContent = "No hay cambios por guardar."; status.style.color = ""; return; }
+    if (!catDirty.size && !catCostDirty.size){ status.textContent = "No hay cambios por guardar."; status.style.color = ""; return; }
+    btn.disabled = true; status.style.color = "";
+    let costMsg = "";
+    if (catCostDirty.size){
+      status.textContent = "Guardando precios de compra (privados)…";
+      const nCost = catCostDirty.size;
+      const r = await saveCosts(Object.fromEntries(catCostDirty));
+      if (r.ok){ catCostDirty.clear(); costMsg = `${nCost} precio(s) de compra guardados en privado. `; }
+      else costMsg = `No se guardaron los precios de compra (${r.error}). `;
+    }
+    if (!catDirty.size){
+      status.textContent = costMsg.startsWith("No") ? costMsg : `✓ ${costMsg}`;
+      status.style.color = costMsg.startsWith("No") ? "var(--ember-bright)" : "var(--ok)";
+      btn.disabled = false;
+      renderCatalogTable();
+      return;
+    }
     const edits = [...catDirty.entries()].map(([id, changes]) => ({ id, changes: { ...changes } }));
-    btn.disabled = true; status.style.color = ""; 
     const send = async batch => {
       const res = await fetch(`${WORKER_URL}/admin/bulk-edit-products`, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -6354,7 +6536,7 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         done = Math.min(i + 400, edits.length);
       }
     } catch (err) {
-      status.textContent = `${done ? `${done} guardada(s), pero ` : ""}${err.message}`;
+      status.textContent = `${costMsg}${done ? `${done} guardada(s), pero ` : ""}${err.message}`;
       status.style.color = "var(--ember-bright)";
     }
     edits.slice(0, done).forEach(e => {
@@ -6368,10 +6550,346 @@ whatsappFloatBtn.addEventListener("click", () => trackEvent("whatsapp_click", "f
         }).catch(() => {});
       }
     });
-    if (done === edits.length){ status.textContent = `✓ ${done} pieza(s) guardadas — ya están así en tu sitio.`; status.style.color = "var(--ok)"; }
+    if (done === edits.length){ status.textContent = `✓ ${costMsg}${done} pieza(s) guardadas — ya están así en tu sitio.`; status.style.color = costMsg.startsWith("No") ? "var(--ember-bright)" : "var(--ok)"; }
     if (done) refreshAllViews();
     btn.disabled = false;
     renderCatalogTable();
+  });
+
+  /* ---- "💰 Valor": valor del inventario a precio publicado (precio × stock), por categoría,
+     expansión, idioma y rango de precio, más costos privados y ganancia potencial ---- */
+  const costDirty = new Map();   // id -> costo (null = borrar)
+  let valueSetSort = "value";
+  const INV_GROUP_LABELS = { single: "🃏 Cartas sueltas", sellado: "📦 Sellado", pcjp: "🇯🇵 Exclusivos JP", acrylic: "🖼️ Acrílicos", toy: "🧸 Juguetes" };
+  const vEsc = t => String(t ?? "").replace(/[&<>"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[ch]));
+  const pct = (a, b) => b ? `${(a / b * 100).toFixed(a / b < 0.1 ? 1 : 0)}%` : "0%";
+  function invGroup(c){
+    if (["pcjp","acrylic","toy"].includes(c.category)) return c.category;
+    return c.kind === "sellado" ? "sellado" : "single";
+  }
+  function invRows(){
+    return CARDS.filter(c => !c.deleted).map(c => {
+      const units = Math.max(0, Number(c.stock) || 0);
+      const price = Number(c.price) || 0;
+      const unitCost = invCosts ? invCosts[String(c.id)] : undefined;
+      return { c, units, price, value: units * price, unitCost: (unitCost === undefined || unitCost === null) ? null : Number(unitCost) };
+    });
+  }
+  function summarize(rows){
+    const inStock = rows.filter(r => r.units > 0);
+    const withCost = inStock.filter(r => r.unitCost !== null);
+    return {
+      value: inStock.reduce((a, r) => a + r.value, 0),
+      units: inStock.reduce((a, r) => a + r.units, 0),
+      products: inStock.length,
+      soldOut: rows.length - inStock.length,
+      cost: withCost.reduce((a, r) => a + r.unitCost * r.units, 0),
+      costValue: withCost.reduce((a, r) => a + r.value, 0),
+      costCount: withCost.length,
+    };
+  }
+  function groupBy(rows, keyFn){
+    const m = new Map();
+    rows.forEach(r => { const k = keyFn(r); if (!m.has(k)) m.set(k, []); m.get(k).push(r); });
+    return [...m.entries()].map(([k, list]) => ({ key: k, ...summarize(list), rows: list }));
+  }
+  function bar(part, total){ return `<div class="value-bar"><span style="width:${total ? Math.max(1, part / total * 100) : 0}%"></span></div>`; }
+  // compara contra el valor de la última vez que abriste esta pestaña en un día distinto
+  function valueTrend(total){
+    const today = new Date().toISOString().slice(0, 10);
+    let rec = null;
+    try { rec = JSON.parse(localStorage.getItem("pb_inv_value") || "null"); } catch {}
+    let ref = rec && rec.date !== today ? { date: rec.date, total: rec.total } : (rec && rec.ref) || null;
+    try { localStorage.setItem("pb_inv_value", JSON.stringify({ date: today, total, ref })); } catch {}
+    if (!ref) return "Primera medición — mañana verás aquí cuánto cambió.";
+    const diff = total - ref.total;
+    const sign = diff > 0 ? "▲ +" : diff < 0 ? "▼ −" : "= ";
+    return `${sign}${money(Math.abs(diff))} vs. ${ref.date.split("-").reverse().join("/")}`;
+  }
+
+  function renderValuePanel(){
+    const body = document.getElementById("valueBody");
+    const rows = invRows();
+    const all = summarize(rows);
+    const inStock = rows.filter(r => r.units > 0);
+    const hasCosts = all.costCount > 0;
+    const profit = all.costValue - all.cost;
+
+    // concentración: qué % del valor está en el 10% de piezas más valiosas
+    const byValue = [...inStock].sort((a, b) => b.value - a.value);
+    const top10pctN = Math.max(1, Math.ceil(byValue.length * 0.1));
+    const top10pctValue = byValue.slice(0, top10pctN).reduce((a, r) => a + r.value, 0);
+    const discountGap = inStock.filter(r => isOnOffer(r.c)).reduce((a, r) => a + (Number(r.c.originalPrice) - r.price) * r.units, 0);
+
+    const groups = groupBy(rows, r => invGroup(r.c)).sort((a, b) => b.value - a.value);
+    const langs = groupBy(rows.filter(r => invGroup(r.c) === "single"), r => r.c.language || "Sin idioma").sort((a, b) => b.value - a.value);
+    const BUCKETS = [[0, 20, "Menos de $20"], [20, 100, "$20 – $99"], [100, 500, "$100 – $499"], [500, 1000, "$500 – $999"], [1000, Infinity, "$1,000 o más"]];
+    const buckets = BUCKETS.map(([lo, hi, label]) => ({ label, ...summarize(rows.filter(r => r.price >= lo && r.price < hi)) }));
+    const sets = groupBy(rows, r => (r.c.set || "").trim() || INV_GROUP_LABELS[invGroup(r.c)] + " (sin expansión)");
+
+    const groupTable = list => `<table class="value-table"><thead><tr><th></th><th class="num">Productos</th><th class="num">Piezas</th><th class="num">Valor</th><th class="num">%</th><th></th></tr></thead><tbody>
+      ${list.map(g => `<tr><td><b>${vEsc(INV_GROUP_LABELS[g.key] || g.key)}</b>${g.soldOut ? `<div style="font-size:10.5px;color:var(--slate);">${g.soldOut} agotada(s)</div>` : ""}</td><td class="num">${g.products}</td><td class="num">${g.units}</td><td class="num"><b>${money(g.value)}</b></td><td class="num">${pct(g.value, all.value)}</td><td style="width:22%;">${bar(g.value, all.value)}</td></tr>`).join("")}
+      </tbody></table>`;
+
+    body.innerHTML = `
+      <div class="value-kpis">
+        <div class="value-kpi main"><div class="k">Valor total</div><div class="v">${money(all.value)}</div><div class="s">${valueTrend(all.value)}</div></div>
+        <div class="value-kpi"><div class="k">Piezas en stock</div><div class="v">${all.units}</div><div class="s">${all.products} producto(s) distintos</div></div>
+        <div class="value-kpi"><div class="k">Precio promedio</div><div class="v">${money(all.units ? Math.round(all.value / all.units) : 0)}</div><div class="s">por pieza</div></div>
+        <div class="value-kpi"><div class="k">Agotados</div><div class="v">${all.soldOut}</div><div class="s">publicados sin stock</div></div>
+        ${hasCosts ? `
+        <div class="value-kpi main" style="border-color:rgba(110,200,140,.4);background:linear-gradient(140deg,rgba(110,200,140,.10),var(--ink));"><div class="k">🔒 Ganancia potencial</div><div class="v" style="color:${profit >= 0 ? "var(--ok)" : "var(--ember-bright)"};">${profit < 0 ? "−" : ""}${money(Math.abs(profit))}</div><div class="s"><b style="color:var(--cream);">${profit >= 0 ? "+" : ""}${all.cost ? Math.round(profit / all.cost * 100) : 0}%</b> sobre lo invertido · margen ${pct(profit, all.costValue)} del precio</div></div>
+        <div class="value-kpi"><div class="k">🔒 Invertido</div><div class="v">${money(Math.round(all.cost))}</div><div class="s">en ${all.costCount} de ${all.products} producto(s) con precio de compra</div></div>` : ""}
+      </div>
+
+      <div class="value-card" style="font-size:12.5px;color:var(--cream-dim);line-height:1.6;">
+        💡 El <b style="color:var(--cream);">${pct(top10pctValue, all.value)}</b> de tu valor está en solo <b style="color:var(--cream);">${top10pctN}</b> producto(s) (tu 10% más valioso) — esas son las piezas que más conviene cuidar y promocionar.
+        ${discountGap ? `<br>🏷️ Tienes <b style="color:var(--cream);">${money(discountGap)}</b> de descuento aplicado en piezas en oferta.` : ""}
+        ${hasCosts && all.costCount < all.products ? `<br>🔒 Faltan costos en ${all.products - all.costCount} producto(s): la ganancia solo cuenta los que sí tienen costo.` : ""}
+      </div>
+
+      <div class="value-grid2">
+        <div class="value-card"><div class="value-h">Por categoría</div>${groupTable(groups)}</div>
+        <div class="value-card"><div class="value-h">Por rango de precio</div>
+          <table class="value-table"><thead><tr><th></th><th class="num">Piezas</th><th class="num">Valor</th><th class="num">%</th><th></th></tr></thead><tbody>
+          ${buckets.map(b => `<tr><td><b>${b.label}</b></td><td class="num">${b.units}</td><td class="num"><b>${money(b.value)}</b></td><td class="num">${pct(b.value, all.value)}</td><td style="width:22%;">${bar(b.value, all.value)}</td></tr>`).join("")}
+          </tbody></table></div>
+        <div class="value-card"><div class="value-h">Cartas sueltas por idioma</div>
+          <table class="value-table"><thead><tr><th></th><th class="num">Piezas</th><th class="num">Valor</th><th></th></tr></thead><tbody>
+          ${langs.map(g => `<tr><td><b>${vEsc(g.key)}</b></td><td class="num">${g.units}</td><td class="num"><b>${money(g.value)}</b></td><td style="width:26%;">${bar(g.value, all.value)}</td></tr>`).join("")}
+          </tbody></table></div>
+        <div class="value-card"><div class="value-h">Top 10 piezas más valiosas</div>
+          <table class="value-table"><tbody>
+          ${byValue.slice(0, 10).map((r, i) => `<tr><td style="color:var(--slate);width:18px;">${i + 1}</td><td><b>${vEsc(r.c.name)}</b><div style="font-size:10.5px;color:var(--slate);">${vEsc(r.c.set || INV_GROUP_LABELS[invGroup(r.c)])}${r.units > 1 ? ` · ${r.units} piezas` : ""}</div></td><td class="num"><b>${money(r.value)}</b></td></tr>`).join("")}
+          </tbody></table></div>
+      </div>
+
+      ${hasCosts ? profitAnalysisHtml(rows, all) : `<div class="value-card" style="font-size:12.5px;color:var(--cream-dim);">🔒 <b style="color:var(--cream);">Análisis de ganancia:</b> aún no capturas precios de compra. Agrégalos en Agregar/Editar, en la columna "🔒 Compra" de 🗂️ Catálogo, o abajo en esta pestaña — no es obligatorio, el análisis usa solo las piezas que lo tengan.</div>`}
+
+      <div class="value-card">
+        <div class="value-h">
+          <span>Por expansión (${sets.length})</span>
+          <span style="display:flex;gap:6px;flex-wrap:wrap;">
+            <input type="text" id="valueSetSearch" placeholder="Buscar expansión…" style="font-size:12px;padding:5px 8px;min-width:150px;">
+            <select id="valueSetSort" style="font-size:12px;padding:5px;">
+              <option value="value"${valueSetSort === "value" ? " selected" : ""}>Mayor valor</option>
+              <option value="units"${valueSetSort === "units" ? " selected" : ""}>Más piezas</option>
+              <option value="avg"${valueSetSort === "avg" ? " selected" : ""}>Mayor precio promedio</option>
+              <option value="name"${valueSetSort === "name" ? " selected" : ""}>Nombre A–Z</option>
+            </select>
+          </span>
+        </div>
+        <div class="value-scroll" id="valueSetTable"></div>
+        <p style="font-size:11px;color:var(--slate);margin:6px 0 0;">Toca una expansión para abrirla en 🗂️ Catálogo y editar sus piezas.</p>
+      </div>
+
+      <button type="button" class="btn btn-ghost" id="valueExportBtn" style="width:100%;justify-content:center;">⬇️ Descargar inventario valorizado (CSV para Excel)</button>
+    `;
+
+    const renderSets = () => {
+      const q = document.getElementById("valueSetSearch").value.trim().toLowerCase();
+      const list = sets.filter(g => !q || g.key.toLowerCase().includes(q)).sort((a, b) =>
+        valueSetSort === "units" ? b.units - a.units :
+        valueSetSort === "avg" ? (b.units ? b.value / b.units : 0) - (a.units ? a.value / a.units : 0) :
+        valueSetSort === "name" ? a.key.localeCompare(b.key) : b.value - a.value);
+      document.getElementById("valueSetTable").innerHTML = `<table class="value-table"><thead><tr>
+          <th>Expansión</th><th class="num">Productos</th><th class="num">Piezas</th><th class="num">Valor</th><th class="num">%</th><th class="num">Prom.</th>${hasCosts ? `<th class="num">🔒 Ganancia</th>` : ""}<th></th></tr></thead><tbody>
+        ${list.map(g => `<tr class="clickable" data-set="${vEsc(g.rows[0].c.set || "")}">
+          <td><b>${vEsc(g.key)}</b>${g.soldOut ? `<div style="font-size:10.5px;color:var(--slate);">${g.soldOut} agotada(s)</div>` : ""}</td>
+          <td class="num">${g.products}</td><td class="num">${g.units}</td><td class="num"><b>${money(g.value)}</b></td>
+          <td class="num">${pct(g.value, all.value)}</td><td class="num">${money(g.units ? Math.round(g.value / g.units) : 0)}</td>
+          ${hasCosts ? `<td class="num">${g.costCount ? `${money(Math.round(g.costValue - g.cost))}<div style="font-size:10.5px;color:var(--slate);">${g.cost ? `${g.costValue - g.cost >= 0 ? "+" : ""}${Math.round((g.costValue - g.cost) / g.cost * 100)}%` : ""}</div>` : "—"}</td>` : ""}
+          <td style="width:14%;">${bar(g.value, all.value)}</td></tr>`).join("") || `<tr><td colspan="8" style="color:var(--slate);">Sin resultados.</td></tr>`}
+        </tbody></table>`;
+    };
+    renderSets();
+    document.getElementById("valueSetSearch").addEventListener("input", renderSets);
+    document.getElementById("valueSetSort").addEventListener("change", e => { valueSetSort = e.target.value; renderSets(); });
+    document.getElementById("valueSetTable").addEventListener("click", e => {
+      const tr = e.target.closest("tr[data-set]");
+      if (!tr || !tr.dataset.set) return;
+      document.getElementById("catSearch").value = tr.dataset.set;
+      document.getElementById("catCategory").value = "all";
+      document.getElementById("catQuick").value = "all";
+      showAdminTab("catalog");
+      renderCatalogTable();
+    });
+    document.getElementById("valueExportBtn").addEventListener("click", () => exportValueCsv(rows));
+    document.getElementById("valueGoNoCost")?.addEventListener("click", () => {
+      document.getElementById("catSearch").value = "";
+      document.getElementById("catCategory").value = "all";
+      document.getElementById("catQuick").value = "nocost";
+      showAdminTab("catalog");
+      renderCatalogTable();
+    });
+  }
+
+  // análisis de ganancia con lo que tiene precio de compra (solo piezas en stock)
+  function profitAnalysisHtml(rows, all){
+    const withCost = rows.filter(r => r.units > 0 && r.unitCost !== null).map(r => {
+      const unitProfit = r.price - r.unitCost;
+      return { ...r, unitProfit, totalProfit: unitProfit * r.units, pctOnCost: r.unitCost > 0 ? unitProfit / r.unitCost * 100 : null };
+    });
+    const noCost = rows.filter(r => r.units > 0 && r.unitCost === null);
+    const noCostValue = noCost.reduce((a, r) => a + r.value, 0);
+    const totalProfit = withCost.reduce((a, r) => a + r.totalProfit, 0);
+    const totalUnits = withCost.reduce((a, r) => a + r.units, 0);
+    const pctTxt = v => v === null ? "—" : `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v))}%`;
+    const signMoney = v => `${v < 0 ? "−" : ""}${money(Math.abs(Math.round(v)))}`;
+    const color = v => v < 0 ? "var(--ember-bright)" : "var(--ok)";
+    const nameCell = r => `<b>${vEsc(r.c.name)}</b><div style="font-size:10.5px;color:var(--slate);">${vEsc(r.c.set || INV_GROUP_LABELS[invGroup(r.c)])} · compra ${money(r.unitCost)} → venta ${money(r.price)}${r.units > 1 ? ` · ${r.units} pzs` : ""}</div>`;
+
+    const cats = groupBy(rows.filter(r => r.units > 0 && r.unitCost !== null), r => invGroup(r.c)).sort((a, b) => (b.costValue - b.cost) - (a.costValue - a.cost));
+    const byMoney = [...withCost].sort((a, b) => b.totalProfit - a.totalProfit).slice(0, 8);
+    const byPct = withCost.filter(r => r.pctOnCost !== null).sort((a, b) => b.pctOnCost - a.pctOnCost).slice(0, 8);
+    const low = withCost.filter(r => r.pctOnCost === null ? r.unitProfit < 0 : r.pctOnCost < 20).sort((a, b) => (a.pctOnCost ?? -999) - (b.pctOnCost ?? -999));
+
+    return `<div class="value-card">
+      <div class="value-h">📈 Análisis de ganancia <span style="font-weight:400;font-size:11.5px;color:var(--slate);">si vendieras todo al precio publicado</span></div>
+      <div class="value-kpis" style="margin-bottom:10px;">
+        <div class="value-kpi"><div class="k">Ganancia por pieza</div><div class="v" style="color:${color(totalProfit)};">${signMoney(totalUnits ? totalProfit / totalUnits : 0)}</div><div class="s">promedio</div></div>
+        <div class="value-kpi"><div class="k">Con pérdida o &lt; 20%</div><div class="v" style="color:${low.length ? "var(--ember-bright)" : "var(--ok)"};">${low.length}</div><div class="s">producto(s) a revisar</div></div>
+        <div class="value-kpi"><div class="k">Sin precio de compra</div><div class="v">${noCost.length}</div><div class="s">valen ${money(noCostValue)} · ${noCost.length ? `<a href="#" id="valueGoNoCost" style="color:var(--foil-bright);" onclick="event.preventDefault()">capturar</a>` : "todo capturado ✓"}</div></div>
+      </div>
+      <div class="value-grid2">
+        <div><div style="font-size:12px;color:var(--cream);margin-bottom:4px;">Por categoría</div>
+          <table class="value-table"><thead><tr><th></th><th class="num">Invertido</th><th class="num">Venta</th><th class="num">Ganancia</th><th class="num">%</th></tr></thead><tbody>
+          ${cats.map(g => { const pr = g.costValue - g.cost; return `<tr><td><b>${vEsc(INV_GROUP_LABELS[g.key])}</b></td><td class="num">${money(Math.round(g.cost))}</td><td class="num">${money(g.costValue)}</td><td class="num" style="color:${color(pr)};"><b style="color:inherit;">${signMoney(pr)}</b></td><td class="num">${pctTxt(g.cost ? pr / g.cost * 100 : null)}</td></tr>`; }).join("")}
+          </tbody></table></div>
+        <div><div style="font-size:12px;color:var(--cream);margin-bottom:4px;">⚠️ Con pérdida o ganancia baja (menos de 20%)</div>
+          ${low.length ? `<div class="value-scroll" style="max-height:220px;"><table class="value-table"><tbody>${low.map(r => `<tr><td>${nameCell(r)}</td><td class="num" style="color:${color(r.unitProfit)};"><b style="color:inherit;">${pctTxt(r.pctOnCost)}</b><div style="font-size:10.5px;">${signMoney(r.unitProfit)}/pz</div></td></tr>`).join("")}</tbody></table></div>` : `<p style="font-size:12px;color:var(--ok);margin:6px 0;">✓ Ninguna: todo lo que tiene precio de compra deja 20% o más.</p>`}</div>
+        <div><div style="font-size:12px;color:var(--cream);margin-bottom:4px;">💵 Más ganancia en dinero</div>
+          <table class="value-table"><tbody>${byMoney.map(r => `<tr><td>${nameCell(r)}</td><td class="num" style="color:${color(r.totalProfit)};"><b style="color:inherit;">${signMoney(r.totalProfit)}</b><div style="font-size:10.5px;">${pctTxt(r.pctOnCost)}</div></td></tr>`).join("")}</tbody></table></div>
+        <div><div style="font-size:12px;color:var(--cream);margin-bottom:4px;">📊 Más ganancia en %</div>
+          <table class="value-table"><tbody>${byPct.map(r => `<tr><td>${nameCell(r)}</td><td class="num" style="color:${color(r.pctOnCost)};"><b style="color:inherit;">${pctTxt(r.pctOnCost)}</b><div style="font-size:10.5px;">${signMoney(r.totalProfit)}</div></td></tr>`).join("")}</tbody></table></div>
+      </div>
+      <p style="font-size:11px;color:var(--slate);margin:8px 0 0;">% de ganancia = (precio de venta − precio de compra) ÷ precio de compra. Ej.: compras en $100 y vendes en $150 → +50%. Solo cuenta piezas en stock con precio de compra capturado.</p>
+    </div>`;
+  }
+
+  function exportValueCsv(rows){
+    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const header = ["ID","Nombre","Categoría","Expansión","Número","Rareza","Acabado","Idioma","Precio","Stock","Valor","Precio de compra","Costo total","Ganancia potencial","% ganancia"];
+    const lines = [header.join(",")].concat(rows.map(r => {
+      const costTotal = r.unitCost !== null ? r.unitCost * r.units : "";
+      return [r.c.id, r.c.name, INV_GROUP_LABELS[invGroup(r.c)].replace(/^\S+\s/, ""), r.c.set || "", r.c.num || "", r.c.rarity || "",
+        finishLabel(r.c) || "Normal", r.c.language || "", r.price, r.units, r.value,
+        r.unitCost ?? "", costTotal, costTotal === "" ? "" : r.value - costTotal,
+        (r.unitCost && r.unitCost > 0) ? Math.round((r.price - r.unitCost) / r.unitCost * 100) + "%" : ""].map(q).join(",");
+    }));
+    // BOM para que Excel respete acentos
+    const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `pokebaul-inventario-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  async function loadCosts(){
+    const status = document.getElementById("costStatus");
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/costs`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass") })
+      });
+      if (res.status === 404 || !res.headers.get("content-type")?.includes("json")){
+        status.textContent = "Para usar costos, pega el worker.js nuevo en Cloudflare y dale Deploy.";
+        invCosts = null; return;
+      }
+      const data = await res.json();
+      if (!data.ok){ status.textContent = data.error || "No se pudieron cargar tus costos."; invCosts = null; return; }
+      invCosts = data.costs || {};
+    } catch {
+      status.textContent = "No se pudieron cargar tus costos (sin conexión).";
+      invCosts = null;
+    }
+  }
+  async function openValuePanel(){
+    renderValuePanel();
+    renderCostList();
+    if (invCosts === null){
+      await ensureCosts();
+      renderValuePanel();
+      renderCostList();
+    }
+  }
+
+  function renderCostList(){
+    const q = document.getElementById("costSearch").value.trim().toLowerCase();
+    const list = document.getElementById("costList");
+    document.getElementById("costDirtyCount").textContent = costDirty.size;
+    if (!q && !costDirty.size){ list.innerHTML = ""; return; }
+    const items = CARDS.filter(c => !c.deleted && (q ? `${c.name} ${c.set || ""} ${c.num || ""}`.toLowerCase().includes(q) : costDirty.has(String(c.id)))).slice(0, 40);
+    list.innerHTML = items.length ? `<div class="rel-list" style="max-height:300px;">${items.map(c => {
+      const id = String(c.id);
+      const v = costDirty.has(id) ? costDirty.get(id) : (invCosts ? invCosts[id] : undefined);
+      return `<div class="rel-row"><div class="rel-info"><div class="rel-name">${vEsc(c.name)}</div><div class="rel-meta">${vEsc(c.set || INV_GROUP_LABELS[invGroup(c)])}${c.num ? ` #${c.num}` : ""} · precio ${money(Number(c.price) || 0)} · stock ${Number(c.stock) || 0}</div></div>
+        <input type="number" min="0" step="0.01" class="cost-input" data-id="${vEsc(id)}" value="${v ?? ""}" placeholder="Costo $" style="width:96px;flex:none;${costDirty.has(id) ? "border-color:var(--foil);" : ""}"></div>`;
+    }).join("")}</div>` : `<p style="font-size:12px;color:var(--slate);">Sin resultados.</p>`;
+  }
+  document.getElementById("costSearch").addEventListener("input", renderCostList);
+  document.getElementById("costList").addEventListener("change", e => {
+    if (!e.target.classList.contains("cost-input")) return;
+    const raw = e.target.value.trim();
+    costDirty.set(e.target.dataset.id, raw === "" ? null : Math.max(0, Number(raw) || 0));
+    e.target.style.borderColor = "var(--foil)";
+    document.getElementById("costDirtyCount").textContent = costDirty.size;
+  });
+  document.getElementById("costCsvBtn").addEventListener("click", () => document.getElementById("costCsvInput").click());
+  document.getElementById("costCsvInput").addEventListener("change", e => {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const status = document.getElementById("costStatus");
+    const reader = new FileReader();
+    reader.onload = () => {
+      const rows = parseCsv(String(reader.result || ""));
+      const costCol = rows.length ? Object.keys(rows[0]).find(h => /cost|costo|paid|pagado/i.test(h)) : null;
+      if (!costCol){ status.textContent = "Ese CSV no trae una columna de costo (ej. \"Average Cost Paid\")."; return; }
+      const byKey = new Map();
+      CARDS.filter(c => !c.deleted).forEach(c => byKey.set(catalogKey(c.name, c.set, c.num), c));
+      let matched = 0, unmatched = 0;
+      rows.forEach(r => {
+        const name = (r["Product Name"] || "").trim();
+        if (!name) return;
+        const num = parseInt(((r["Card Number"] || "").split("/")[0] || "").replace(/\D/g, "")) || 0;
+        const cost = parseFloat(String(r[costCol] || "").replace(/[^0-9.\-]/g, ""));
+        const card = byKey.get(catalogKey(name, (r["Set"] || "").trim(), num));
+        if (card && cost > 0){ costDirty.set(String(card.id), cost); matched++; } else if (cost > 0) unmatched++;
+      });
+      status.style.color = "";
+      status.textContent = `${matched} costo(s) listos para guardar${unmatched ? ` · ${unmatched} fila(s) del CSV no coincidieron con ninguna pieza` : ""}. Revisa y dale "Guardar costos". (Se asume que Collectr te da el costo en pesos.)`;
+      document.getElementById("costSearch").value = "";
+      renderCostList();
+    };
+    reader.readAsText(file);
+  });
+  document.getElementById("costSaveBtn").addEventListener("click", async () => {
+    const status = document.getElementById("costStatus");
+    const btn = document.getElementById("costSaveBtn");
+    if (!costDirty.size){ status.textContent = "No hay costos nuevos por guardar."; return; }
+    btn.disabled = true; status.style.color = ""; status.textContent = "Guardando…";
+    try {
+      const res = await fetch(`${WORKER_URL}/admin/save-costs`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: sessionStorage.getItem("vitrina_admin_pass"), costs: Object.fromEntries(costDirty) })
+      });
+      if (res.status === 404 || !res.headers.get("content-type")?.includes("json")) throw new Error("Pega el worker.js nuevo en Cloudflare y dale Deploy para poder guardar costos.");
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "No se pudieron guardar.");
+      invCosts = data.costs || {};
+      const n = costDirty.size;
+      costDirty.clear();
+      status.textContent = `✓ ${n} costo(s) guardados — solo tú puedes verlos.`;
+      status.style.color = "var(--ok)";
+      renderValuePanel();
+      renderCostList();
+    } catch (err) {
+      status.textContent = err.message;
+      status.style.color = "var(--ember-bright)";
+    }
+    btn.disabled = false;
   });
 
   /* ---- "✨ Holo": marcar de un jalón como holo/reverse holo las cartas sueltas que entraron
